@@ -1,0 +1,19 @@
+.addpharma{
+    margin-left: 16px;
+    margin-top: 24px;
+    
+}
+.pharma-form{
+    margin-top: 24px;
+    h3{
+        color: #1F2937;
+        font-size: 16px;
+    }
+}
+.pharma-input{
+    width: 400px;
+    height: 40px;
+    background-color: #E6F9EF;
+    border-radius: 8px;
+    border-color: #B7E9D1;
+}

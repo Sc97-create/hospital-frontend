@@ -1,0 +1,42 @@
+.header-layout {
+    background-color: #F9FAFB;
+    height: 48px;
+    display: flex;
+    justify-content: flex-end;
+     img{
+        height: 20px;
+        width: 20px;
+        cursor: pointer;
+    }
+    gap: 16px;
+    border-color: #E5E7EB;
+    border-width: 4px;
+    align-items: center;
+}
+.account-class{
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    h3{
+        font-size: 16px;
+        margin-bottom: 0px;
+    }
+   
+}
+.dropdown-class{
+    width: 60px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+.ant-dropdown-menu .ant-dropdown-menu-title-content {
+    font-family: 'Roboto';
+    font-size: 14px;
+    font-weight: bold;
+    color: #6B7280;
+}
+.account-class img:nth-of-type(1){
+    cursor: default;
+}
