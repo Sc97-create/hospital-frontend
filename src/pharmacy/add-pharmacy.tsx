@@ -3,6 +3,7 @@ import Sidebar from "../sidebar";
 import { Link, useParams } from "react-router-dom";
 import './add-pharmacy.css'
 import AddManualForm from "./add-manual-form";
+import  UploadCsv from "./upload-inovice";
 
 export default function AddPharmacy() {
     const { id } = useParams()
@@ -18,7 +19,7 @@ export default function AddPharmacy() {
         {
             key: '2',
             label: 'Upload Invoice (PDF)',
-            children: 'Content of Tab Pane 2',
+            children: <UploadCsv/>,
         },
     ];
     return (

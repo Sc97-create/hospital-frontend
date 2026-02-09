@@ -1,0 +1,75 @@
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.step-title {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #667085;
+}
+
+.step-progress {
+  font-weight: 500;
+  color: #1570ef;
+}
+
+.muted-text {
+  color: #667085;
+}
+
+.password-rules {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 16px;
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475467;
+}
+
+.rule.success {
+  color: #039855;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.icon.check {
+  color: #039855;
+}
+
+.icon.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #98a2b3; /* gray circle */
+  border-radius: 50%;
+}
+
+
+.button-row1 {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.help-text {
+  margin-top: 24px;
+  text-align: center;
+  color: #667085;
+}

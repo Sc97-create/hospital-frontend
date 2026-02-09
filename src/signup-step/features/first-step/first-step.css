@@ -1,0 +1,61 @@
+.info-card {
+  background: #f9fafb;
+  border: .5px solid #6B7280;
+  border-radius: 12px;
+  padding: 20px;
+}
+.button-row {
+  display: flex;
+  justify-content: flex-end; /* 🔥 moves button right */
+  margin-top: 32px;
+}
+.custom-primary-btn {
+  background-color: #25D366;
+  border-color: #eaecf0;
+  color: #f9fafb;
+}
+
+.custom-primary-btn:hover {
+  background-color: #f9fafb !important;
+  border-color: #25D366 !important;
+  color: #25D366 !important;
+}
+
+.custom-primary-btn:active {
+  background-color: #25D366;
+  border-color: #25D366;
+}
+
+
+.help-card {
+  text-align: center;
+  border-style: dashed;
+}
+.card-title {
+  margin-bottom: 12px;
+}
+
+.card-text {
+  margin-bottom: 16px;
+  color: #475467;
+  line-height: 1.6;
+}
+
+.card-subtitle {
+  display: block;        /* 🔥 important */
+  margin-bottom: 8px;
+}
+
+.card-list {
+  padding-left: 20px;
+  margin-bottom: 16px;
+}
+
+.card-list li {
+  margin-bottom: 6px;
+}
+
+.card-link {
+  display: inline-block;
+  margin-top: 8px;
+}

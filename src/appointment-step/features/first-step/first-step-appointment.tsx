@@ -1,16 +1,25 @@
 import { Col, Dropdown, Form, Input, Row, Select, Space, Tag, Tooltip } from "antd";
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import {
     DownOutlined,
     SearchOutlined,
 } from '@ant-design/icons'
 import './first-step-appointment.css'
+import type { PersonalInfo } from "../../types/first-step-appointment";
 const { Option } = Select;
 const handleChange = (value: string) => {
     console.log(`selected ${value}`);
 };
-function FirstStep() {
-    const [form] = Form.useForm();
+export interface FirstStepRef {
+    validate: () => Promise<PersonalInfo>;
+    getValues: () => PersonalInfo;
+}
+const FirstStep = forwardRef<FirstStepRef>((_, ref) => {
+    const [form] = Form.useForm<PersonalInfo>();
+   
+    const OnFinish = (values: PersonalInfo) => {
+        console.log('values', values)
+    }
     const [SymInput, setSympInput] = useState('');
     const [showSympAll, setSympShowAll] = useState(false);
     const departments = [
@@ -28,6 +37,19 @@ function FirstStep() {
         setSymptomTags(symptomtags.filter(tag => tag !== removedTag));
 
     };
+     useImperativeHandle(ref, () => ({
+        validate: async () => {
+            const values = await form.validateFields();
+            return {
+                ...values,
+                symptoms: symptomtags,
+            };
+        },
+        getValues: () => ({
+            ...form.getFieldsValue(),
+            symptoms: symptomtags,
+        }),
+    }));
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && SymInput.trim()) {
@@ -46,33 +68,34 @@ function FirstStep() {
             <Form
                 layout='vertical'
                 form={form}
+                onFinish={OnFinish}
             >
                 <Row gutter={[0, 0]} >
                     <Col span={12}>
-                        <Form.Item label="First Name" className='first-name-label'>
+                        <Form.Item label="First Name" name="first_name" >
                             <Input placeholder="what we call you" className='input-form-layout' />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="Last Name">
+                        <Form.Item label="Last Name" name="last_name" >
                             <Input placeholder="we need it for reference" className='input-form-layout' />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label="Age">
+                        <Form.Item label="Age" name="age">
                             <Input type="number" placeholder="are you 21?" className='input-form-layout' />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label='Phone number'>
+                        <Form.Item label='Phone number' name="mobile_number">
                             <Input type='tel' placeholder='we are trying to reach you' maxLength={10} className='input-form-layout' />
                         </Form.Item>
                     </Col>
-                    
+
                     <Col span={12}>
                         <Form.Item label='Gender' name="gender" >
                             <Select
-                                className='gender-form-layout'
+                                className='dropdown-input-class'
                                 onChange={handleChange}
                                 placeholder='its upto you'
                                 options={[
@@ -85,11 +108,11 @@ function FirstStep() {
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label='Email ID'>
+                        <Form.Item label='Email ID' name="email_id">
                             <Input placeholder='we want to notify you' type='email' className='input-form-layout' />
                         </Form.Item>
                     </Col>
-                     <Col span={12}>
+                    <Col span={12}>
                         <Form.Item
                             label="Department"
                             name="department"
@@ -111,13 +134,13 @@ function FirstStep() {
                         </Form.Item>
                     </Col>
                     <Col span={12}>
-                        <Form.Item label='Assign Doctor' >
+                        <Form.Item label='Assign Doctor' name="assign_doctor" >
                             <Input className='input-form-layout' suffix={<SearchOutlined />} />
                         </Form.Item>
                     </Col>
-                    
+
                     <Col span={12}>
-                        <Form.Item label='Symptoms'>
+                        <Form.Item label='Symptoms' name="symptoms">
                             <Input
                                 placeholder="for ex: fever"
                                 value={SymInput}
@@ -156,8 +179,8 @@ function FirstStep() {
                         </Form.Item>
                     </Col>
 
-                   <Col span={12}>
-                        <Form.Item label="Weight">
+                    <Col span={12}>
+                        <Form.Item label="Weight" name="weight">
                             <Input type="number" placeholder="don't be overweight" className='input-form-layout' />
                         </Form.Item>
                     </Col>
@@ -165,5 +188,8 @@ function FirstStep() {
             </Form>
         </>
     )
-}
+
+})
+
+
 export default FirstStep

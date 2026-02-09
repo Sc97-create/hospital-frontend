@@ -1,5 +1,5 @@
 import { Button, Col, DatePicker, Form, Input, Row, Select, type DatePickerProps } from "antd"
-import '../appointment-step/first-step-appointment.css'
+import '../appointment-step/features/first-step/first-step-appointment'
 import './add-manual-form.css'
 import { CheckOutlined, InfoCircleOutlined } from '@ant-design/icons'
 const { Option } = Select

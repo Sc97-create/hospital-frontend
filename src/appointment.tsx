@@ -1,42 +1,65 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Sidebar from './sidebar';
-import { Breadcrumb,  Layout,  Steps } from 'antd';
+import { Breadcrumb, Layout, message, Steps } from 'antd';
 import { Button } from 'antd';
 import './appointment.css'
 import {
     HomeOutlined,
     UserOutlined,
 } from '@ant-design/icons'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Content } from 'antd/es/layout/layout';
-import FirstStep from './appointment-step/first-step-appointment';
-import SecondStep from './appointment-step/second-step-appointment';
-import PreviewAppointment from './appointment-step/third-step-appointment';
+import FirstStep, { type FirstStepRef } from './appointment-step/features/first-step/first-step-appointment';
+import SecondStep from './appointment-step/features/second-step/second-step-appointment';
+import PreviewAppointment from './appointment-step/features/third-step/third-step-appointment';
+import type { PersonalInfo } from './appointment-step/types/first-step-appointment';
+import { useFirstStepAppointment } from './appointment-step/features/first-step/useFirstAppointment';
 
 function Appointment() {
+    const stepRef = useRef<FirstStepRef>(null);
+    const navigate=useNavigate()
     const steps = [
         {
             title: 'Patient Details',
-            content: <FirstStep />,
+            content: <FirstStep ref={stepRef} />,
         },
         {
             title: 'Bed Allotment',
-            content: <SecondStep/>,
+            content: <SecondStep />,
         },
         {
             title: 'Preview And Submit',
-            content: <PreviewAppointment/>,
+            content: <PreviewAppointment />,
         },
     ];
     const [current, setCurrent] = useState(0);
-    const next = () => {
-        setCurrent(current + 1);
+
+    const [appointmentData, setAppointmentData] = useState<Partial<PersonalInfo>>({})
+    const next = async () => {
+        try {
+            const values = await stepRef.current?.validate();
+            setAppointmentData((prev) => ({
+                ...prev,
+                ...values,
+            }));
+            setCurrent((c) => c + 1);
+        } catch {
+            // validation failed
+        }
     };
+    const { mutate, isPending } = useFirstStepAppointment();
     //const items = steps.map((item) => ({ key: item.title, title: item.title }));
+
     const handleSubmit = () => {
-        console.log("Appointment submitted successfully!");
-        // Example: send API call or WhatsApp notification here
-        // toast.success("Appointment confirmed! ID sent to WhatsApp.");
+        mutate(appointmentData as PersonalInfo, {
+            onSuccess: () => {
+                message.success("Appointment created successfully");
+                navigate("/appointments");
+            },
+            onError: () => {
+                message.error("Failed to create appointment");
+            },
+        });
     };
     const prev = () => {
         if (current > 0) {
