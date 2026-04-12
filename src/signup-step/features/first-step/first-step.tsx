@@ -1,34 +1,64 @@
 import { Button, Col, Form, Input, Progress, Row, Select } from 'antd'
 import './first-step.css'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { OrgSignup } from '../../types/first-step-signup';
-import { useFirstStepSignup } from './useFirstStepSignup';
+import { createOrg } from './createOrganisation';
+import { updateOrg } from './updateOrganisation';
 
-interface FirstStepProps {
-    onNext: () => void;
+type Props = {
+    data: any;
+    onSuccess: (orgID: string) => void;
+    OnNext: () => void;
 }
 
-export interface SingupOrg {
-    validate: () => Promise<OrgSignup>;
-    getValues: () => OrgSignup;
-}
-function FirstStep({ onNext }: FirstStepProps) {
+function FirstStep({ data, onSuccess, OnNext }: Props) {
     const [current, setCurrent] = useState(0);
-    const { mutate, isPending } = useFirstStepSignup();
+    const { mutate: createOrgFn, isPending: createOrgPending } = createOrg();
+    const { mutate: updateOrgFn, isPending: updateOrgPending } = updateOrg();
     const [form] = Form.useForm<OrgSignup>();
+    //console.log('get data', data)
     const OnFinish = (values: OrgSignup) => {
         console.log("values", values);
+        if (!data?.id) {
+            createOrgFn(values, {
+                onSuccess: (data) => {
+                    console.log("API success", data);
+                    onSuccess(data.organisation_id)
+                    OnNext();
+                },
+                onError: (error) => {
+                    console.error("API failed", error);
+                },
+            });
+        } else {
+            updateOrgFn(
+                {
+                    organisation_id: data.id,
+                    ...values
+                },
+                {
+                    onSuccess: (data) => {
+                        console.log("API success", data);
+                        onSuccess(data.organisation_id)
+                        OnNext();
+                    },
+                    onError: (error) => {
+                        console.error("API failed", error);
+                    },
+                })
+        }
 
-        mutate(values, {
-            onSuccess: (data) => {
-                console.log("API success", data);
-                onNext(); // move only AFTER API success
-            },
-            onError: (error) => {
-                console.error("API failed", error);
-            },
-        });
     };
+    useEffect(() => {
+        console.log("isPending", createOrgPending)
+        if (data) {
+            form.setFieldsValue({
+                organisation_name: data?.organisation_name,
+                legal_entity_name: data?.legal_entity_name,
+                hospital_type: data?.hospital_type,
+            })
+        }
+    }, [data, createOrgPending, updateOrgPending])
 
     return (
         <>
@@ -80,8 +110,8 @@ function FirstStep({ onNext }: FirstStepProps) {
                             </Form.Item>
 
                             <div className='button-row'>
-                                <Button className='custom-primary-btn' htmlType='submit'>
-                                    Continue to Location →
+                                <Button className='custom-primary-btn' htmlType='submit' loading={createOrgPending} disabled={createOrgPending}>
+                                    {data?.id ? "Update" : "Continue to Location →"}
                                 </Button>
                             </div>
                         </Form>

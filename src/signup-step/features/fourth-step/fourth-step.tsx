@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     Layout,
     Typography,
@@ -23,15 +23,26 @@ import { useNavigate } from "react-router-dom";
 const { Header, Content, Footer } = Layout;
 const { Title, Text, Link } = Typography;
 
-const ReviewAndCreate = ({ onBack }: any) => {
+interface FourthProps {
+    Userdata: any;
+    OrgData: any;
+    onBack: () => void;
+}
+
+const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if (Userdata) {
+            console.log('data123', Userdata)
+        }
+        if (OrgData) {
+            console.log('orgdata123', OrgData)
+        }
+
+    })
     const handleCreateOrganisation = async () => {
         try {
-            // 🔹 API call goes here
-            // await createOrganisation(payload);
-
-            // ✅ Navigate to dashboard on success
             navigate("/employees/add-employee");
         } catch (error) {
             console.error("Failed to create organisation", error);
@@ -76,30 +87,35 @@ const ReviewAndCreate = ({ onBack }: any) => {
             <Card
                 title="Organisation Details"
                 extra={<Link><EditOutlined /> Edit</Link>}
-                style={{ marginBottom: 16 }}>
-                <Row gutter={[16, 16]}>
+                style={{ marginBottom: 16 }}
+                className="review-card"
+            >
+                <Row gutter={[32, 20]}>
                     <Col span={12}>
-                        <Text type="secondary">ORGANISATION NAME</Text>
-                        <br />
-                        <Text strong>St. Jude Medical Center</Text>
-                    </Col>
-                    <Col span={12}>
-                        <Text type="secondary">TAX ID / REGISTRATION</Text>
-                        <br />
-                        <Text strong>TAX-882910-B</Text>
+                        <Text type="secondary" className="review-label">
+                            ORGANISATION NAME
+                        </Text>
+                        <div>
+                            <Text strong>{OrgData?.organisation_name}</Text>
+                        </div>
                     </Col>
 
                     <Col span={12}>
-                        <Text type="secondary">TYPE</Text>
-                        <br />
-                        <Text strong>General Hospital (Private)</Text>
+                        <Text type="secondary" className="review-label">
+                            TAX ID / REGISTRATION
+                        </Text>
+                        <div>
+                            <Text strong>{OrgData?.code}</Text>
+                        </div>
                     </Col>
+
                     <Col span={12}>
-                        <Text type="secondary">WEBSITE</Text>
-                        <br />
-                        <Link href="https://www.stjude-medical.com" target="_blank">
-                            www.stjude-medical.com
-                        </Link>
+                        <Text type="secondary" className="review-label">
+                            TYPE
+                        </Text>
+                        <div>
+                            <Text strong>{OrgData?.hospital_type}</Text>
+                        </div>
                     </Col>
                 </Row>
             </Card>
@@ -109,26 +125,25 @@ const ReviewAndCreate = ({ onBack }: any) => {
                 title="Location & Contact"
                 extra={<Link><EditOutlined /> Edit</Link>}
                 style={{ marginBottom: 16 }}
+                className="review-card"
             >
                 <Row gutter={[16, 16]}>
                     <Col span={12}>
-                        <Text type="secondary">STREET ADDRESS</Text>
-                        <br />
-                        <Text strong>
-                            124 Healthcare Plaza, Medical District
-                        </Text>
+                        <Text type="secondary" className="review-label">COUNTRY</Text>
+                        <div>
+                            <Text strong>
+                                {OrgData?.address.country_id}
+                            </Text>
+                        </div>
+
                     </Col>
 
                     <Col span={12}>
-                        <Text type="secondary">CONTACT NUMBER</Text>
-                        <br />
-                        <Text strong>+1 (617) 555-0123</Text>
-                    </Col>
+                        <Text type="secondary" className="review-label">CITY & STATE</Text>
+                        <div>
+                            <Text strong>{OrgData?.address.city}, {OrgData?.address.state}</Text>
+                        </div>
 
-                    <Col span={12}>
-                        <Text type="secondary">CITY & STATE</Text>
-                        <br />
-                        <Text strong>Boston, Massachusetts</Text>
                     </Col>
                 </Row>
             </Card>
@@ -139,27 +154,29 @@ const ReviewAndCreate = ({ onBack }: any) => {
                 extra={<Link><EditOutlined /> Edit</Link>}>
                 <Row align="middle" gutter={16}>
                     <Col>
-                        <Avatar size={64} icon={<UserOutlined />} />
+                        <Avatar size={32} icon={<UserOutlined />} />
                     </Col>
                     <Col>
-                        <Text type="secondary">FULL NAME</Text>
-                        <br />
-                        <Text strong>Dr. Sarah Richardson</Text>
-                        <br />
-                        <Tag
-                            color="#25D366"
-                            className="root-admin-tag">
-                            ROOT ADMIN
-                        </Tag>
-
+                        <Text type="secondary" className="review-label">FULL NAME</Text>
+                        <div>
+                            <Text strong>{Userdata?.username}</Text>
+                        </div>
+                        <div>
+                            <Tag
+                                color="#25D366"
+                                className="root-admin-tag">
+                                ROOT ADMIN
+                            </Tag>
+                        </div>
                     </Col>
                     <Col flex="auto" />
                     <Col>
                         <Text type="secondary">PROFESSIONAL EMAIL</Text>
-                        <br />
-                        <Text strong>
-                            s.richardson@stjude-medical.com
-                        </Text>
+                        <div>
+                            <Text strong>
+                                {Userdata?.email_id}
+                            </Text>
+                        </div>
                     </Col>
                 </Row>
             </Card>

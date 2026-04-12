@@ -73,3 +73,22 @@
   text-align: center;
   color: #667085;
 }
+.setup-options .ant-form-item {
+  margin-bottom: 6px;
+}
+
+.setup-checkbox {
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.consent-checkbox {
+  font-size: 12px;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+.setup-options {
+  margin-top: 12px;
+  margin-bottom: 20px;
+}

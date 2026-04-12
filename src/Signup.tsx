@@ -1,67 +1,100 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Input, Button, Steps } from 'antd';
 import { CheckCircleFilled, LoadingOutlined, LogoutOutlined, SolutionOutlined, UserOutlined } from '@ant-design/icons';
 import './signup.css'
 import { Content } from 'antd/es/layout/layout';
 import FirstStep from './signup-step/features/first-step/first-step';
-import SecondStep from './signup-step/second-step';
-import ThirdStep from './signup-step/third-step';
-import ReviewAndCreate from './signup-step/fourth-step';
+import SecondStep from './signup-step/features/second-step/second-step';
+import ThirdStep from './signup-step/features/third-step/third-step';
+import ReviewAndCreate from './signup-step/features/fourth-step/fourth-step';
 import { useNavigate } from 'react-router-dom';
+import { GetByOrganisationID, GetUserbyID } from './signup-step/api/common-api';
 
 
 function Signup() {
+    const [organisationID, setOrganisationID] = useState<string | ''>('');
+    const [userID, setUserID] = useState<string | ''>('');
+    const [organisationData, setOrganisationData] = useState(null);
+    const [userData, setUserData] = useState(null);
+    const [refreshOrg, setRefreshOrg] = useState(0);
     const navigate = useNavigate();
     const handleSaveAndExit = () => {
         console.log("Save & Exit clicked");
         navigate('/login')
     };
+    const fetchorganisationData = async () => {
+        try {
+            if (organisationID) {
+                console.log("org", organisationID);
+                const data = await GetByOrganisationID(organisationID)
+                setOrganisationData(data.data)
+                console.log("organisation25=>", data.data)
+            }
+        } catch (error) {
+            console.log("api error", error)
+        };
+
+    }
+    useEffect(() => {
+        console.log("organisationID", organisationID)
+        if (organisationID) {
+            fetchorganisationData();
+        }
+        if (userID) {
+            FetchUserData();
+        }
+    }, [organisationID, userID, refreshOrg]);
+
+    const FetchUserData = async () => {
+        try {
+            if (userID) {
+                console.log("userID", userID)
+                const data = await GetUserbyID(userID)
+                setUserData(data.data)
+            }
+        } catch (error) {
+            console.log('error', error)
+        };
+    }
+
+
     const [current, setCurrent] = useState(0);
     const steps = [
         {
             title: 'Organisation',
-            content: <FirstStep onNext={() => setCurrent(1)} />,
+            content: <FirstStep
+                data={organisationData}
+                onSuccess={(orgId: string) => {
+                    setOrganisationID(orgId);
+                }}
+                OnNext={() => setCurrent(1)}
+            />,
             icon: <CheckCircleFilled />
         },
         {
             title: 'Location',
-            content: <SecondStep onBack={() => setCurrent(0)}
+            content: <SecondStep data={organisationData}
+                OnUpdate={() => {
+                    setRefreshOrg(refreshOrg + 1);
+                }}
+                organisationID={organisationID} onBack={() => setCurrent(0)}
                 onNext={() => setCurrent(2)} />,
             icon: <UserOutlined />
         },
         {
             title: 'Root Admin',
-            content: <ThirdStep onBack={() => setCurrent(1)}
-                onNext={() => setCurrent(3)} />,
+            content: <ThirdStep onSuccess={(userId: string) => {
+                setUserID(userId);
+            }} organisationID={organisationID} onBack={() => setCurrent(1)}
+                onNext={() => setCurrent(3)} data={userData} />,
             icon: <SolutionOutlined />
         },
         {
             title: 'Review',
-            content: <ReviewAndCreate onBack={() => setCurrent(2)} />,
+            content: <ReviewAndCreate Userdata={userData} OrgData={organisationData} onBack={() => setCurrent(2)} />,
             icon: <LoadingOutlined />
         }
     ];
-
-    /*
-      need to add row to form
-      need to add plan with inputs 6 month is valid and then it goes on and year,month
-    */
-    // const [form] = Form.useForm();
-    // const [password, setPassword] = React.useState('');
-    // const validateStrongPassword = (_: any, value: string) => {
-    //     if (!value) return Promise.resolve();
-
-    //     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    //     setPassword(value)
-    //     if (!strongPasswordRegex.test(value)) {
-    //         return Promise.reject(
-    //             'Password must be at least 8 characters long and include uppercase, lowercase, and a number.'
-    //         );
-    //     }
-
-    //     return Promise.resolve();
-    // };
-
     return (
         <>
             <div className="container-fluid">

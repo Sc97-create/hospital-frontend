@@ -3,10 +3,10 @@
   justify-content: space-between;
   margin-top: 24px;
 }
-.root-admin-tag{
-    margin-top: 16px;
-    font-weight: 500;
-    font-family: 'Roboto';
+.root-admin-tag {
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: 3px;
 }
 .review-card {
   border-radius: 10px;
@@ -20,7 +20,7 @@
 }
 
 .review-label {
-  font-size: 11px;
+  font-size: 8px;
   font-weight: 500;
   color: #8c8c8c;
   letter-spacing: 0.4px;
@@ -28,7 +28,7 @@
 }
 
 .review-value {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   color: #262626;
   line-height: 1.4;
@@ -37,3 +37,4 @@
 .review-link {
   color: #1677ff;
 }
+

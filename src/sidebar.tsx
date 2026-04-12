@@ -18,11 +18,12 @@ function Sidebar() {
     const navigate = useNavigate();
     const [collapse, setCollapse] = useState(false)
     const [hover, setHover] = useState(false);
-    const routeMap: Record<'/patients' | '/appointment' | '/pharmacy' | '/employees', string> = {
+    const routeMap: Record<'/patients' | '/appointment' | '/pharmacy' | '/employees' | '/bed-arrangement', string> = {
         '/patients': '/patients',
         '/appointment': '/appointment',
         '/pharmacy': '/pharmacy',
-        "/employees":'/employees'
+        "/employees": '/employees',
+        "/bed-arrangement": '/bed-arrangement'
     };
 
     const matchedKey = (Object.keys(routeMap) as Array<keyof typeof routeMap>).find(
@@ -78,9 +79,14 @@ function Sidebar() {
                                 label: 'Pharmacy',
                             },
                             {
-                                key:'/employees',
-                                icon:<UserOutlined />,
-                                label:'Employees'
+                                key: '/employees',
+                                icon: <UserOutlined />,
+                                label: 'Employees'
+                            },
+                            {
+                                key: '/bed-arrangement',
+                                icon: <UserOutlined />,
+                                label: 'Bed Arrangement'
                             }
                         ]}
                     />

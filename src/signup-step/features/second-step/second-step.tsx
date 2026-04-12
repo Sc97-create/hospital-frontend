@@ -11,15 +11,53 @@ import {
 } from "antd";
 
 import './second-step.css'
+import { useSecondSignup } from "./useSecondStepSignup";
+import type { SecondSignupPayload } from "../../types/second-step-signup";
+import { useEffect, useState } from "react";
 
 interface SecondStepProps {
+  data: any
+  organisationID: string;
+  OnUpdate(): void
   onNext: () => void;
   onBack: () => void;
 }
 
 const { Option } = Select;
 
-function SecondStep({ onNext, onBack }: SecondStepProps) {
+function SecondStep({ data, OnUpdate, organisationID, onNext, onBack }: SecondStepProps) {
+  const { mutate, isPending } = useSecondSignup();
+  const [form] = Form.useForm<SecondSignupPayload>();
+  const [auditLogs, setAuditLogs] = useState(true);
+  const [emergencyAccess, setEmergencyAccess] = useState(false);
+
+  useEffect(() => {
+    if (data) {
+      form.setFieldsValue({
+        country_id: data?.address?.country_id ? data.address.country_id : 'United States',
+        state_id: data?.address?.state,
+        city_id: data?.address?.city
+      })
+    }
+  }, [data, isPending])
+
+  console.log("org id", organisationID)
+  const onFinish = (values: Omit<SecondSignupPayload, "organisation_id">) => {
+    mutate({
+      organisation_id: organisationID,
+      ...values,
+    },
+      {
+        onSuccess: (data) => {
+          OnUpdate()
+          console.log("API Success", data);
+          onNext();
+        },
+        onError: (error) => {
+          console.error("API failed", error);
+        }
+      });
+  };
   return (
     <div className="main-layout">
       <h2>Location & Security</h2>
@@ -28,37 +66,43 @@ function SecondStep({ onNext, onBack }: SecondStepProps) {
         security protocols.
       </p>
 
-      <Form layout="vertical">
+      <Form layout="vertical" form={form} initialValues={{
+        country_id: "United States",
+        timezone: "GMT-08:00"
+      }} onFinish={onFinish}>
         {/* ✅ Location Details Card */}
         <Card
           title="📍 Location Details"
-          bordered
           style={{ marginBottom: 24 }}
         >
           <Row gutter={[16, 16]}>
             <Col span={12}>
-              <Form.Item label="Country" required>
-                <Select defaultValue="United States">
-                  <Option value="United States">United States</Option>
-                  <Option value="India">India</Option>
+              <Form.Item
+                label="Country"
+                name="country_id"
+                rules={[{ required: true, message: "Please select country" }]}
+              >
+                <Select>
+                  <Select.Option value="United States">United States</Select.Option>
+                  <Select.Option value="India">India</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
 
             <Col span={12}>
-              <Form.Item label="State / Province" required>
+              <Form.Item label="State / Province" name="state_id" required>
                 <Input placeholder="e.g. California" />
               </Form.Item>
             </Col>
 
             <Col span={12}>
-              <Form.Item label="City" required>
+              <Form.Item label="City" name="city_id" required>
                 <Input placeholder="e.g. San Francisco" />
               </Form.Item>
             </Col>
 
             <Col span={12}>
-              <Form.Item label="Timezone" required>
+              <Form.Item label="Timezone" name="timezone" required>
                 <Select defaultValue="GMT-08:00">
                   <Option value="GMT-08:00">
                     (GMT-08:00) Pacific Time (US & Canada)
@@ -86,7 +130,14 @@ function SecondStep({ onNext, onBack }: SecondStepProps) {
               </p>
             </Col>
             <Col>
-              <Switch defaultChecked />
+              <Form.Item
+                name="enable_audit_logs"
+                valuePropName="checked"
+                initialValue={true}
+                noStyle
+              >
+                <Switch />
+              </Form.Item>
             </Col>
           </Row>
 
@@ -98,9 +149,17 @@ function SecondStep({ onNext, onBack }: SecondStepProps) {
               </p>
             </Col>
             <Col>
-              <Switch />
+              <Form.Item
+                name="emergency_access"
+                valuePropName="checked"
+                initialValue={false}
+                noStyle
+              >
+                <Switch />
+              </Form.Item>
             </Col>
           </Row>
+
         </Card>
 
         {/* Navigation */}
@@ -108,7 +167,7 @@ function SecondStep({ onNext, onBack }: SecondStepProps) {
           <Button className="custom-primary-btn" onClick={onBack}>
             ← Back
           </Button>
-          <Button className="custom-primary-btn" onClick={onNext}>
+          <Button className="custom-primary-btn" htmlType="submit" loading={isPending}>
             Next: Root Admin →
           </Button>
         </div>
