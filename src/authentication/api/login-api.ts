@@ -1,10 +1,11 @@
-import axios from "axios";
+import apiClient from "../../lib/api-client";
 import type { loginPayload, loginResponse } from "../types/auth";
 
-export const LoginReq= async(payload:loginPayload):Promise<loginResponse>=>{
-    const response=await axios.post(
-        "http://localhost:9069/api/v1/authentication/login",
+export const LoginReq = async (payload: loginPayload): Promise<loginResponse> => {
+    const response = await apiClient.post(
+        "/authentication/login",
         payload
+        , { withCredentials: true }
     );
     return response.data
 }

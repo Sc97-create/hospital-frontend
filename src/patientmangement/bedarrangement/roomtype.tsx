@@ -31,6 +31,7 @@ export default function CreateBed() {
         setLoading(true);
 
         const payload: RoomType = {
+            id: "",
             name: values.roomType,
             is_default: values.isDefault || false,
             organisation_id: "de6b9b6e-9fda-49cb-8828-80310924e707",

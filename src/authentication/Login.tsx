@@ -10,9 +10,10 @@ function Login() {
     const login = async (values: loginPayload) => {
         try {
             const data = await LoginReq(values)
-            console.log("data",data)
-            localStorage.setItem("access_token",data.accesstoken)
-            localStorage.setItem("user_id",data.user_id)
+            console.log("data", data)
+            localStorage.setItem("access_token", data.accesstoken)
+            localStorage.setItem("user_id", data.user_id)
+
             navigate('/dashboard')
         } catch (error) {
             console.log("error", error)

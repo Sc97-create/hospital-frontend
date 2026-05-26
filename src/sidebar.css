@@ -47,7 +47,24 @@
     border-color: #B7E9D1;
     border-radius: 8px;
     border-width: 1px;
+}
 
+.ant-menu-light .ant-menu-item-selected .ant-menu-title-content,
+.ant-menu-light .ant-menu-item-selected .anticon {
+    color: #25D366 !important;
+}
+
+.ant-menu-light .ant-menu-item:hover,
+.ant-menu-light .ant-menu-submenu-title:hover {
+    background-color: #B7E9D1 !important;
+    border-radius: 8px;
+}
+
+.ant-menu-light .ant-menu-item:hover .ant-menu-title-content,
+.ant-menu-light .ant-menu-submenu-title:hover .ant-menu-title-content,
+.ant-menu-light .ant-menu-item:hover .anticon,
+.ant-menu-light .ant-menu-submenu-title:hover .anticon {
+    color: #1F2937 !important;
 }
 
 .ant-menu-item {
