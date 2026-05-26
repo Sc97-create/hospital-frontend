@@ -24,6 +24,7 @@ function FirstStep({ data, onSuccess, OnNext }: Props) {
                 onSuccess: (data) => {
                     console.log("API success", data);
                     onSuccess(data.organisation_id)
+                    localStorage.setItem("organisation_id", data.organisation_id)
                     OnNext();
                 },
                 onError: (error) => {
@@ -64,7 +65,7 @@ function FirstStep({ data, onSuccess, OnNext }: Props) {
         <>
             <div className="main-layout">
                 <Row gutter={[32, 0]}>
-                    <Col span={12}>
+                    <Col xs={24} lg={12}>
                         <h2>Organisation Details</h2>
                         <p style={{ color: "#667085", marginBottom: 24 }}>
                             Step 1 of 4: Provide the basic identity details for your healthcare facility.
@@ -117,7 +118,7 @@ function FirstStep({ data, onSuccess, OnNext }: Props) {
                         </Form>
                     </Col>
 
-                    <Col span={12}>
+                    <Col xs={24} lg={12}>
                         {/* Compliance Card */}
                         <div className="info-card">
                             <h4 className='card-title'>✔ Compliance & Trust</h4>

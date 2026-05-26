@@ -43,7 +43,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
     })
     const handleCreateOrganisation = async () => {
         try {
-            navigate("/employees/add-employee");
+            navigate("/login");
         } catch (error) {
             console.error("Failed to create organisation", error);
         }
@@ -91,7 +91,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                 className="review-card"
             >
                 <Row gutter={[32, 20]}>
-                    <Col span={12}>
+                    <Col xs={24} sm={12}>
                         <Text type="secondary" className="review-label">
                             ORGANISATION NAME
                         </Text>
@@ -100,7 +100,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                         </div>
                     </Col>
 
-                    <Col span={12}>
+                    <Col xs={24} sm={12}>
                         <Text type="secondary" className="review-label">
                             TAX ID / REGISTRATION
                         </Text>
@@ -109,7 +109,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                         </div>
                     </Col>
 
-                    <Col span={12}>
+                    <Col xs={24} sm={12}>
                         <Text type="secondary" className="review-label">
                             TYPE
                         </Text>
@@ -128,7 +128,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                 className="review-card"
             >
                 <Row gutter={[16, 16]}>
-                    <Col span={12}>
+                    <Col xs={24} sm={12}>
                         <Text type="secondary" className="review-label">COUNTRY</Text>
                         <div>
                             <Text strong>
@@ -138,7 +138,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
 
                     </Col>
 
-                    <Col span={12}>
+                    <Col xs={24} sm={12}>
                         <Text type="secondary" className="review-label">CITY & STATE</Text>
                         <div>
                             <Text strong>{OrgData?.address.city}, {OrgData?.address.state}</Text>

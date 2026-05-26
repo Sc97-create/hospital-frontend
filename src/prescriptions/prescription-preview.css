@@ -1,0 +1,185 @@
+.pharmacy-main-layout {
+    padding: 20px;
+    background: #f5f7fb;
+    min-height: 100vh;
+}
+
+.patient-card,
+.medicine-table-card,
+.notes-card {
+    border-radius: 14px !important;
+    border: 1px solid #ececec;
+    margin-bottom: 18px;
+}
+
+.patient-name {
+    margin: 0 !important;
+    font-size: 16px !important;
+}
+
+.patient-subtext {
+    color: #8c8c8c;
+    font-size: 13px;
+}
+
+.info-label {
+    font-size: 11px;
+    color: #8c8c8c;
+    font-weight: 600;
+}
+
+.alert-card {
+    border-radius: 12px;
+    margin-bottom: 14px;
+}
+
+.interaction-alert {
+    border-left: 4px solid #faad14;
+}
+
+.allergy-alert {
+    border-left: 4px solid #ff4d4f;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.table-title {
+    margin: 0 !important;
+    font-size: 15px !important;
+}
+
+.medicine-table .ant-table {
+    font-size: 13px;
+}
+
+.medicine-table .ant-table-thead>tr>th {
+    font-size: 11px;
+    color: #8c8c8c;
+    font-weight: 700;
+    background: #fafafa;
+    padding: 12px;
+}
+
+.medicine-table .ant-table-tbody>tr>td {
+    padding: 14px 12px;
+}
+
+.medicine-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.medicine-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.medicine-generic {
+    font-size: 11px;
+    color: #8c8c8c;
+}
+
+.schedule-tag {
+    font-size: 10px;
+    border-radius: 6px;
+    padding-inline: 6px;
+}
+
+.qty-box {
+    width: 32px;
+    height: 28px;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.stock-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.stock-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.stock-status.success .stock-dot {
+    background: #52c41a;
+}
+
+.stock-status.warning .stock-dot {
+    background: #faad14;
+}
+
+.stock-status.danger .stock-dot {
+    background: #ff4d4f;
+}
+
+.dispense-btn {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.billing-summary {
+    width: 240px;
+    margin-left: auto;
+    margin-top: 18px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.summary-row.total {
+    padding-top: 10px;
+    border-top: 1px solid #ececec;
+    margin-top: 10px;
+}
+
+.notes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.notes-textarea {
+    border-radius: 10px;
+}
+
+.notes-tags {
+    margin-top: 12px;
+}
+
+.sticky-footer {
+    position: sticky;
+    bottom: 0;
+    background: #ffffff;
+    border: 1px solid #ececec;
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.confirm-btn {
+    height: 40px;
+    border-radius: 10px;
+    font-weight: 600;
+}

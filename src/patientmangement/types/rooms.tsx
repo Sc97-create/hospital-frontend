@@ -14,4 +14,15 @@ export interface RoomResponse {
 export interface RoomData {
     id: string;
     room_number: string;
+    floors: number;
+    status: string;
+    created_at: Date;
+    updated_at: Date;
+    organisation_id: string;
+    room_type_id: string;
+}
+
+export interface RoomDataArr {
+    data: RoomData[];
+    message: string;
 }

@@ -65,46 +65,6 @@ export default function CreateRooms() {
             setLoading(false);
         }
     };
-    // Columns for the preview table
-    const columns = [
-        {
-            title: 'ROOM NUMBER',
-            dataIndex: 'roomNumber',
-            key: 'roomNumber',
-            render: (text: string) => <span className="room-number-col">{text}</span>,
-        },
-        {
-            title: 'FLOOR',
-            dataIndex: 'floor',
-            key: 'floor',
-        },
-        {
-            title: 'ROOM TYPE',
-            dataIndex: 'roomType',
-            key: 'roomType',
-            render: (type: string) => <Tag className="tag-general">{type}</Tag>,
-        },
-        {
-            title: 'ACTION',
-            key: 'action',
-            render: () => <DeleteOutlined className="action-icon" />,
-        },
-    ];
-
-    const data = [
-        {
-            key: '1',
-            roomNumber: 'G101',
-            floor: 'Floor 1',
-            roomType: 'General',
-        },
-        {
-            key: '2',
-            roomNumber: 'G102',
-            floor: 'Floor 1',
-            roomType: 'General',
-        },
-    ];
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
@@ -228,24 +188,6 @@ export default function CreateRooms() {
                         </Card>
                     </Col>
                 </Row>
-
-                {/* Preview Table */}
-                <div className="preview-section">
-                    <div className="preview-header">
-                        <h3 className="preview-title">Preview Table</h3>
-                        <a href="#" className="export-draft">
-                            <DownloadOutlined /> Export Draft
-                        </a>
-                    </div>
-
-                    <Table
-                        columns={columns}
-                        dataSource={data}
-                        pagination={false}
-                        className="custom-table"
-                        footer={() => <div className="table-footer">Showing 2 results of 2 newly created entries</div>}
-                    />
-                </div>
 
                 {/* Footer Actions */}
                 <div className="footer-actions">

@@ -10,13 +10,14 @@ html, body {
   height: 100%;
   padding: 0;
   margin: 0;
-  
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
   height: 100%;
   padding: 0;
+  overflow-x: hidden;
 }
 body,
 .ant-typography,
@@ -25,4 +26,35 @@ body,
 .ant-btn,
 .ant-input {
   font-family: 'Roboto', sans-serif;
+}
+
+.app-tag {
+    font-size: 13px !important;
+    padding: 2px 12px !important;
+    border-radius: 6px !important;
+    text-transform: capitalize;
+    font-weight: 500;
+    text-align: center;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 28px !important;
+}
+
+/* Global CTA button overrides */
+.ant-btn-primary {
+  background-color: #25D366 !important;
+  border-color: #25D366 !important;
+}
+
+.ant-btn-primary:not(:disabled):hover {
+  background-color: #20b858 !important;
+  border-color: #20b858 !important;
+}
+
+/* Global default button hover overrides */
+.ant-btn:not(.ant-btn-primary):not(:disabled):hover {
+  color: #25D366 !important;
+  border-color: #B7E9D1 !important;
+  background-color: #E6F9EF !important;
 }

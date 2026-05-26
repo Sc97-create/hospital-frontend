@@ -1,0 +1,225 @@
+.patient-profile-wrapper {
+    padding: 16px;
+    width: 100%;
+}
+
+/* HEADER */
+
+.patient-header-card {
+    border-radius: 16px;
+    margin-bottom: 16px;
+    border: 1px solid #e5e7eb;
+    padding: 16px;
+}
+
+.patient-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.patient-left-section {
+    display: flex;
+    gap: 16px;
+}
+
+.patient-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.patient-main-info h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.patient-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.patient-meta-grid {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.patient-tag-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.patient-action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* TABS */
+
+.patient-tabs {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 18px;
+    padding-left: 4px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+.patient-tabs span {
+    font-size: 13px;
+    color: #6b7280;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.active-tab {
+    color: #2563eb !important;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 8px;
+}
+
+/* CARDS */
+
+.overview-card,
+.insurance-card {
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    min-height: 100%;
+}
+
+.card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.card-title h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.edit-link {
+    font-size: 13px;
+    color: #2563eb;
+    cursor: pointer;
+}
+
+/* INFO GRID */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.info-grid label,
+.contact-item label,
+.medical-item label,
+.insurance-grid label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    letter-spacing: 0.4px;
+}
+
+.info-grid p,
+.contact-item p,
+.medical-item p,
+.insurance-grid p {
+    margin: 0;
+    font-size: 14px;
+    color: #111827;
+    font-weight: 500;
+}
+
+/* CONTACT */
+
+.contact-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* MEDICAL */
+
+.medical-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.medical-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* INSURANCE */
+
+.insurance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.insurance-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1200px) {
+    .insurance-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .patient-header-container {
+        flex-direction: column;
+    }
+
+    .patient-left-section {
+        flex-direction: column;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .patient-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .insurance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .patient-action-buttons {
+        width: 100%;
+    }
+}

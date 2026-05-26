@@ -1,0 +1,131 @@
+/* ===== MAIN ===== */
+
+.prescription-layout-wrapper {
+    min-height: 65vh;
+    max-width: 100%;
+    overflow-x: hidden;
+
+}
+
+/* ===== BREADCRUMB ===== */
+
+.breadcrumb-layout {
+    padding: 14px 24px 14px 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* ===== PAGE ===== */
+
+.prescription-page {
+    padding: 20px 24px 20px 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ===== CARD ===== */
+
+.prescription-card {
+    border-radius: 12px !important;
+    border: 1px solid #e8e8e8;
+}
+
+/* ===== HEADER ===== */
+
+.table-header-row {
+    margin-bottom: 18px;
+}
+
+.page-title {
+    margin: 0 !important;
+    font-size: 20px !important;
+    font-weight: 600 !important;
+}
+
+/* ===== SEARCH ===== */
+
+.search-input {
+    width: 220px;
+}
+
+.search-input .ant-input {
+    font-size: 14px;
+}
+
+.search-input .ant-input-affix-wrapper {
+    height: 36px;
+    display: flex;
+    align-items: center;
+}
+
+.search-input .ant-input {
+    height: 100%;
+}
+
+.search-input input {
+    height: 100%;
+    font-size: 13px;
+}
+
+/* ===== TABLE ===== */
+
+.prescription-table .ant-table {
+    font-size: 14px;
+}
+
+.prescription-table .ant-table-thead>tr>th {
+    font-size: 12px;
+    font-weight: 600;
+    color: #595959;
+}
+
+.prescription-table .ant-table-tbody>tr>td {
+    padding: 18px 12px;
+}
+
+/* ===== CODE ===== */
+
+.code-tag {
+    background-color: #ffffff !important;
+    color: #25D366 !important;
+    border: 1px solid #25D366 !important;
+    cursor: pointer;
+}
+
+/* ===== MEDICINE ===== */
+
+.medicine-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+}
+
+.medicine-name {
+    font-size: 14px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.more-tag {
+    width: fit-content;
+    font-size: 11px;
+    border-radius: 10px;
+    padding-inline: 8px;
+}
+
+.status-tag {
+    font-size: 14px !important;
+    padding: 4px 12px !important;
+    border-radius: 6px !important;
+    text-transform: capitalize;
+    font-weight: 500;
+}
+
+/* ===== FOOTER ===== */
+
+.table-footer {
+    margin-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

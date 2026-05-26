@@ -1,11 +1,11 @@
-import axios from "axios";
+import apiClient from "../../lib/api-client";
 import type { CreateAdmin,AdminResponse, UpdateUserPayload } from "../types/third-step-signup";
 
 
 
 export const AddUser = async (payload: CreateAdmin): Promise<AdminResponse> => {
-    const response = await axios.post(
-        "http://localhost:9069/api/v1/employee/create",
+    const response = await apiClient.post(
+        "/employee/create",
         payload
 
     );
@@ -13,8 +13,8 @@ export const AddUser = async (payload: CreateAdmin): Promise<AdminResponse> => {
 }
 
 export const UpdateUsers= async(payload:UpdateUserPayload):Promise<AdminResponse>=>{
-    const response=await axios.patch(
-        "http://localhost:9069/api/v1/employee/update",
+    const response=await apiClient.patch(
+        "/employee/update",
         payload
     );
     return response.data

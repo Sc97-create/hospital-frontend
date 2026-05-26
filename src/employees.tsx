@@ -16,7 +16,7 @@ function Employees() {
                     <div className="breadcrumb-layout">
                         <Breadcrumb>
                             <Breadcrumb.Item>
-                            <HomeOutlined />
+                                <HomeOutlined />
                                 <Link to={'/dashboard'}>Overview</Link>
                             </Breadcrumb.Item>
                             <Breadcrumb.Item>
@@ -26,12 +26,12 @@ function Employees() {
                     </div>
                     <Content className="main-layout">
                         <div className="button-layout">
-                            <Button icon={<PlusCircleOutlined />} className="appointment-button" onClick={()=>{navigate('/employees/add-employee')}}>
+                            <Button icon={<PlusCircleOutlined />} className="appointment-button" onClick={() => { navigate('/employees/add-employee') }}>
                                 Add Employee
                             </Button>
                         </div>
                         <div className="search-layout">
-                            <Input className="search-input" placeholder="search employees" suffix={<SearchOutlined />} />
+                            <Input className="search-input1" placeholder="search employees" suffix={<SearchOutlined />} />
                         </div>
                     </Content>
 

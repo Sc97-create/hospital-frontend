@@ -1,0 +1,108 @@
+.add-supplier-container {
+    min-height: 100vh;
+    padding: 24px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.add-supplier-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #6b7280;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.title {
+    margin-bottom: 4px !important;
+    font-weight: 600;
+}
+
+.subtitle {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.ant-form-item {
+    margin-bottom: 20px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+}
+
+/* ✅ Ant Card Styling */
+.supplier-card {
+    border-radius: 12px;
+    padding: 32px;
+    /* 🔥 increase padding */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Card body padding tweak */
+.supplier-card .ant-card-body {
+    padding: 24px;
+}
+
+/* Inputs */
+.ant-input {
+    height: 40px;
+    border-radius: 6px;
+}
+
+/* Actions */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+}
+
+.cancel-btn {
+    border: none;
+    background: transparent;
+    color: #6b7280;
+}
+
+.submit-btn {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+    border-radius: 6px;
+    height: 40px;
+    padding: 0 20px;
+}
+
+.submit-btn:hover {
+    background-color: #1e40af;
+    border-color: #1e40af;
+}
+
+@media screen and (max-width: 768px) {
+    .add-supplier-container {
+        padding: 16px;
+    }
+    
+    .supplier-card {
+        padding: 16px;
+    }
+    
+    .supplier-card .ant-card-body {
+        padding: 12px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .submit-btn {
+        width: 100%;
+    }
+}

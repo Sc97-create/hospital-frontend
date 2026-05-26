@@ -1,101 +1,546 @@
-import { Layout, Breadcrumb, Form, Input, Select, Button, } from "antd"
-import { Link } from "react-router-dom"
-import Header from "../../header"
-import Sidebar from "../../sidebar"
-import { Content } from "antd/es/layout/layout"
-import FormItem from "antd/es/form/FormItem"
-import './add-employee.css'
-import { useState } from "react"
-import AddPermission from "../add-permissions/add-permission"
+import {
+    Avatar,
+    Badge,
+    Breadcrumb,
+    Button,
+    Card,
+    Col,
+    DatePicker,
+    Form,
+    Input,
+    Layout,
+    Radio,
+    Row,
+    Select,
+    Tag,
+    TimePicker,
+    Typography,
+    Upload,
+} from 'antd';
+
+import {
+    CalendarOutlined,
+    CameraOutlined,
+    HomeOutlined,
+    MailOutlined,
+    PhoneOutlined,
+    PlusOutlined,
+    TeamOutlined,
+    UserOutlined,
+} from '@ant-design/icons';
+
+import './add-employee.css';
+import Sidebar from '../../sidebar';
+import { Link } from 'react-router-dom';
+
+const { Content } = Layout;
+const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 function AddEmployee() {
-    const [form] = Form.useForm()
-    const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false)
+
+    const [form] = Form.useForm();
+
     return (
-        <>
-            <Layout>
-                <Sidebar />
-                <Layout>
+        <Layout>
+            <Sidebar />
+            <Layout className='employee-layout'>
 
-                    <div className="breadcrumb-layout">
-                        <Breadcrumb>
-                            <Breadcrumb.Item>
-                                <Link to={'/employees'}>Employees</Link>
-                            </Breadcrumb.Item>
-                            <Breadcrumb.Item>
-                                Add Employee
-                            </Breadcrumb.Item>
-                        </Breadcrumb>
+                <Content className='employee-content'>
+
+                    {/* HEADER */}
+
+                    <div className='employee-header'>
+
+                        <div>
+
+                            <Breadcrumb>
+
+                                <Breadcrumb.Item href='/dashboard'>
+                                    <HomeOutlined />
+                                </Breadcrumb.Item>
+
+                                <Breadcrumb.Item>
+                                    <Link to="/employees">Staff Management</Link>
+                                </Breadcrumb.Item>
+
+                                <Breadcrumb.Item>
+                                    Add Employee
+                                </Breadcrumb.Item>
+
+                            </Breadcrumb>
+
+                            <div className='employee-title-row'>
+
+                                <Title level={2} className='employee-title'>
+                                    Add Employee
+                                </Title>
+
+                                <Tag color='default'>
+                                    Draft
+                                </Tag>
+
+                            </div>
+
+                        </div>
+
                     </div>
-                    <Content className="addpharma">
-                        <h2>Add Employee</h2>
-                        <div className="pharma-form">
-                            <Form layout="vertical" form={form}>
-                                <Form.Item label="Full Name" >
-                                    <Input placeholder="enter full name" className="pharma-input" />
-                                </Form.Item>
-                                <Form.Item label="Role">
-                                    <Select
-                                        style={{ width: 400, height: 40, borderRadius: 8 }}
-                                        defaultValue='Select Role'
-                                        options={
-                                            [
-                                                { value: 'attendant', label: 'Attendant' },
-                                                { value: 'pharmacist', label: 'Pharmacist' },
-                                                { value: 'doctor', label: 'Doctor' },
-                                                { value: 'nurse', label: 'Nurse' },
-                                                { value: 'administrator', label: 'Administrator' },
-                                                { value: 'technician', label: 'Technician' }
-                                            ]
-                                        }
-                                    />
-                                </Form.Item>
-                                <Form.Item label="Department">
-                                    <Select
-                                        defaultValue='Select Department'
-                                        style={{ width: 400, height: 40, borderRadius: 8 }}
-                                        options={
-                                            [
-                                                { value: 'oncology', label: 'Oncology' },
-                                                { value: 'cardiology', label: 'Cardiology' },
-                                                { value: 'human_resource', label: 'Human Resource' },
-                                                { value: 'emergency_medicine', label: 'Emergency Medicine' },
-                                                { value: 'pediatrics', label: 'Pediatrics' },
-                                                { value: 'pharmaceutical_service', label: 'Pharmaceutical Services' }
-                                            ]
-                                        }
-                                    />
-                                </Form.Item>
-                                <Form.Item label="Email ID">
-                                    <Input type="email" placeholder="enter email address" className="pharma-input" />
-                                </Form.Item>
-                                <Form.Item label="Phone number">
-                                    <Input type="number" placeholder="please add contact number" className="pharma-input" />
-                                </Form.Item>
-                                <Form.Item label="Address">
-                                    <Input type="text" placeholder="we need your address" className="pharma-input" />
-                                </Form.Item>
-                            </Form>
-                        </div>
-                        <div className="add-emp-button-class">
-                            <Button className="preview-button">
-                                Cancel
-                            </Button>
-                            <Button className="invite-emp-button" onClick={() => setIsPermissionModalOpen(true)}>
-                                Invite Employee
-                            </Button>
-                        </div>
-                        <AddPermission
 
-                            open={isPermissionModalOpen}
-                            onClose={() => setIsPermissionModalOpen(false)}
-                        />
-                    </Content>
+                    <Form
+                        form={form}
+                        layout='vertical'
+                    >
 
-                </Layout>
+                        <Row gutter={[20, 20]}>
+
+                            {/* LEFT */}
+
+                            <Col xs={24} lg={16}>
+
+                                {/* PERSONAL INFO */}
+
+                                <Card
+                                    className='employee-card'
+                                    title='Personal Information'
+                                >
+
+                                    <Row gutter={[20, 20]}>
+
+                                        {/* PROFILE */}
+
+                                        <Col xs={24} sm={8} md={6} lg={6}>
+
+                                            <div className='upload-section'>
+
+                                                <Upload
+                                                    showUploadList={false}
+                                                >
+
+                                                    <div className='upload-box'>
+
+                                                        <CameraOutlined className='upload-icon' />
+
+                                                    </div>
+
+                                                </Upload>
+
+                                                <Text className='upload-text'>
+                                                    JPG or PNG, max 2MB
+                                                </Text>
+
+                                            </div>
+
+                                        </Col>
+
+                                        {/* FORM */}
+
+                                        <Col xs={24} sm={16} md={18} lg={18}>
+
+                                            <Row gutter={14}>
+
+                                                <Col xs={24} sm={12}>
+
+                                                    <Form.Item
+                                                        label='First Name'
+                                                        name='first_name'
+                                                    >
+
+                                                        <Input
+                                                            placeholder='e.g. John'
+                                                            className='input-form-layout'
+                                                        />
+
+                                                    </Form.Item>
+
+                                                </Col>
+
+                                                <Col xs={24} sm={12}>
+
+                                                    <Form.Item
+                                                        label='Last Name'
+                                                        name='last_name'
+                                                    >
+
+                                                        <Input
+                                                            placeholder='e.g. Doe'
+                                                            className='input-form-layout'
+                                                        />
+
+                                                    </Form.Item>
+
+                                                </Col>
+
+                                                <Col xs={24} sm={12}>
+
+                                                    <Form.Item
+                                                        label='Gender'
+                                                        name='gender'
+                                                    >
+
+                                                        <Select
+                                                            placeholder='Select Gender'
+                                                            className='dropdown-input-class'
+                                                        >
+
+                                                            <Select.Option value='male'>
+                                                                Male
+                                                            </Select.Option>
+
+                                                            <Select.Option value='female'>
+                                                                Female
+                                                            </Select.Option>
+
+                                                        </Select>
+
+                                                    </Form.Item>
+
+                                                </Col>
+
+                                                <Col xs={24} sm={12}>
+
+                                                    <Form.Item
+                                                        label='Date of Birth'
+                                                        name='dob'
+                                                    >
+
+                                                        <DatePicker
+                                                            className='date-picker-layout'
+                                                        />
+
+                                                    </Form.Item>
+
+                                                </Col>
+
+                                                <Col xs={24} sm={12}>
+
+                                                    <Form.Item
+                                                        label='Mobile Number'
+                                                        name='mobile'
+                                                    >
+
+                                                        <Input
+                                                            prefix={<PhoneOutlined />}
+                                                            className='input-form-layout'
+                                                        />
+
+                                                    </Form.Item>
+
+                                                </Col>
+
+                                                <Col xs={24} sm={12}>
+
+                                                    <Form.Item
+                                                        label='Email Address'
+                                                        name='email'
+                                                    >
+
+                                                        <Input
+                                                            prefix={<MailOutlined />}
+                                                            className='input-form-layout'
+                                                        />
+
+                                                    </Form.Item>
+
+                                                </Col>
+
+                                                <Col span={24}>
+
+                                                    <Form.Item
+                                                        label='Address'
+                                                        name='address'
+                                                    >
+
+                                                        <TextArea
+                                                            rows={3}
+                                                            className='text-area-layout'
+                                                        />
+
+                                                    </Form.Item>
+
+                                                </Col>
+
+                                            </Row>
+
+                                        </Col>
+
+                                    </Row>
+
+                                </Card>
+
+                                {/* EMPLOYEE INFO */}
+
+                                <Card
+                                    className='employee-card top-space'
+                                    title='Employee Information'
+                                >
+
+                                    <Row gutter={16}>
+
+                                        <Col xs={24} sm={12}>
+
+                                            <Form.Item
+                                                label='Auto-generated ID'
+                                            >
+
+                                                <Input
+                                                    value='HMS-2024-001'
+                                                    disabled
+                                                    className='input-form-layout'
+                                                />
+
+                                            </Form.Item>
+
+                                        </Col>
+
+                                        <Col xs={24} sm={12}>
+
+                                            <Form.Item
+                                                label='Department'
+                                                name='department'
+                                            >
+
+                                                <Select className='dropdown-input-class'>
+
+                                                    <Select.Option value='cardiology'>
+                                                        Cardiology
+                                                    </Select.Option>
+
+                                                    <Select.Option value='pharmacy'>
+                                                        Pharmacy
+                                                    </Select.Option>
+
+                                                    <Select.Option value='reception'>
+                                                        Reception
+                                                    </Select.Option>
+
+                                                </Select>
+
+                                            </Form.Item>
+
+                                        </Col>
+
+                                    </Row>
+
+                                    {/* ROLE */}
+
+                                    <div className='role-section'>
+
+                                        <Text className='role-title'>
+                                            Role Selection
+                                        </Text>
+
+                                        <div className='role-grid'>
+
+                                            <div className='role-card active-role'>
+                                                <UserOutlined />
+                                                <span>Doctor</span>
+                                            </div>
+
+                                            <div className='role-card'>
+                                                <TeamOutlined />
+                                                <span>Nurse</span>
+                                            </div>
+
+                                            <div className='role-card'>
+                                                <PlusOutlined />
+                                                <span>Pharmacist</span>
+                                            </div>
+
+                                            <div className='role-card'>
+                                                <UserOutlined />
+                                                <span>Receptionist</span>
+                                            </div>
+
+                                            <div className='role-card'>
+                                                <TeamOutlined />
+                                                <span>Attendant</span>
+                                            </div>
+
+                                            <div className='role-card'>
+                                                <UserOutlined />
+                                                <span>Admin</span>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </Card>
+
+                                {/* SHIFT */}
+
+                                <Card
+                                    className='employee-card top-space'
+                                    title='Shift Assignment'
+                                >
+
+                                    <div className='shift-wrapper'>
+
+                                        <Radio.Group defaultValue='general'>
+
+                                            <Radio.Button value='general'>
+                                                General Shift
+                                            </Radio.Button>
+
+                                            <Radio.Button value='morning'>
+                                                Morning Shift
+                                            </Radio.Button>
+
+                                            <Radio.Button value='evening'>
+                                                Evening Shift
+                                            </Radio.Button>
+
+                                            <Radio.Button value='night'>
+                                                Night Shift
+                                            </Radio.Button>
+
+                                            <Radio.Button value='rotational'>
+                                                Rotational
+                                            </Radio.Button>
+
+                                        </Radio.Group>
+
+                                    </div>
+
+                                    <Row gutter={16} className='top-space'>
+
+                                        <Col xs={24} sm={12}>
+
+                                            <Form.Item
+                                                label='Start Time'
+                                                name='start_time'
+                                            >
+
+                                                <TimePicker
+                                                    className='time-picker-layout'
+                                                />
+
+                                            </Form.Item>
+
+                                        </Col>
+
+                                        <Col xs={24} sm={12}>
+
+                                            <Form.Item
+                                                label='End Time'
+                                                name='end_time'
+                                            >
+
+                                                <TimePicker
+                                                    className='time-picker-layout'
+                                                />
+
+                                            </Form.Item>
+
+                                        </Col>
+
+                                    </Row>
+
+                                </Card>
+
+                            </Col>
+
+                            {/* RIGHT */}
+
+                            <Col xs={24} lg={8}>
+
+                                <Card className='preview-card'>
+
+                                    <div className='preview-top'>
+
+                                        <Badge status='success' text='Active' />
+
+                                    </div>
+
+                                    <div className='preview-profile'>
+
+                                        <Avatar
+                                            size={90}
+                                            src='https://i.pravatar.cc/150'
+                                        />
+
+                                        <Text className='preview-id'>
+                                            HMS-2024-001
+                                        </Text>
+
+                                        <Title level={4}>
+                                            Dr. John Doe
+                                        </Title>
+
+                                        <Tag color='blue'>
+                                            Doctor
+                                        </Tag>
+
+                                    </div>
+
+                                    <div className='preview-section'>
+
+                                        <Text strong>
+                                            Shift Summary
+                                        </Text>
+
+                                        <p>
+                                            General Shift (09:00 - 17:00)
+                                        </p>
+
+                                    </div>
+
+                                    <div className='preview-section'>
+
+                                        <Text strong>
+                                            System Permissions
+                                        </Text>
+
+                                        <ul className='permission-list'>
+
+                                            <li>Patient Records</li>
+
+                                            <li>Prescription Access</li>
+
+                                            <li>Billing Access</li>
+
+                                            <li>Inventory Management</li>
+
+                                        </ul>
+
+                                    </div>
+
+                                </Card>
+
+                            </Col>
+
+                        </Row>
+
+                    </Form>
+
+                    {/* FOOTER */}
+
+                    <div className='employee-footer'>
+
+                        <Button>
+                            Cancel
+                        </Button>
+
+                        <div className='footer-right'>
+
+                            <Button>
+                                Save Draft
+                            </Button>
+
+                            <Button type='primary'>
+                                Create Employee
+                            </Button>
+
+                        </div>
+
+                    </div>
+
+                </Content>
+
             </Layout>
-        </>
-    )
+        </Layout>
+    );
 }
 
-export default AddEmployee
+export default AddEmployee;
+
