@@ -1,11 +1,17 @@
-import axios from "axios";
+import apiClient from "../../lib/api-client";
 import type { PersonalInfo, PersonalInfoResponse } from "../types/first-step-appointment";
 
 
-export const FirstStep=async(payload:PersonalInfo):Promise<PersonalInfoResponse>=>{
-    const response= await axios.post(
-        "http://localhost:9069/api/v1/patient/addGeneralInfo",
+export const CreateAppointment = async (payload: PersonalInfo): Promise<PersonalInfoResponse> => {
+    const response = await apiClient.post(
+        "/patients/addGeneralInfo",
         payload
+    );
+    return response.data
+}
+export const GetPatientByID = async (patientID: string): Promise<PersonalInfoResponse> => {
+    const response = await apiClient.get(
+        `/patients/getPatientByID`, { params: { patient_id: patientID } }
     );
     return response.data
 }

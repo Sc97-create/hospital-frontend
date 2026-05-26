@@ -76,7 +76,7 @@ function SecondStep({ data, OnUpdate, organisationID, onNext, onBack }: SecondSt
           style={{ marginBottom: 24 }}
         >
           <Row gutter={[16, 16]}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 label="Country"
                 name="country_id"
@@ -89,19 +89,19 @@ function SecondStep({ data, OnUpdate, organisationID, onNext, onBack }: SecondSt
               </Form.Item>
             </Col>
 
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item label="State / Province" name="state_id" required>
                 <Input placeholder="e.g. California" />
               </Form.Item>
             </Col>
 
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item label="City" name="city_id" required>
                 <Input placeholder="e.g. San Francisco" />
               </Form.Item>
             </Col>
 
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item label="Timezone" name="timezone" required>
                 <Select defaultValue="GMT-08:00">
                   <Option value="GMT-08:00">

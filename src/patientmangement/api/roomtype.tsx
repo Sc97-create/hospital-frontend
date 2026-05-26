@@ -1,18 +1,29 @@
-import axios from "axios";
-import type { RoomType, RoomTypeResponse } from "../types/roomtype";
+import apiClient from "../../lib/api-client";
+import type { RoomType, RoomTypeArr, RoomTypeResponse } from "../types/roomtype";
 
 //write api call
 export const CreateRoomType = async (payload: RoomType): Promise<RoomTypeResponse> => {
-    const response = await axios.post(
-        "http://localhost:9069/api/v1/bed/createRoomType",
+    const response = await apiClient.post(
+        "/bed/createRoomType",
         payload
     );
     return response.data
 }
 export const GetRoomType = async (id: string): Promise<RoomTypeResponse> => {
-    const response = await axios.get(
-        `http://localhost:9069/api/v1/bed/getRoomTypeData`,
+    const response = await apiClient.get(
+        `/bed/getRoomTypeData`,
         { params: { id } }
+    );
+    return response.data
+}
+export const GetRoomTypeByOrganisationID = async (organisationID: string): Promise<RoomTypeArr> => {
+    const response = await apiClient.get(
+        `/bed/getAvailableRoomTypes`,
+        {
+            params: {
+                organisation_id: organisationID
+            }
+        }
     );
     return response.data
 }

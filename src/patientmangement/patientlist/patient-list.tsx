@@ -1,0 +1,238 @@
+import { Layout, Breadcrumb, Button, Input, Table, Tag, Pagination } from 'antd'
+import { useState, useEffect } from 'react'
+import type { TableColumnsType, TableColumnType, TableProps, TablePaginationConfig } from 'antd'
+import './patient-list.css'
+import Sidebar from '../../sidebar'
+import datecheck from 'dayjs'
+import { useNavigate } from "react-router-dom";
+import {
+    HomeOutlined,
+    UserOutlined,
+    PlusCircleOutlined,
+    SearchOutlined
+} from '@ant-design/icons'
+import HeaderLayout from '../../header'
+import { findMany } from '../api/patients'
+import type { Patientlistresponse } from '../types/patients'
+const { Search } = Input;
+
+const { Content } = Layout
+
+interface DataType {
+    key: React.Key;
+    patient_name: string;
+    age: number;
+    weight: number;
+    gender: string;
+    issued_at: Date;
+    status: string;
+}
+
+
+
+function PatientList() {
+    const navigate = useNavigate()
+    const columns: TableColumnsType<DataType> = [
+
+        {
+            title: 'Code',
+            dataIndex: 'code',
+            className: 'column-layout',
+            showSorterTooltip: { target: 'full-header' },
+            render: (text: string) => (
+                <span style={{ backgroundColor: '#FFF9C4', color: '#000', padding: '4px 8px', borderRadius: '6px', fontWeight: '600' }}>
+                    {text}
+                </span>
+            )
+        },
+        {
+            title: 'Patient Name',
+            dataIndex: 'patient_name',
+            defaultSortOrder: 'descend',
+            className: 'other-layout',
+            render: (text, record) => (
+                <span
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/patients/patient-overview/${record.key}`)}
+                >
+                    {text}
+                </span>
+            )
+
+        },
+        {
+            title: 'Age',
+            dataIndex: 'age',
+            className: 'other-layout',
+            sorter: (a, b) => a.age - b.age,
+        },
+        {
+            title: 'Weight',
+            dataIndex: 'weight',
+            className: 'other-layout'
+        },
+        {
+            title: 'Gender',
+            dataIndex: 'gender',
+            className: 'other-layout',
+            filters: [
+                {
+                    text: 'Male',
+                    value: 'male',
+                },
+                {
+                    text: 'Female',
+                    value: 'female',
+                }],
+            onFilter: (value, record) => record.gender.indexOf(value as string) === 0,
+
+
+        },
+        {
+            title: 'Issued At',
+            dataIndex: 'issued_at',
+            className: 'other-layout',
+            showSorterTooltip: { target: 'full-header' },
+            render: (date: Date) => datecheck(date).format('DD MMMM YYYY'),
+            defaultSortOrder: 'descend',
+            sorter: (a, b) => new Date(a.issued_at).getTime() - new Date(b.issued_at).getTime()
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            align: 'center',
+            render: (status: string) => {
+                const toTitleCase = (str: string) =>
+                    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+                const colorMap: Record<string, string> = {
+                    pending: 'orange',
+                    active: 'green',
+                    completed: 'blue',
+                    cancelled: 'red',
+                };
+                return <Tag color={colorMap[status.toLowerCase()]} bordered={true} className='app-tag'>{toTitleCase(status)}</Tag>
+            }
+        }
+    ];
+    const [response, setresponse] = useState<Patientlistresponse>();
+    const [loading, setLoading] = useState(false);
+    const patientlist = async (page = 1, pageSize = 10) => {
+        setLoading(true);
+        try {
+            const res = await findMany(pageSize, page, localStorage.getItem("organisation_id") || "");
+            setresponse(res);
+
+            setPagination(prev => ({
+                ...prev,
+                current: page,
+                pageSize: pageSize,
+                total: res?.total || 0 
+            }));
+        }
+        catch (e) {
+            console.log(e);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        patientlist(pagination.current, pagination.pageSize);
+    }, []);
+
+
+    const [pagination, setPagination] = useState<TablePaginationConfig>({
+        current: 1,
+        pageSize: 10,
+        total: response?.data?.length || 0
+    })
+    const currentData: DataType[] = (response?.data || []).map(patient => ({
+        key: patient.patient_id,
+        code: '#' + patient.patient_code,
+        patient_name: patient.patient_name,
+        age: patient.patient_age,
+        weight: patient.patient_weight,
+        gender: patient.patient_gender,
+        issued_at: patient.admission_date,
+        status: patient.patient_status || 'active'
+    }));
+    const onChange = (page: number, pageSize?: number) => {
+        patientlist(page, pageSize);
+    };
+
+
+    return (
+        <>
+            <Layout>
+
+                <Sidebar />
+                <Layout>
+
+                    <Breadcrumb
+                        className='breadcrumb-layout'
+                        items={[
+                            {
+                                href: '/dashboard',
+                                title: <HomeOutlined />,
+                            },
+                            {
+
+                                title: (
+                                    <>
+                                        <UserOutlined />
+                                        <span>Patients</span>
+                                    </>
+                                ),
+                            },
+
+                        ]}
+                    />
+                    <Content className='main-layout'>
+                        <div className="button-layout">
+                            <Button
+                                className='appointment-button'
+                                icon={<PlusCircleOutlined />}
+                                onClick={() => { navigate('/patients/add-patient') }}
+                            >
+                                Add New Patient
+                            </Button>
+                        </div>
+                        <div className="search-layout">
+
+                            <Input placeholder='search patients' className='search-input1' suffix={<SearchOutlined
+                                style={{ cursor: 'pointer', width: '14px', height: '14px' }}
+                            />} />
+                        </div>
+                        <div className="table-data">
+                            <Table<DataType>
+                                columns={columns}
+                                dataSource={currentData}
+                                showSorterTooltip={{ target: 'sorter-icon' }}
+                                scroll={{ y: 400 }}
+                                pagination={false}
+                                loading={loading}
+                            />
+                        </div>
+                        <div className="pagination-tab">
+                            <h3>Total Patients ({response?.data?.length || 0})</h3>
+                            <Pagination
+                                current={pagination.current}
+                                pageSize={pagination.pageSize}
+                                total={pagination.total}
+                                onChange={onChange}
+                            />
+                        </div>
+                    </Content>
+                </Layout>
+            </Layout>
+        </>
+    )
+}
+
+export default PatientList
+
+function dayjs(date: Date) {
+    throw new Error('Function not implemented.')
+}

@@ -102,15 +102,15 @@ function ThirdStep({ onSuccess, organisationID, onNext, onBack, data }: ThirdSte
                 This account will have full control over the organization's platform
                 settings and user management. Use a secure work email.
             </p>
-            <Card>
-                <Form layout="vertical" form={form} onFinish={onFinish}>
+            <Form layout="vertical" form={form} onFinish={onFinish}>
+                <Card>
                     <Row gutter={16}>
-                        <Col span={12}>
+                        <Col xs={24} sm={12}>
                             <Form.Item label="First Name" name="first_name" required>
                                 <Input placeholder="e.g. Dr. Jane" />
                             </Form.Item>
                         </Col>
-                        <Col span={12}>
+                        <Col xs={24} sm={12}>
                             <Form.Item label="Last Name" name="last_name" required>
                                 <Input placeholder="e.g. Smith" />
                             </Form.Item>
@@ -120,13 +120,13 @@ function ThirdStep({ onSuccess, organisationID, onNext, onBack, data }: ThirdSte
 
 
                     <Row gutter={16}>
-                        <Col span={12}>
+                        <Col xs={24} sm={12}>
                             <Form.Item label="Work Email" name="email_id" required>
                                 <Input placeholder="jane.smith@hospital.com" />
                             </Form.Item>
                         </Col>
 
-                        <Col span={12}>
+                        <Col xs={24} sm={12}>
                             <Form.Item label="Phone Number" name="mob_no" required>
                                 <Input placeholder="+1 (555) 000-0000" />
                             </Form.Item>
@@ -178,14 +178,14 @@ function ThirdStep({ onSuccess, organisationID, onNext, onBack, data }: ThirdSte
                         </div>
                     )}
 
-                    <div className="button-row1">
-                        <Button onClick={onBack}>Back</Button>
-                        <Button className="custom-primary-btn" htmlType="submit" loading={isPendingAdmin} disabled={!cansubmit}>
-                            {data?.id ? "Update User" : "Create Root Account"}
-                        </Button>
-                    </div>
-                </Form>
-            </Card>
+                </Card>
+                <div className="button-row1">
+                    <Button onClick={onBack}>Back</Button>
+                    <Button className="custom-primary-btn" htmlType="submit" loading={isPendingAdmin} disabled={!cansubmit}>
+                        {data?.id ? "Update User" : "Create Root Account"}
+                    </Button>
+                </div>
+            </Form>
 
             <p className="help-text">
                 Need help? <a href="#">Contact Platform Support</a>

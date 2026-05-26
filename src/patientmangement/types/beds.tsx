@@ -13,6 +13,10 @@ export interface CreateBedResponse {
     message: string;
     code: number;
 }
+export interface RoomBedData {
+    data: RoomBed[];
+    message: string;
+}
 export interface RoomBed {
     bed_number: string[];
     room_id: string;
@@ -38,4 +42,15 @@ export interface RoomSummary {
     total_rooms: number;
     total_beds: number;
     total_floors: number;
+}
+export interface BedModel {
+    id: string;
+    beds: string;
+    status: string;
+    organisation_id: string;
+
+}
+export interface GetBedResponse {
+    data: BedModel[];
+    message: string;
 }

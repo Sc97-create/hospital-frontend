@@ -4,6 +4,7 @@ import { Button, Menu } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     AppstoreOutlined,
+    MedicineBoxOutlined,
     MenuFoldOutlined,
     ShopOutlined,
     TeamOutlined,
@@ -18,12 +19,13 @@ function Sidebar() {
     const navigate = useNavigate();
     const [collapse, setCollapse] = useState(false)
     const [hover, setHover] = useState(false);
-    const routeMap: Record<'/patients' | '/appointment' | '/pharmacy' | '/employees' | '/bed-arrangement', string> = {
+    const routeMap: Record<'/patients' | '/appointment' | '/suppliers' | '/employees' | '/bed-arrangement' | '/prescription', string> = {
         '/patients': '/patients',
         '/appointment': '/appointment',
-        '/pharmacy': '/pharmacy',
+        '/suppliers': '/suppliers',
         "/employees": '/employees',
-        "/bed-arrangement": '/bed-arrangement'
+        "/bed-arrangement": '/bed-arrangement',
+        "/prescription": '/prescription'
     };
 
     const matchedKey = (Object.keys(routeMap) as Array<keyof typeof routeMap>).find(
@@ -74,9 +76,9 @@ function Sidebar() {
                                 label: 'Patients',
                             },
                             {
-                                key: '/pharmacy',
+                                key: '/suppliers',
                                 icon: <ShopOutlined />,
-                                label: 'Pharmacy',
+                                label: 'Suppliers',
                             },
                             {
                                 key: '/employees',
@@ -87,6 +89,11 @@ function Sidebar() {
                                 key: '/bed-arrangement',
                                 icon: <UserOutlined />,
                                 label: 'Bed Arrangement'
+                            },
+                            {
+                                key: '/prescription',
+                                icon: <MedicineBoxOutlined />,
+                                label: 'Prescription'
                             }
                         ]}
                     />
