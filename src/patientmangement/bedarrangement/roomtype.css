@@ -1,0 +1,91 @@
+.container {
+    padding: 48px 32px 32px 32px;
+    background: #f5f7fa;
+    min-height: 100vh;
+}
+
+.header-title {
+    margin-bottom: 4px;
+}
+
+.steps-container {
+    margin: 24px 0;
+}
+
+.main-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-top: 16px;
+    padding: 24px;
+}
+
+.help-text {
+    font-size: 12px;
+}
+
+.default-toggle-card {
+    margin-top: 16px;
+    background: #fafafa;
+    border-radius: 10px;
+}
+
+.actions-row {
+    margin-top: 24px;
+}
+
+.cancel-button {
+    margin-right: 12px;
+    height: 40px;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #F9FAFB;
+    border-color: #6B7280;
+    background-color: #6B7280;
+    font-size: 15px;
+
+}
+
+.cancel-button:hover,
+.cancel-button:focus {
+    background-color: #F9FAFB !important;
+    color: #6B7280 !important;
+    border-color: #6B7280 !important;
+}
+
+.bottom-info-row {
+    margin-top: 24px;
+}
+
+.pro-tip-card {
+    border-left: 4px solid #52c41a;
+    border-radius: 10px;
+    background: #f6ffed;
+}
+
+.info-icon {
+    color: #52c41a;
+    font-size: 18px;
+}
+
+.suggestions-card {
+    border-radius: 10px;
+    text-align: center;
+    background: #fafafa;
+}
+
+.save-button.ant-btn-primary {
+    background-color: #25D366;
+    border-color: #25D366;
+    color: #F9FAFB;
+    height: 40px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.save-button.ant-btn-primary:hover,
+.save-button.ant-btn-primary:focus {
+    background-color: #ffffff !important;
+    color: #25D366 !important;
+    border-color: #25D366 !important;
+}

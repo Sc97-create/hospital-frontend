@@ -1,0 +1,60 @@
+.manual-input-sub-class {
+    width: auto;
+    height: 40px;
+    background-color: #F9FAFB;
+    border-radius: 8px;
+    border-color: #E5E7EB !important;
+    box-shadow: none !important;
+    font-family: 'Roboto';
+    color: #1F2937;
+    align-items: center;
+
+}
+
+.manual-input-dropdown {
+    width: auto !important;
+    height: 40px !important;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.manual-input-form-layout {
+    width: 380px;
+    height: 40px;
+    background-color: #F9FAFB;
+    border-radius: 8px;
+    border-color: #E5E7EB !important;
+    box-shadow: none !important;
+    font-family: 'Roboto';
+    color: #1F2937;
+    align-items: center;
+}
+
+.note-tag {
+    width: 380px;
+    height: 56px;
+    background-color: #E6F9EF;
+    border-radius: 8px;
+    border-color: #B7E9D1;
+    p {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        font-family: 'Roboto';
+        align-items: center;
+        padding: 12px;
+    }
+}
+.add-manual-form-buttons{
+    margin-top: 40px;
+    margin-left: 160px;
+    display: flex;
+    gap: 16px;
+}
+.inventory-button{
+    background-color: #25D366;
+    color: #F9FAFB;
+    font-size: 14px;
+    padding: 8px;
+}

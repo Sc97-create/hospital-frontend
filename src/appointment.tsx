@@ -1,0 +1,178 @@
+import React, { useRef, useState } from 'react';
+import Sidebar from './sidebar';
+import { Breadcrumb, Layout, message, Steps } from 'antd';
+import { Button } from 'antd';
+import './appointment.css'
+import {
+    HomeOutlined,
+    UserOutlined,
+} from '@ant-design/icons'
+import { Link, useNavigate } from 'react-router-dom';
+import { Content } from 'antd/es/layout/layout';
+import FirstStep, { type FirstStepRef } from './appointment-step/features/first-step/first-step-appointment';
+import SecondStep from './appointment-step/features/second-step/second-step-appointment';
+import PreviewAppointment from './appointment-step/features/third-step/third-step-appointment';
+import type { PersonalInfo } from './appointment-step/types/first-step-appointment';
+import { useFirstStepAppointment } from './appointment-step/features/first-step/useFirstAppointment';
+
+function Appointment() {
+    const stepRef = useRef<FirstStepRef>(null);
+    const navigate=useNavigate()
+    const steps = [
+        {
+            title: 'Patient Details',
+            content: <FirstStep ref={stepRef} />,
+        },
+        {
+            title: 'Bed Allotment',
+            content: <SecondStep />,
+        },
+        {
+            title: 'Preview And Submit',
+            content: <PreviewAppointment />,
+        },
+    ];
+    const [current, setCurrent] = useState(0);
+
+    const [appointmentData, setAppointmentData] = useState<Partial<PersonalInfo>>({})
+    const next = async () => {
+        try {
+            const values = await stepRef.current?.validate();
+            setAppointmentData((prev) => ({
+                ...prev,
+                ...values,
+            }));
+            setCurrent((c) => c + 1);
+        } catch {
+            // validation failed
+        }
+    };
+    const { mutate, isPending } = useFirstStepAppointment();
+    //const items = steps.map((item) => ({ key: item.title, title: item.title }));
+
+    const handleSubmit = () => {
+        mutate(appointmentData as PersonalInfo, {
+            onSuccess: () => {
+                message.success("Appointment created successfully");
+                navigate("/appointments");
+            },
+            onError: () => {
+                message.error("Failed to create appointment");
+            },
+        });
+    };
+    const prev = () => {
+        if (current > 0) {
+            setCurrent(current - 1);
+        }
+    };
+    return (
+
+        <>
+            <Layout>
+                <Sidebar />
+                <Layout>
+                    <Breadcrumb className='appointment-breadcrumb-layout'>
+                        <Breadcrumb.Item>
+                            <HomeOutlined />
+                            <Link to='/dashboard'>Home</Link>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>
+                            <UserOutlined />
+                            <Link to='/patients'>Patient List</Link>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>
+                            Appointment Request
+                        </Breadcrumb.Item>
+                    </Breadcrumb>
+                    <Content className='appointment-layout'>
+                        {/* <FirstStep />
+                        <div className="button-wrapper">
+                            <Button className='submit-appointment-form' onClick={() => {
+                                console.log("clicked")
+                            }}>Submit</Button>
+                        </div> */}
+                        <div style={{ maxWidth: 900, margin: "16px" }}>
+                            <Steps
+                                current={current}
+
+                                items={steps.map((item) => ({ key: item.title, title: item.title }))}
+                            />
+                        </div>
+                        <div style={{ minHeight: "400px" }}>{steps[current].content}</div>
+
+                        {/* Navigation Buttons */}
+                        <div
+                            className="button-wrapper"
+                            style={{
+                                marginBottom: 32,
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: 12,
+                                marginRight: 315,
+                            }}
+                        >
+                            {current < steps.length - 1 && (
+                                <>
+                                    {current > 0 && (
+                                        <Button
+                                            onClick={prev}
+                                            style={{
+                                                borderRadius: 8,
+                                                width: 80,
+                                            }}
+                                        >
+                                            Back
+                                        </Button>
+                                    )}
+
+                                    <Button
+                                        type="primary"
+                                        onClick={next}
+                                        style={{
+                                            borderRadius: 8,
+                                            backgroundColor: "#25D366",
+                                            width: 80,
+                                            fontWeight: "600",
+                                        }}
+                                    >
+                                        Next
+                                    </Button>
+                                </>
+                            )}
+                            {current === steps.length - 1 && (
+                                <>
+                                    <Button
+                                        onClick={() => setCurrent(0)}
+                                        style={{
+                                            borderRadius: 8,
+                                            width: 80,
+                                        }}
+                                    >
+                                        Edit
+                                    </Button>
+
+                                    <Button
+                                        type="primary"
+                                        onClick={handleSubmit}
+                                        style={{
+                                            borderRadius: 8,
+                                            backgroundColor: "#25D366",
+                                            fontWeight: "600",
+                                        }}
+                                    >
+                                        Confirm & Submit
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+
+
+
+                    </Content>
+                </Layout>
+            </Layout >
+        </>
+    )
+}
+export default Appointment

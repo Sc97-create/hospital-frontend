@@ -1,0 +1,99 @@
+.inovice-upload-info {
+    font-family: "Roboto";
+    font-size: 14px;
+    color: #6B7280;
+    font-weight: 600;
+    margin-bottom: .2rem;
+}
+
+.invoice-upload-info-medium {
+    font-family: "Roboto";
+    font-size: 10px;
+    color: #6B7280;
+    font-weight: 600;
+    margin-bottom: .5rem;
+}
+
+
+.upload-hint {
+    width: auto;
+    height: 30px;
+    border-radius: 8px;
+    background-color: #E6F9EF;
+    padding: 8px;
+    border-color: #B7E9D1;
+    border-width: 10px;
+
+    p {
+        font-size: 10px;
+        font-family: "Roboto";
+        font-weight: 600;
+    }
+
+}
+.progress-bar-main {
+  margin-top: 1rem;
+  width: 100%;
+  background-color: #E6F9EF;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Text section */
+.info-bar {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-bar h4 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.info-bar p {
+  font-family: "Roboto";
+  font-size: 10px;
+  margin: 2px 0 0 0;
+  color: #3f8f6b;
+}
+
+/* Progress section */
+.progress-bar {
+  width: 100%;
+}
+
+/* AntD progress full width */
+.progress-bar .ant-progress {
+  width: 100%;
+}
+.file-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-icon {
+  font-size: 16px;
+  color: #e74c3c; /* PDF red */
+}
+.status-text {
+  padding-left: 24px; /* icon (16px) + gap (8px) */
+  font-size: 10px;
+  margin: 2px 0 0 0;
+  color: #3f8f6b;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.status-icon {
+  font-size: 18px;
+  color: #52c41a; /* AntD success green */
+}
+.medicine-table{
+    margin-top: 1rem;
+}

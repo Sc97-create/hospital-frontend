@@ -1,0 +1,40 @@
+.button-row1 {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+.root-admin-tag {
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: 3px;
+}
+.review-card {
+  border-radius: 10px;
+}
+
+.review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;              /* tight label-value spacing */
+
+}
+
+.review-label {
+  font-size: 8px;
+  font-weight: 500;
+  color: #8c8c8c;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.review-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: #262626;
+  line-height: 1.4;
+}
+
+.review-link {
+  color: #1677ff;
+}
+

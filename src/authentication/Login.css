@@ -1,0 +1,80 @@
+.container-fluid {
+    margin: 0;
+    padding: 0;
+}
+
+/* Layout wrapper */
+.auth-layout {
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Left Panel */
+.left-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Right Panel */
+.right-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    /* important for mobile */
+}
+
+/* Login Card */
+.login-card {
+    width: 450px;
+    max-width: 450px;
+    border: 1px solid #E5E7EB;
+    padding: 32px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.login-card h2 {
+    font-family: 'Roboto';
+    font-weight: bold;
+    margin-bottom: 24px;
+}
+
+/* Form spacing */
+.login-form .ant-form-item {
+    margin-bottom: 20px;
+}
+
+/* Button */
+.login-submit-button {
+    background-color: #25D366;
+    color: #F9FAFB;
+    font-weight: bold;
+}
+
+/* Bottom Links */
+.button-input {
+    width: 100%;
+}
+
+.auth-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 14px;
+}
+
+.auth-links span {
+    color: #6B7280;
+}

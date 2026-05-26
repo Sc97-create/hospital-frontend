@@ -1,0 +1,87 @@
+.secondstepcard {
+    height: auto;
+    width: 77% !important;
+    padding: 16px;
+    margin-right: 24px;
+    background-color: #F9FAFB;
+    border-color: #E5E7EB;
+    border-radius: 8px;
+    border-width: 2px;
+}
+.text-tag{
+    h2{
+        font-size: 20px;
+        font-weight: 600;
+        color: #1F2937;
+    }
+    p{
+        font-size: 12px;
+    }
+}
+.emergency-signal {
+    height: 40px;
+    width: auto;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffe5e5;
+    border: 1px solid #ff4d4f;
+    box-shadow: 0 0 8px rgba(255, 77, 79, 0.4);
+    padding-top: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    h3 {
+        color: red;
+        font-size: 14px;
+    }
+}
+.bed-allotment{
+    display: flex;
+    justify-content: space-between;
+    
+}
+.enable-emergency {
+  background-color: #E6F9EF;
+  border-color: #B7E9D1;
+  padding: 16px 24px;
+  border-radius: 8px;
+  display: flex;              /* <-- make it flex so align-items works */
+  align-items: center;        /* vertically center content */
+  justify-content: space-between;
+  height: auto;               /* <-- let it grow naturally */
+}
+
+.inline-class-enable {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;        /* vertically align h2 & switch */
+  width: 100%;                /* make inner flex take full width */
+}
+.divider {
+  border: none;
+  border-top: 1px solid #ccc; /* line color */
+  margin: 16px 0;             /* spacing above/below */
+}
+.enable-emergency h3 {
+  font-size: 16px;
+  margin: 0;
+  color: #1F2937;
+}
+.dropdown-second-step{
+     width: 420px !important;
+    height: 40px !important;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+.admitted-date{
+    height: 40px !important;
+}
+
+.scroll-enabled-page {
+  height: auto;
+  overflow-y: auto !important; /* enable vertical scroll */
+  overflow-x: hidden;           /* prevent horizontal scroll */
+  padding: 20px;
+}

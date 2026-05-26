@@ -1,0 +1,355 @@
+.step-3-container {
+    padding: 40px;
+    background: #f8fafc;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.header-meta {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e3a8a;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+}
+
+.page-title {
+    margin-top: 0 !important;
+    margin-bottom: 24px !important;
+    font-weight: 800 !important;
+    font-size: 28px !important;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+}
+
+.main-row {
+    margin-top: 8px;
+}
+
+/* Left Card */
+.action-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.card-title-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.title-icon {
+    font-size: 18px;
+    color: #0f766e;
+    margin-right: 12px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 10px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.custom-select-blue .ant-select-selector {
+    background-color: #e2e8f0 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    min-height: 48px !important;
+    padding: 4px 12px !important;
+    font-size: 14px !important;
+}
+
+.custom-select-blue .ant-select-selection-item {
+    background-color: #cbd5e1 !important;
+    color: #0369a1 !important;
+    border-radius: 16px !important;
+    font-weight: 600 !important;
+    padding: 0 12px !important;
+    margin-top: 6px !important;
+    height: 26px !important;
+    line-height: 26px !important;
+    font-size: 13px !important;
+}
+
+.custom-input-number {
+    background-color: #e2e8f0;
+    border: none;
+    border-radius: 8px;
+    height: 48px;
+}
+
+.custom-input-number .ant-input-number-input {
+    height: 48px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.custom-input-number .ant-input-number-handler-wrap {
+    display: none;
+}
+
+.form-group-checkbox {
+    margin-bottom: 24px;
+    margin-top: 16px;
+}
+
+.custom-checkbox {
+    color: #475569;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.generate-beds-btn {
+    background: #E6F9EF;
+    border: none;
+    border-radius: 8px;
+    height: 40px;
+    color: #6B7280;
+    font-weight: 800;
+    font-size: 15px;
+}
+
+.generate-beds-btn:hover {
+    color: #6B7280 !important;
+    filter: brightness(0.95);
+    background-color: #E6F9EF;
+}
+
+/* Middle Card */
+.table-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 20px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.table-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.auto-refresh-tag {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-weight: 700;
+}
+
+.custom-table-step3 .ant-table-thead>tr>th {
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    border-bottom: none;
+    padding: 16px 24px;
+}
+
+.custom-table-step3 .ant-table-tbody>tr>td {
+    padding: 20px 24px;
+    border-bottom: none;
+    color: #0f172a;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.blue-text-bold {
+    color: #0284c7;
+    font-weight: 800;
+    font-size: 15px;
+}
+
+.bed-tags {
+    display: flex;
+    gap: 8px;
+}
+
+.bed-tag {
+    background: #e2e8f0;
+    color: #334155;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.table-footer-link {
+    text-align: center;
+    padding: 20px;
+    background: #f8fafc;
+}
+
+.table-footer-link a {
+    color: #0284c7;
+    font-weight: 800;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+/* Right Card */
+.summary-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    background-color: #f1f5f9;
+}
+
+.summary-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 32px;
+    display: block;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.summary-label {
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.summary-value-teal {
+    color: #0d9488;
+    font-weight: 800;
+    font-size: 15px;
+}
+
+.stats-row {
+    margin-bottom: 32px;
+}
+
+.stat-box {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: left;
+    height: 100%;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #475569;
+    font-weight: 800;
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.stat-value {
+    color: #0284c7;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.floor-dist-section {
+    margin-bottom: 40px;
+}
+
+.dist-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+}
+
+.floor-tags {
+    display: flex;
+    gap: 8px;
+}
+
+.floor-tag {
+    background: #dbeafe;
+    color: #1e40af;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.progress-section {
+    margin-top: 16px;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #475569;
+    margin-top: 10px;
+}
+
+.final-actions {
+    margin-top: 24px;
+}
+
+.save-complete-btn {
+    background-color: #25D366;
+    border-color: #25D366;
+    color: #F9FAFB;
+    height: 40px;
+    border-radius: 8px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    font-size: 15px;
+    width: 100%;
+}
+
+.save-complete-btn:hover,
+.save-complete-btn:focus {
+    background-color: #ffffff !important;
+    color: #25D366 !important;
+    border-color: #25D366 !important;
+}
+
+.cancel-btn {
+    height: 40px;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #F9FAFB;
+    border-color: #6B7280;
+    background-color: #6B7280;
+    font-size: 15px;
+}
+
+.cancel-btn:hover,
+.cancel-btn:focus {
+    background-color: #F9FAFB !important;
+    color: #6B7280 !important;
+    border-color: #6B7280 !important;
+}

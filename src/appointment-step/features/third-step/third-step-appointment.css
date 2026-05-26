@@ -1,0 +1,11 @@
+.thirdstepcard{
+     height: auto;
+    width: 77% !important;
+    padding: 16px;
+    margin-right: 24px;
+    background-color: #F9FAFB;
+    border-color: #E5E7EB;
+    border-radius: 8px;
+    border-width: 2px;
+    margin-bottom: 12px;
+}

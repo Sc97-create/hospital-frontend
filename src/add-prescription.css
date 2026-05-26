@@ -1,0 +1,35 @@
+.add-button{
+    width: 80px;
+    height: 30px;
+    color: #F9FAFB;
+    font-weight: 600;
+    background-color: #25D366;
+}
+.preview-button{
+    background-color: #6B7280;
+    color: #F9FAFB;
+    font-weight: 600;
+    width: 80px !important;
+    height: 30px !important;
+}
+.main-freq-input{
+  width: 100%;
+}
+.prescription-form{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: 0;
+}
+.input-color-layout{
+   
+    background-color: #F9FAFB;
+    border-color: #E5E7EB;
+    border-radius: 8px;
+    border-width: 2px;
+   
+}
+.totalcount{
+    font-weight: 600px;
+    color: #6B7280;
+}

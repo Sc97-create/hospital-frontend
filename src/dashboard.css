@@ -1,0 +1,89 @@
+
+
+
+
+
+.content-layout {
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+}
+.first-row {
+    justify-content: space-between;
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    padding-left: 0px;
+
+}
+
+.ant-card .ant-card-body{
+    padding-top: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.first-card {
+    width: 300px;
+    height: 240px;
+    gap: 8px;
+    background-color: #F9FAFB;
+    border-color: #E5E7EB;
+    border-radius: 8px;
+    border-width: 2px;
+}
+.list-layout{
+    width: 280px;
+    justify-content: flex-start;
+    
+}
+.title-class h3{
+    font-size: 14px;
+    color: #6B7280;
+    font-weight: bold;
+}
+.load-more-button{
+    align-items: center;
+    margin-top: 12px;
+    margin-left: 24px;
+    justify-content: center;
+    display: flex;
+}
+.load-more-button .ant-btn{
+    color: #6B7280;
+    background-color: #E6F9EF;
+    font-weight: bold;
+}
+.description-class .ant-badge.ant-badge-status .ant-badge-status-text{
+    color: #6B7280;
+}
+h3 {
+    font-size: 14px;
+    font-style: 'Roboto';
+    color: #6B7280;
+    font-weight: bold;
+}
+
+.special-card {
+    width: 300px;
+    height: 240px;
+    gap: 12px;
+    background-color: #25D366;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+
+}
+
+.special-card h2 {
+    color: #F9FAFB;
+}
+
+.add-img{
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+    align-items: center;
+}

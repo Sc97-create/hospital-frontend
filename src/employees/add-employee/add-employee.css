@@ -1,0 +1,25 @@
+.invite-emp-button{
+    width: 120px;
+    height: 30px;
+    color: #F9FAFB;
+    background-color:#25D366 ;
+    border-radius: 8px;
+    font-weight: 600;
+}
+.add-emp-button-class{
+    display: flex;
+    gap: 24px;
+    margin-left: 175px;
+}
+.pharma-input {
+  height: 32px !important; /* reduce from default ~40px */
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.ant-select-selector {
+  height: 32px !important;
+  border-radius: 6px !important;
+  display: flex;
+  align-items: center;
+}
