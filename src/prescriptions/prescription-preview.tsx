@@ -7,6 +7,8 @@ import {
     Col,
     Input,
     Layout,
+    message,
+    Modal,
     Row,
     Space,
     Table,
@@ -70,6 +72,8 @@ const columns = [
         title: 'MEDICINE & COMPOSITION',
         dataIndex: 'medicine',
         key: 'medicine',
+        width: 220,
+        align: 'left' as const,
 
         render: (_: any, record: any) => (
             <div className='medicine-info'>
@@ -88,11 +92,15 @@ const columns = [
         title: 'DOSAGE',
         dataIndex: 'dosage',
         key: 'dosage',
+        width: 100,
+        align: 'left' as const,
     },
 
     {
         title: 'SCHEDULE',
         key: 'schedule',
+        width: 140,
+        align: 'left' as const,
 
         render: () => (
             <Space size={4}>
@@ -107,12 +115,16 @@ const columns = [
         title: 'DURATION',
         dataIndex: 'duration',
         key: 'duration',
+        width: 100,
+        align: 'left' as const,
     },
 
     {
         title: 'QTY',
         dataIndex: 'qty',
         key: 'qty',
+        width: 70,
+        align: 'center' as const,
 
         render: (qty: number) => (
             <div className='qty-box'>
@@ -124,6 +136,8 @@ const columns = [
     {
         title: 'STOCK STATUS',
         key: 'stock',
+        width: 180,
+        align: 'left' as const,
 
         render: (_: any, record: any) => (
             <div className={`stock-status ${record.stockType}`}>
@@ -137,6 +151,8 @@ const columns = [
     {
         title: 'ACTION',
         key: 'action',
+        width: 110,
+        align: 'center' as const,
 
         render: () => (
             <Button type='text' className='dispense-btn'>
@@ -147,8 +163,41 @@ const columns = [
 ];
 
 function PharmacistPrescriptionDetail() {
+    const [messageApi, contextHolder] = message.useMessage();
+
+    const handlePrint = () => {
+        messageApi.info('Sending to printer…');
+        window.print();
+    };
+
+    const handleGenerateLabels = () => {
+        messageApi.loading({ content: 'Generating labels…', key: 'labels', duration: 2 });
+        setTimeout(() => messageApi.success({ content: 'Labels generated', key: 'labels' }), 2000);
+    };
+
+    const handleDiscard = () => {
+        Modal.confirm({
+            title: 'Discard Order?',
+            content: 'This will cancel all items in the current order. This action cannot be undone.',
+            okText: 'Yes, Discard',
+            okType: 'danger',
+            cancelText: 'Keep Order',
+            onOk: () => messageApi.warning('Order discarded'),
+        });
+    };
+
+    const handlePartialDispense = () => {
+        messageApi.info('Partial dispense recorded');
+    };
+
+    const handleConfirmDispense = () => {
+        messageApi.loading({ content: 'Confirming dispense…', key: 'dispense', duration: 1.5 });
+        setTimeout(() => messageApi.success({ content: 'Order confirmed & dispensed', key: 'dispense' }), 1500);
+    };
+
     return (
         <Layout>
+            {contextHolder}
             <Sidebar />
 
             <Layout>
@@ -264,6 +313,7 @@ function PharmacistPrescriptionDetail() {
                             columns={columns}
                             dataSource={dataSource}
                             pagination={false}
+                            scroll={{ x: 'max-content' }}
                             className='medicine-table'
                         />
 
@@ -289,21 +339,21 @@ function PharmacistPrescriptionDetail() {
                     {/* Footer */}
                     <div className='sticky-footer'>
                         <Space>
-                            <Button icon={<PrinterOutlined />}>
+                            <Button icon={<PrinterOutlined />} onClick={handlePrint}>
                                 Print Bill
                             </Button>
 
-                            <Button icon={<FileTextOutlined />}>
+                            <Button icon={<FileTextOutlined />} onClick={handleGenerateLabels}>
                                 Generate Labels
                             </Button>
                         </Space>
 
                         <Space>
-                            <Button danger>
+                            <Button danger onClick={handleDiscard}>
                                 Discard Order
                             </Button>
 
-                            <Button>
+                            <Button onClick={handlePartialDispense}>
                                 Partial Dispense
                             </Button>
 
@@ -311,6 +361,7 @@ function PharmacistPrescriptionDetail() {
                                 type='primary'
                                 icon={<CheckCircleOutlined />}
                                 className='confirm-btn'
+                                onClick={handleConfirmDispense}
                             >
                                 Confirm & Dispense
                             </Button>

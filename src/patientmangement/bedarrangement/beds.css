@@ -1,5 +1,5 @@
 .step-3-container {
-    padding: 40px;
+    padding: var(--spacing-page);
     background: #f8fafc;
     flex-grow: 1;
     width: 100%;
@@ -41,13 +41,13 @@
 }
 
 .title-icon {
-    font-size: 18px;
+    font-size: var(--text-md);
     color: #0f766e;
     margin-right: 12px;
 }
 
 .card-title {
-    font-size: 18px;
+    font-size: var(--text-md);
     font-weight: 800;
     color: #0f172a;
     margin-top: 10px;
@@ -71,7 +71,7 @@
     border-radius: 8px !important;
     min-height: 48px !important;
     padding: 4px 12px !important;
-    font-size: 14px !important;
+    font-size: var(--text-base) !important;
 }
 
 .custom-select-blue .ant-select-selection-item {
@@ -111,7 +111,7 @@
 .custom-checkbox {
     color: #475569;
     font-weight: 500;
-    font-size: 14px;
+    font-size: var(--text-sm);
 }
 
 .generate-beds-btn {
@@ -148,7 +148,7 @@
 }
 
 .table-title {
-    font-size: 18px;
+    font-size: var(--text-md);
     font-weight: 800;
     color: #1e293b;
 }
@@ -156,7 +156,7 @@
 .auto-refresh-tag {
     background: #e2e8f0;
     color: #475569;
-    font-size: 12px;
+    font-size: var(--text-xs);
     padding: 6px 12px;
     border-radius: 16px;
     font-weight: 700;
@@ -176,7 +176,7 @@
     border-bottom: none;
     color: #0f172a;
     font-weight: 600;
-    font-size: 14px;
+    font-size: var(--text-base);
 }
 
 .blue-text-bold {
@@ -195,7 +195,7 @@
     color: #334155;
     padding: 4px 10px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: var(--text-xs);
     font-weight: 800;
 }
 
@@ -208,7 +208,7 @@
 .table-footer-link a {
     color: #0284c7;
     font-weight: 800;
-    font-size: 14px;
+    font-size: var(--text-sm);
     text-decoration: none;
 }
 
@@ -221,7 +221,7 @@
 }
 
 .summary-title {
-    font-size: 18px;
+    font-size: var(--text-md);
     font-weight: 800;
     color: #1e293b;
     margin-bottom: 32px;
@@ -237,7 +237,7 @@
 
 .summary-label {
     color: #475569;
-    font-size: 14px;
+    font-size: var(--text-sm);
     font-weight: 600;
 }
 
@@ -309,7 +309,7 @@
 }
 
 .progress-text {
-    font-size: 12px;
+    font-size: var(--text-xs);
     color: #475569;
     margin-top: 10px;
 }

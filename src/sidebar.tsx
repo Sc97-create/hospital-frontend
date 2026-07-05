@@ -17,7 +17,7 @@ const { Sider } = Layout
 function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const [collapse, setCollapse] = useState(false)
+    const [collapse, setCollapse] = useState(false);
     const [hover, setHover] = useState(false);
     const routeMap: Record<'/patients' | '/appointment' | '/suppliers' | '/employees' | '/bed-arrangement' | '/prescription', string> = {
         '/patients': '/patients',
@@ -35,7 +35,16 @@ function Sidebar() {
     return (
         <>
             <div className="container-fluid">
-                <Sider trigger={null} collapsible collapsed={collapse} collapsedWidth={60} className='sidebar-layout'>
+                <Sider
+                    trigger={null}
+                    collapsible
+                    collapsed={collapse}
+                    collapsedWidth={60}
+                    width={240}
+                    breakpoint="lg"
+                    onBreakpoint={(broken) => setCollapse(broken)}
+                    className='sidebar-layout'
+                >
                     <div className="logo-layout">
                         <img src={hover ? "/collapse.png" : "/sample-icon.ico"}
                             alt="logo"
@@ -48,11 +57,11 @@ function Sidebar() {
                             style={{ cursor: 'pointer' }}
                         />
                         {!collapse && (
-                            <Button
-                                icon={<MenuFoldOutlined />}
-                                onClick={() => setCollapse(true)}
-
-                            />
+                        <Button
+                            type="text"
+                            icon={<MenuFoldOutlined />}
+                            onClick={() => setCollapse(true)}
+                        />
                         )}
 
 

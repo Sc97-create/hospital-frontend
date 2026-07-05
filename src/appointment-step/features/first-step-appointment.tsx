@@ -88,15 +88,23 @@ function FirstStep() {
                 >
                     <Row gutter={[16, 0]} >
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Name" name="name" >
-                                <Input placeholder="what we call you" className='input-form-layout' />
+                            <Form.Item
+                                label="Name"
+                                name="name"
+                                rules={[{ required: true, message: 'Patient name is required' }]}
+                            >
+                                <Input placeholder="Full name" className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Blood Group" name="blood_group">
+                            <Form.Item
+                                label="Blood Group"
+                                name="blood_group"
+                                rules={[{ required: true, message: 'Please select a blood group' }]}
+                            >
                                 <Select
                                     className='dropdown-input-class'
-                                    placeholder='select your blood group'
+                                    placeholder='Select blood group'
                                     options={[
                                         { value: 'A+', label: 'A+' },
                                         { value: 'A-', label: 'A-' },
@@ -111,43 +119,74 @@ function FirstStep() {
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Age" name="age">
-                                <Input type="number" placeholder="are you 21?" className='input-form-layout' />
+                            <Form.Item
+                                label="Age"
+                                name="age"
+                                rules={[
+                                    { required: true, message: 'Age is required' },
+                                    { type: 'number', min: 0, max: 150, message: 'Enter a valid age (0–150)', transform: (v) => Number(v) },
+                                ]}
+                            >
+                                <Input type="number" placeholder="Age in years" className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label='Phone number' name="mobile_number">
-                                <Input type='tel' placeholder='we are trying to reach you' maxLength={10} className='input-form-layout' />
+                            <Form.Item
+                                label='Phone Number'
+                                name="mobile_number"
+                                rules={[
+                                    { required: true, message: 'Phone number is required' },
+                                    { pattern: /^\d{10}$/, message: 'Enter a valid 10-digit phone number' },
+                                ]}
+                            >
+                                <Input type='tel' placeholder='10-digit mobile number' maxLength={10} className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label='Gender' name="gender" >
+                            <Form.Item
+                                label='Gender'
+                                name="gender"
+                                rules={[{ required: true, message: 'Please select a gender' }]}
+                            >
                                 <Select
                                     className='dropdown-input-class'
                                     onChange={handleChange}
-                                    placeholder='its upto you'
+                                    placeholder='Select gender'
                                     options={[
                                         { value: 'female', label: 'Female' },
                                         { value: 'male', label: 'Male' },
-                                        { value: 'not prefer to say', label: 'Not Prefer To Say' },
-
+                                        { value: 'not prefer to say', label: 'Prefer not to say' },
                                     ]}
                                 />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label='Email ID' name="email_id">
-                                <Input placeholder='we want to notify you' type='email' className='input-form-layout' />
+                            <Form.Item
+                                label='Email ID'
+                                name="email_id"
+                                rules={[{ type: 'email', message: 'Enter a valid email address' }]}
+                            >
+                                <Input placeholder='Email address (optional)' type='email' className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Weight" name="weight">
-                                <Input type="number" placeholder="don't be overweight" className='input-form-layout' />
+                            <Form.Item
+                                label="Weight (kg)"
+                                name="weight"
+                                rules={[
+                                    { type: 'number', min: 0, max: 500, message: 'Enter a valid weight', transform: (v) => Number(v) },
+                                ]}
+                            >
+                                <Input type="number" placeholder="Weight in kg (optional)" className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Address" name="address">
-                                <Input placeholder="where do you live?" className='input-form-layout' />
+                            <Form.Item
+                                label="Address"
+                                name="address"
+                                rules={[{ required: true, message: 'Address is required' }]}
+                            >
+                                <Input placeholder="Street / locality" className='input-form-layout' />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -158,12 +197,7 @@ function FirstStep() {
                 <Button
                     type="primary"
                     onClick={handleSubmit}
-                    style={{
-                        borderRadius: 8,
-                        backgroundColor: "#25D366",
-                        width: 80,
-                        fontWeight: "600",
-                    }}
+                    style={{ borderRadius: 8, minWidth: 100, fontWeight: 600 }}
                 >
                     Submit
                 </Button>

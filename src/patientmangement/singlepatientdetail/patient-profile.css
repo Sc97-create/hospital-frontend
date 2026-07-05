@@ -33,7 +33,7 @@
 
 .patient-main-info h2 {
     margin: 0;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: #111827;
 }
@@ -108,7 +108,7 @@
 
 .card-title h3 {
     margin: 0;
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 600;
     color: #111827;
 }
@@ -145,7 +145,7 @@
 .medical-item p,
 .insurance-grid p {
     margin: 0;
-    font-size: 14px;
+    font-size: 15px;
     color: #111827;
     font-weight: 500;
 }

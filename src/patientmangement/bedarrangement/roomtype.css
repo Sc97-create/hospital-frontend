@@ -20,7 +20,7 @@
 }
 
 .help-text {
-    font-size: 12px;
+    font-size: var(--text-xs);
 }
 
 .default-toggle-card {
@@ -64,7 +64,7 @@
 
 .info-icon {
     color: #52c41a;
-    font-size: 18px;
+    font-size: var(--text-md);
 }
 
 .suggestions-card {

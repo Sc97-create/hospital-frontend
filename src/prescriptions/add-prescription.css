@@ -107,7 +107,7 @@
 
 .medicine-title {
     margin: 0 !important;
-    font-size: 16px !important;
+    font-size: var(--text-md) !important;
     font-weight: 600 !important;
     color: #1a3353 !important;
 }
@@ -163,7 +163,7 @@
 
 .separator {
     color: #d1d5db;
-    font-size: 10px;
+    font-size: var(--text-xs);
 }
 
 .medicine-actions {
@@ -232,12 +232,12 @@
 }
 
 .medicine-option-name {
-    font-size: 14px;
+    font-size: var(--text-base);
     font-weight: 500;
 }
 
 .medicine-option-generic {
-    font-size: 12px;
+    font-size: var(--text-xs);
     color: #8c8c8c;
 }
 
@@ -254,7 +254,7 @@
 
 .sidebar-title {
     margin-bottom: 28px !important;
-    font-size: 18px !important;
+    font-size: var(--text-md) !important;
     font-weight: 700 !important;
 }
 
@@ -275,7 +275,7 @@
 }
 
 .medicine-form .ant-form-item-label>label {
-    font-size: 14px;
+    font-size: var(--text-sm);
     font-weight: 600;
     color: #344054;
 }
@@ -364,7 +364,7 @@
 }
 
 .food-radio .ant-radio-wrapper {
-    font-size: 14px;
+    font-size: var(--text-sm);
     margin-inline-end: 0;
 }
 
@@ -375,7 +375,7 @@
 .add-btn {
     height: 48px !important;
     border-radius: 12px !important;
-    font-size: 16px !important;
+    font-size: var(--text-base) !important;
     font-weight: 600 !important;
     margin-top: 10px;
 }
@@ -402,7 +402,7 @@
 
 .medicine-form input::placeholder {
     color: #98a2b3;
-    font-size: 14px;
+    font-size: var(--text-sm);
 }
 
 .read-only-input {
@@ -418,9 +418,9 @@
 
 @media screen and (max-width: 1200px) {
     .prescription-sidebar {
-        width: 350px !important;
-        flex: 0 0 350px !important;
-        max-width: 350px !important;
+        width: 320px !important;
+        flex: 0 0 320px !important;
+        max-width: 320px !important;
     }
 }
 
@@ -463,11 +463,11 @@
     }
 
     .preview-title {
-        font-size: 20px !important;
+        font-size: var(--text-lg) !important;
     }
 
     .sidebar-title {
-        font-size: 16px !important;
+        font-size: var(--text-md) !important;
     }
 }
 

@@ -275,14 +275,7 @@ function SecondStep() {
                 <Button
                     type="primary"
                     onClick={form.submit}
-
-                    // disabled={form.getFieldsError().length > 0}
-                    style={{
-                        borderRadius: 8,
-                        backgroundColor: "#25D366",
-                        width: 80,
-                        fontWeight: "600",
-                    }}
+                    style={{ borderRadius: 8, minWidth: 100, fontWeight: 600 }}
                 >
                     Submit
                 </Button>

@@ -6,11 +6,17 @@
 .sidebar-layout {
     background-color: #F9FAFB;
     height: 100vh;
-    width: 300px;
-    border-color: black;
-    border-width: 2px;
     overflow: hidden;
     padding-top: 12px;
+    border-right: 1px solid #E5E7EB !important;
+}
+
+@media (max-width: 992px) {
+    .sidebar-layout {
+        position: fixed !important;
+        z-index: 100;
+        height: 100vh;
+    }
 }
 .logo-layout {
     color: #1F2937;
@@ -20,7 +26,6 @@
     align-items: center;
 
     span {
-        font-family: 'Roboto';
         font-weight: bold;
         font-size: 16px;
         font-style: italic;
@@ -35,12 +40,8 @@
 .menu-layout {
     width: 200px;
     height: 100vh;
-    border-color: #E5E7EB;
-    border-radius: 1px;
-    border-width: 2px;
     background-color: #F9FAFB;
     justify-content: center;
-
 }
 .ant-menu-light .ant-menu-item-selected {
     background-color: #E6F9EF;
@@ -74,7 +75,6 @@
 
 .ant-menu-item>.ant-menu-title-content {
     color: #6B7280;
-    font-family: 'Roboto';
     font-weight: bold;
     font-size: 14px;
 }
@@ -100,4 +100,7 @@
   overflow-y: hidden;
   position: sticky;
   top: 0;
+  border-right: none !important;
+  border-inline-end: none !important;
+  box-shadow: none !important;
 }

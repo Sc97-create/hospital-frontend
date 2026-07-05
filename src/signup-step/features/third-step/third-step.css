@@ -5,7 +5,7 @@
 }
 
 .step-title {
-  font-size: 12px;
+  font-size: var(--text-xs);
   letter-spacing: 0.08em;
   color: #667085;
 }
@@ -47,7 +47,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: var(--text-xs);
 }
 
 .icon.check {
@@ -83,7 +83,7 @@
 }
 
 .consent-checkbox {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: #6B7280;
   line-height: 1.4;
 }

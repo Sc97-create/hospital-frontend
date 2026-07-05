@@ -9,6 +9,7 @@ import {
     Form,
     Input,
     Layout,
+    message,
     Radio,
     Row,
     Select,
@@ -40,9 +41,31 @@ const { TextArea } = Input;
 function AddEmployee() {
 
     const [form] = Form.useForm();
+    const [messageApi, contextHolder] = message.useMessage();
+
+    const handleSaveDraft = async () => {
+        const values = form.getFieldsValue();
+        if (!values.name && !values.email) {
+            messageApi.warning('Fill in at least a name or email before saving a draft');
+            return;
+        }
+        messageApi.loading({ content: 'Saving draft…', key: 'draft', duration: 1.5 });
+        setTimeout(() => messageApi.success({ content: 'Draft saved', key: 'draft' }), 1500);
+    };
+
+    const handleCreateEmployee = async () => {
+        try {
+            await form.validateFields();
+            messageApi.loading({ content: 'Creating employee…', key: 'create', duration: 2 });
+            setTimeout(() => messageApi.success({ content: 'Employee created successfully', key: 'create' }), 2000);
+        } catch {
+            messageApi.error('Please fill in all required fields');
+        }
+    };
 
     return (
         <Layout>
+            {contextHolder}
             <Sidebar />
             <Layout className='employee-layout'>
 
@@ -143,6 +166,7 @@ function AddEmployee() {
                                                     <Form.Item
                                                         label='First Name'
                                                         name='first_name'
+                                                        rules={[{ required: true, message: 'First name is required' }]}
                                                     >
 
                                                         <Input
@@ -159,6 +183,7 @@ function AddEmployee() {
                                                     <Form.Item
                                                         label='Last Name'
                                                         name='last_name'
+                                                        rules={[{ required: true, message: 'Last name is required' }]}
                                                     >
 
                                                         <Input
@@ -175,6 +200,7 @@ function AddEmployee() {
                                                     <Form.Item
                                                         label='Gender'
                                                         name='gender'
+                                                        rules={[{ required: true, message: 'Please select a gender' }]}
                                                     >
 
                                                         <Select
@@ -201,6 +227,7 @@ function AddEmployee() {
                                                     <Form.Item
                                                         label='Date of Birth'
                                                         name='dob'
+                                                        rules={[{ required: true, message: 'Date of birth is required' }]}
                                                     >
 
                                                         <DatePicker
@@ -216,11 +243,16 @@ function AddEmployee() {
                                                     <Form.Item
                                                         label='Mobile Number'
                                                         name='mobile'
+                                                        rules={[
+                                                            { required: true, message: 'Mobile number is required' },
+                                                            { pattern: /^\d{10}$/, message: 'Enter a valid 10-digit number' },
+                                                        ]}
                                                     >
 
                                                         <Input
                                                             prefix={<PhoneOutlined />}
                                                             className='input-form-layout'
+                                                            maxLength={10}
                                                         />
 
                                                     </Form.Item>
@@ -232,6 +264,10 @@ function AddEmployee() {
                                                     <Form.Item
                                                         label='Email Address'
                                                         name='email'
+                                                        rules={[
+                                                            { required: true, message: 'Email address is required' },
+                                                            { type: 'email', message: 'Enter a valid email address' },
+                                                        ]}
                                                     >
 
                                                         <Input
@@ -248,6 +284,7 @@ function AddEmployee() {
                                                     <Form.Item
                                                         label='Address'
                                                         name='address'
+                                                        rules={[{ required: true, message: 'Address is required' }]}
                                                     >
 
                                                         <TextArea
@@ -297,9 +334,10 @@ function AddEmployee() {
                                             <Form.Item
                                                 label='Department'
                                                 name='department'
+                                                rules={[{ required: true, message: 'Please select a department' }]}
                                             >
 
-                                                <Select className='dropdown-input-class'>
+                                                <Select className='dropdown-input-class' placeholder='Select department'>
 
                                                     <Select.Option value='cardiology'>
                                                         Cardiology
@@ -517,17 +555,17 @@ function AddEmployee() {
 
                     <div className='employee-footer'>
 
-                        <Button>
+                        <Button onClick={() => form.resetFields()}>
                             Cancel
                         </Button>
 
                         <div className='footer-right'>
 
-                            <Button>
+                            <Button onClick={handleSaveDraft}>
                                 Save Draft
                             </Button>
 
-                            <Button type='primary'>
+                            <Button type='primary' onClick={handleCreateEmployee}>
                                 Create Employee
                             </Button>
 

@@ -210,7 +210,7 @@ function PatientList() {
                                 columns={columns}
                                 dataSource={currentData}
                                 showSorterTooltip={{ target: 'sorter-icon' }}
-                                scroll={{ y: 400 }}
+                                scroll={{ x: 'max-content', y: 400 }}
                                 pagination={false}
                                 loading={loading}
                             />

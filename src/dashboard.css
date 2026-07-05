@@ -38,9 +38,9 @@
     
 }
 .title-class h3{
-    font-size: 14px;
+    font-size: 13px;
     color: #6B7280;
-    font-weight: bold;
+    font-weight: 600;
 }
 .load-more-button{
     align-items: center;
@@ -57,12 +57,6 @@
 .description-class .ant-badge.ant-badge-status .ant-badge-status-text{
     color: #6B7280;
 }
-h3 {
-    font-size: 14px;
-    font-style: 'Roboto';
-    color: #6B7280;
-    font-weight: bold;
-}
 
 .special-card {
     width: 300px;
@@ -78,6 +72,8 @@ h3 {
 }
 
 .special-card h2 {
+    font-size: 22px;
+    font-weight: 600;
     color: #F9FAFB;
 }
 

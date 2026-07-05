@@ -209,7 +209,7 @@ function AddPrescription() {
 
                 <Layout className="prescription-layout">
                     {/* LEFT PANEL - Form */}
-                    <Sider width={420} className="prescription-sidebar" breakpoint="lg" collapsedWidth="0" trigger={null}>
+                    <Sider width={320} className="prescription-sidebar" breakpoint="md" collapsedWidth="0" trigger={null}>
                         <Title level={4} className="sidebar-title">
                             Add Medicine
                         </Title>

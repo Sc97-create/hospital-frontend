@@ -87,8 +87,8 @@ function ThirdStep({ onSuccess, organisationID, onNext, onBack, data }: ThirdSte
         if (data) {
             console.log(data)
             form.setFieldsValue({
-                first_name: data?.first_name ? data.first_name : 'random',
-                last_name: data?.last_name ? data.last_name : 'shit',
+                first_name: data?.first_name ?? '',
+                last_name: data?.last_name ?? '',
                 email_id: data?.email_id ? data.email_id : '',
                 mob_no: data?.phone_number ? data.phone_number : '',
 

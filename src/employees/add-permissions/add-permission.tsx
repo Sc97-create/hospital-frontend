@@ -93,7 +93,7 @@ function AddPermission({ open, onClose }: AddPermissionProps) {
     return (
         <Modal
             open={open}
-            width={900}
+            width="min(900px, 95vw)"
             footer={null}
             onCancel={handleClose}
             title="Assign Permissions to Employee"

@@ -1,4 +1,5 @@
 import './App.css'
+import { ConfigProvider } from 'antd'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Signup from './Signup'
 import Login from './authentication/Login'
@@ -27,7 +28,16 @@ import GeneralInfo from './patientmangement/singlepatientdetail/patient-profile'
 function App() {
 
   return (
-    <>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#25D366',
+          colorPrimaryHover: '#20b858',
+          borderRadius: 8,
+          fontFamily: "'Roboto', sans-serif",
+        },
+      }}
+    >
       <div>
         <nav>
 
@@ -56,7 +66,7 @@ function App() {
           <Route path='/bed-arrangement/step-3' element={<BedStep3 />} />
         </Routes>
       </div>
-    </>
+    </ConfigProvider>
   )
 }
 

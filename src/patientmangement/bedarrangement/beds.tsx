@@ -236,6 +236,7 @@ export default function BedStep3() {
                                 dataSource={bedPreview.slice(0, 3)}
                                 rowKey="key"
                                 pagination={false}
+                                scroll={{ x: 'max-content' }}
                                 className="custom-table-step3"
                             />
                             {bedPreview.length > 3 && (

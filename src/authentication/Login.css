@@ -45,8 +45,7 @@
 }
 
 .login-card h2 {
-    font-family: 'Roboto';
-    font-weight: bold;
+    font-weight: 700;
     margin-bottom: 24px;
 }
 
@@ -57,7 +56,7 @@
 
 /* Button */
 .login-submit-button {
-    background-color: #25D366;
+    background-color: var(--color-primary);
     color: #F9FAFB;
     font-weight: bold;
 }
@@ -72,7 +71,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .auth-links span {
