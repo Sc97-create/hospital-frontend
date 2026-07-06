@@ -1,20 +1,13 @@
-import { Breadcrumb, Button, Card, Col, Drawer, Input, Layout, Row, Tag, Typography } from "antd"
+import { Breadcrumb, Button, Card, Input, Layout, Tag, Typography } from "antd"
 import Sidebar from "../sidebar"
 import Header from "../header"
 import './pharmacy.css'
-import { MedicineBoxOutlined, PlusCircleOutlined, PlusOutlined, SearchOutlined, ShopOutlined } from '@ant-design/icons'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { Content } from "antd/es/layout/layout"
-import { Outlet, useMatch, useNavigate, useParams } from "react-router-dom"
-import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 function AddPharmacy() {
     const navigate = useNavigate()
-    const isAddOpen = useMatch("/pharmacy/add")
-    const [open, setOpen] = useState(false);
-    const { id } = useParams();
-    const showDrawer = () => {
-        setOpen(true);
-    };
     const { Title, Text } = Typography;
 
     interface Supplier {
@@ -63,9 +56,6 @@ function AddPharmacy() {
         }
     ];
 
-    const onClose = () => {
-        setOpen(false);
-    };
     return (
         <>
             <Layout>

@@ -1,9 +1,8 @@
 import { Button, Card, Layout, List, message } from "antd"
 import './third-step-appointment.css'
-import { useParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 function PreviewAppointment() {
-    const { patientID } = useParams<{ patientID: string }>();
     const navigate = useNavigate();
 
     const handleEdit = () => {

@@ -1,4 +1,4 @@
-import { Card, Col, Row, Tag, Button, Layout, Breadcrumb } from "antd"
+import { Card, Tag, Button, Layout, Breadcrumb } from "antd"
 import './patient-profile.css'
 import { useEffect, useState } from "react";
 import { findOne } from "../api/patients";

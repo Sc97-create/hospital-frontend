@@ -1,6 +1,6 @@
 // PrescriptionPage.tsx
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Layout,
     Form,
@@ -28,67 +28,51 @@ import {
     CheckOutlined,
     SearchOutlined,
     CalendarOutlined,
-    ClockCircleOutlined,
     HomeOutlined,
 } from "@ant-design/icons";
 
 import "./add-prescription.css";
 import Sidebar from "../sidebar";
-import { Header } from "antd/es/layout/layout";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import type { CreatePrescription, medicineResponse, UpdatePrescriptionStatus } from "./types/prescriptionmodel";
+import type { CreatePrescription, Medicine, medicineResponse, SearchMedicineItem, UpdatePrescriptionStatus } from "./types/prescriptionmodel";
 import { CreatePrescriptionApi, FindOnePrescription, SearchMedicines, UpdatePrescription, UpdateStatus } from "./api/prescription";
+import type { DefaultOptionType } from "antd/es/select";
 
 const { Sider, Content } = Layout;
 const { Text, Title } = Typography;
 const { Option } = Select;
 
-const medicines = [
-    {
-        id: 1,
-        name: "Dolo 650",
-        dosage: "650mg",
-        duration: "5 Days",
-        food: "After Food",
-        type: "Tablet",
-        timing: "Morning 1 Afternoon 0 Night 1",
-    },
-    {
-        id: 2,
-        name: "Amoxicillin",
-        dosage: "500mg",
-        duration: "7 Days",
-        food: "Before Food",
-        type: "Capsule",
-        timing: "Morning 1 Afternoon 1 Night 1",
-    },
-    {
-        id: 3,
-        name: "B-Complex",
-        dosage: "2ml",
-        duration: "3 Days",
-        food: "Doesn't Matter",
-        type: "Injection",
-        timing: "Morning 0 Afternoon 0 Night 1",
-    },
-];
+interface MedicineOption extends DefaultOptionType {
+    medicine: SearchMedicineItem;
+}
+
+interface PrescriptionFormValues {
+    medicine: string;
+    medicine_id: string;
+    morning: string | number;
+    afternoon: string | number;
+    night: string | number;
+    dosage: string;
+    duration: string | number;
+    duration_type: string;
+    food_instruction: string;
+    medicine_type: string;
+}
 
 function AddPrescription() {
     const params = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [searchValue, setSearchValue] = useState('');
     const [findonePrescriptionData, setFindOnePrescriptionData] = useState<medicineResponse[]>()
     const [prescriptionID, setPrescriptionID] = useState<string>('')
     const [currentPage, setCurrentPage] = useState(1);
     const [totalMedicines, setTotalMedicines] = useState(0);
     const pageSize = 3;
-    // const [medicineOptions, setMedicineOptions] = useState<any[]>([]);
 
     const [form] = Form.useForm();
 
-    const [medicineOptions, setMedicineOptions] = useState<any[]>([]);
+    const [medicineOptions, setMedicineOptions] = useState<MedicineOption[]>([]);
 
-    const [medicines, setMedicines] = useState<any[]>([]);
+    const [medicines] = useState<Medicine[]>([]);
     const [created_at, setCreatedAt] = useState<string>();
     const [isSent, setIsSent] = useState(false);
     const handleUpdateStatus = async (payload: UpdatePrescriptionStatus) => {
@@ -108,7 +92,7 @@ function AddPrescription() {
         }
         try {
             const response = await SearchMedicines(value);
-            const formatted = response.data.map((item: any) => ({
+            const formatted = response.data.map((item: SearchMedicineItem) => ({
                 value: item.name,
                 label: (
                     <div className="medicine-option">
@@ -136,7 +120,7 @@ function AddPrescription() {
         setCreatedAt(findoneesponse.data.created_at.toString());
         setCurrentPage(page);
     }
-    const handleFinalize = async (values: any) => {
+    const handleFinalize = async (values: PrescriptionFormValues) => {
         // 1. Format the new medicine from the current form values
         const newMedicine = {
             medicine_id: values.medicine_id,
@@ -235,8 +219,8 @@ function AddPrescription() {
                                     className="medicine-search"
                                     options={medicineOptions}
                                     onSearch={searchMedicine}
-                                    onSelect={(value, option: any) => {
-                                        const med = option.medicine;
+                                    onSelect={(value, option) => {
+                                        const med = (option as MedicineOption).medicine;
                                         form.setFieldsValue({
                                             medicine: value,
                                             medicine_id: med.id,

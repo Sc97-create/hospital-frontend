@@ -20,7 +20,6 @@ import {
 } from 'antd';
 
 import {
-    CalendarOutlined,
     CameraOutlined,
     HomeOutlined,
     MailOutlined,

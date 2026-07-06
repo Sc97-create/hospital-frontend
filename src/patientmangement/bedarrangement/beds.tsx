@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-    Layout, Card, Typography, Select, InputNumber, Checkbox, Form,
+    Layout, Card, Select, InputNumber, Form,
     Button, Table, Row, Col, Progress, Popconfirm,
-    message, Modal
+    Modal
 } from 'antd';
 import {
     AppstoreAddOutlined, ThunderboltOutlined
@@ -12,10 +12,8 @@ import Sidebar from '../../sidebar';
 import BedArrangementSteps from './bed-arrangement-steps';
 import './beds.css';
 import type { RoomData } from '../types/rooms';
-import type { GenerateBedModel, BedPreview, RoomBed, Beds, RoomsummaryResponse, RoomSummary } from '../types/beds';
-import { CreateBed, GenerateBeds, GetRoomSummaryByRoomType } from '../api/beds';
-
-const { Title } = Typography;
+import type { GenerateBedModel, BedPreview, Beds, RoomSummary } from '../types/beds';
+import { CreateBed, GenerateBeds } from '../api/beds';
 
 export default function BedStep3() {
     const navigate = useNavigate();
@@ -70,7 +68,6 @@ export default function BedStep3() {
     ];
 
     const [form] = Form.useForm();
-    const previewData = bedPreview.slice(0, 3);
 
     const [loading, setLoading] = useState(false);
 

@@ -5,7 +5,6 @@ import {
     Button,
     Card,
     Col,
-    Input,
     Layout,
     message,
     Modal,
@@ -32,9 +31,19 @@ import './prescription-preview.css';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
-const { TextArea } = Input;
 
-const dataSource = [
+interface PrescriptionRow {
+    key: string;
+    medicine: string;
+    generic: string;
+    dosage: string;
+    duration: string;
+    qty: number;
+    stock: string;
+    stockType: string;
+}
+
+const dataSource: PrescriptionRow[] = [
     {
         key: '1',
         medicine: 'Dolo 650',
@@ -75,7 +84,7 @@ const columns = [
         width: 220,
         align: 'left' as const,
 
-        render: (_: any, record: any) => (
+        render: (_: unknown, record: PrescriptionRow) => (
             <div className='medicine-info'>
                 <Text className='medicine-name'>
                     {record.medicine}
@@ -139,7 +148,7 @@ const columns = [
         width: 180,
         align: 'left' as const,
 
-        render: (_: any, record: any) => (
+        render: (_: unknown, record: PrescriptionRow) => (
             <div className={`stock-status ${record.stockType}`}>
                 <span className='stock-dot'></span>
 

@@ -10,8 +10,15 @@ export interface PersonalInfo {
     address: string;
     
 }
+
+export interface AppointmentCreateData {
+    patient_id?: string;
+    id?: string;
+}
+
 export interface PersonalInfoResponse {
-    data: any;
-    message: string;
-    code: number;
+    data?: string | AppointmentCreateData;
+    patient_id?: string;
+    message?: string;
+    code?: number;
 }

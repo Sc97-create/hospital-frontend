@@ -1,5 +1,5 @@
 import apiClient from "../../lib/api-client";
-import type { GenerateBedModel, Beds, RoomsummaryResponse, CreateBedResponse, Beddata, RoomBedData, GetBedResponse, } from "../types/beds";
+import type { GenerateBedModel, Beds, RoomsummaryResponse, CreateBedResponse, Beddata, GetBedResponse } from "../types/beds";
 
 export const CreateBed = async (payload: Beds): Promise<CreateBedResponse> => {
     const response = await apiClient.post(

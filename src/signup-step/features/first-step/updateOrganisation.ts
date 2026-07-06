@@ -3,6 +3,6 @@ import type { OrgSignupResponse, UpdateOrganisation } from "../../types/first-st
 import { UpdateOrg } from "../../api/first-step-signup";
 
 
-export const updateOrg = () => useMutation<OrgSignupResponse, Error, UpdateOrganisation>({
+export const useUpdateOrg = () => useMutation<OrgSignupResponse, Error, UpdateOrganisation>({
     mutationFn: UpdateOrg
 })

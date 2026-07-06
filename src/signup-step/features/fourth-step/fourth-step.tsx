@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
     Layout,
     Typography,
@@ -19,13 +19,14 @@ import {
     WarningOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import type { OrganisationData, UserData } from "../../types/common-api";
 
-const { Header, Content, Footer } = Layout;
+const { Content } = Layout;
 const { Title, Text, Link } = Typography;
 
 interface FourthProps {
-    Userdata: any;
-    OrgData: any;
+    Userdata: UserData | null;
+    OrgData: OrganisationData | null;
     onBack: () => void;
 }
 
@@ -132,7 +133,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                         <Text type="secondary" className="review-label">COUNTRY</Text>
                         <div>
                             <Text strong>
-                                {OrgData?.address.country_id}
+                                {OrgData?.address?.country_id}
                             </Text>
                         </div>
 
@@ -141,7 +142,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                     <Col xs={24} sm={12}>
                         <Text type="secondary" className="review-label">CITY & STATE</Text>
                         <div>
-                            <Text strong>{OrgData?.address.city}, {OrgData?.address.state}</Text>
+                            <Text strong>{OrgData?.address?.city}, {OrgData?.address?.state}</Text>
                         </div>
 
                     </Col>

@@ -1,22 +1,11 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Flex, Layout, Dropdown, Space, Avatar } from 'antd'
-import { Button, Menu, theme, Row, Col, Card, List, Skeleton,Badge } from 'antd';
+import { Flex, Layout, Avatar } from 'antd'
+import { Button, Row, Col, Card, List, Skeleton, Badge } from 'antd';
 import { useNavigate } from "react-router-dom";
-import {
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    UploadOutlined,
-    UserOutlined,
-    VideoCameraOutlined,
-    DownOutlined,
-} from '@ant-design/icons';
 import './dashboard.css'
 import { useState } from 'react';
 import Sidebar from './sidebar';
 import HeaderLayout from './header';
-const { Header, Footer, Sider, Content } = Layout
-const PageSize = 2
+const { Content } = Layout
 const patientData = [
     {
         'avatar': '/user.png',
@@ -61,29 +50,10 @@ const patientData = [
         'doctor':'rajesh sangolli'
     }
 ]
-const items = [
-    {
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                Logout
-            </a>
-        ),
-        key: '0'
-    },
-    {
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                Settings
-            </a>
-        ),
-        key: '1'
-    }
-]
 
 function Dashboard() {
     const navigate=useNavigate();
-    const [collapse, setCollapse] = useState(false)
-    const [hover, setHover] = useState(false);
+    const [collapse] = useState(false)
     const [visibleCount, setVisibleCount] = useState(2);
     const handleLoadMore = () => {
         setVisibleCount(prev => Math.min(prev + 2, patientData.length));

@@ -1,14 +1,6 @@
-import { Col, Dropdown, Form, Input, Row, Select, Space, Tag, Tooltip, Card, AutoComplete } from "antd";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import {
-    DownOutlined,
-    SearchOutlined,
-} from '@ant-design/icons'
+import { Col, Form, Input, Row, Select, Card } from "antd";
 import './first-step-appointment.css'
 import type { PersonalInfo } from "../types/first-step-appointment";
-import { GetDepartments } from "../../shared/api/shared-api";
-import type { Department } from "../../shared/types/share-type";
-const { Option } = Select;
 const handleChange = (value: string) => {
     console.log(`selected ${value}`);
 };
@@ -18,8 +10,6 @@ const handleChange = (value: string) => {
 import { Button } from 'antd';
 import { CreateAppointment } from "../api/first-step-appointment";
 import { useNavigate } from "react-router-dom";
-import { GetDoctors } from "../../shared/api/shared-api";
-import { getDepartments } from "../../shared/shared";
 
 export interface FirstStepRef {
     validate: () => Promise<PersonalInfo>;
@@ -31,12 +21,6 @@ function FirstStep() {
 
     const [form] = Form.useForm<PersonalInfo>();
     const navigate = useNavigate();
-    const [SymInput, setSympInput] = useState('');
-    const [showSympAll, setSympShowAll] = useState(false);
-    const [symptomtags, setSymptomTags] = useState<string[]>([])
-    const [doctors, setDoctors] = useState<string>("");
-    const [options, setOptions] = useState([]);
-    const [loading, setLoading] = useState(false);
 
     
     const handleSubmit = async () => {
@@ -53,10 +37,10 @@ function FirstStep() {
                 if (typeof response.data === 'string') {
                     id = response.data;
                 } else {
-                    id = response.data.patient_id || response.data.id;
+                    id = response.data.patient_id || response.data.id || "";
                 }
-            } else if ((response as any)?.patient_id) {
-                id = (response as any).patient_id;
+            } else if (response?.patient_id) {
+                id = response.patient_id;
             }
             if (id) {
                 navigate(`/patients`);

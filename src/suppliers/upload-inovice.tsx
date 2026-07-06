@@ -1,9 +1,7 @@
-import { message, Progress, Table, Upload, type TableColumnsType, type UploadProps, Pagination, type TablePaginationConfig } from "antd";
-import { CheckCircleFilled, FilePdfOutlined, HighlightOutlined, InboxOutlined } from '@ant-design/icons'
+import { message, Progress, Upload, type UploadProps } from "antd";
+import { FilePdfOutlined, HighlightOutlined, InboxOutlined } from '@ant-design/icons'
 import './upload-inovice.css'
 import { Content } from "antd/es/layout/layout";
-import datecheck from 'dayjs'
-import { useState } from "react";
 
 const { Dragger } = Upload;
 const props: UploadProps = {
@@ -25,13 +23,6 @@ const props: UploadProps = {
         console.log('Dropped files', e.dataTransfer.files);
     },
 };
-interface DataType {
-    key: React.Key;
-    medicine_name: string;
-    batch: string;
-    expiry: Date;
-    qty: number;
-}
 function UploadCsv() {
     return (
         <>

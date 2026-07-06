@@ -32,9 +32,15 @@ apiClient.interceptors.request.use(
 
 // To prevent infinite loops and handle concurrent requests during refresh
 let isRefreshing = false;
-let failedQueue: any[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+type QueuedRequest = {
+    resolve: (token: string | null) => void;
+    reject: (error: unknown) => void;
+};
+
+let failedQueue: QueuedRequest[] = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach((prom) => {
         if (error) {
             prom.reject(error);

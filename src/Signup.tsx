@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Button, Steps } from 'antd';
+import { useEffect, useState } from 'react';
+import { Steps } from 'antd';
 import { CheckCircleFilled, LoadingOutlined, LogoutOutlined, SolutionOutlined, UserOutlined } from '@ant-design/icons';
 import './signup.css'
 import { Content } from 'antd/es/layout/layout';
@@ -9,13 +9,14 @@ import ThirdStep from './signup-step/features/third-step/third-step';
 import ReviewAndCreate from './signup-step/features/fourth-step/fourth-step';
 import { useNavigate } from 'react-router-dom';
 import { GetByOrganisationID, GetUserbyID } from './signup-step/api/common-api';
+import type { OrganisationData, UserData } from './signup-step/types/common-api';
 
 
 function Signup() {
     const [organisationID, setOrganisationID] = useState<string | ''>('');
     const [userID, setUserID] = useState<string | ''>('');
-    const [organisationData, setOrganisationData] = useState(null);
-    const [userData, setUserData] = useState(null);
+    const [organisationData, setOrganisationData] = useState<OrganisationData | null>(null);
+    const [userData, setUserData] = useState<UserData | null>(null);
     const [refreshOrg, setRefreshOrg] = useState(0);
     const navigate = useNavigate();
     const handleSaveAndExit = () => {
