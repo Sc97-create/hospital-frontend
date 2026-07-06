@@ -14,16 +14,16 @@
 
 .patient-name {
     margin: 0 !important;
-    font-size: 17px !important;
+    font-size: var(--text-md) !important;
 }
 
 .patient-subtext {
     color: #8c8c8c;
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 
 .info-label {
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: #8c8c8c;
     font-weight: 600;
 }
@@ -50,11 +50,11 @@
 
 .table-title {
     margin: 0 !important;
-    font-size: 17px !important;
+    font-size: var(--text-md) !important;
 }
 
 .medicine-table .ant-table {
-    font-size: 14px;
+    font-size: var(--text-base);
 }
 
 .medicine-table .ant-table-thead>tr>th {
@@ -78,17 +78,17 @@
 }
 
 .medicine-name {
-    font-size: 15px;
+    font-size: var(--text-base);
     font-weight: 600;
 }
 
 .medicine-generic {
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: #8c8c8c;
 }
 
 .schedule-tag {
-    font-size: 11px;
+    font-size: var(--text-xs);
     border-radius: 6px;
     padding-inline: 6px;
 }
@@ -135,7 +135,7 @@
 }
 
 .dispense-btn {
-    font-size: 13px;
+    font-size: var(--text-sm);
     font-weight: 600;
 }
 
@@ -150,7 +150,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 8px;
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 
 .summary-row.total {

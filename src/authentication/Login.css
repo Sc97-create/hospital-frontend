@@ -71,7 +71,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 
 .auth-links span {

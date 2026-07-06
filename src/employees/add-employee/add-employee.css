@@ -71,7 +71,6 @@
   background-color: #F9FAFB !important;
   border-radius: 8px !important;
   border: 1px solid #E5E7EB !important;
-  font-family: 'Roboto', sans-serif;
   color: #1F2937;
 }
 
@@ -110,7 +109,7 @@
 }
 
 .role-title {
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: #344054;
 }

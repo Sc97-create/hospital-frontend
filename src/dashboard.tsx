@@ -100,7 +100,7 @@ function Dashboard() {
                             <Content className='content-layout'>
                                 <Row gutter={[8, 8]} className={`first-row ${collapse ? 'collapsed-row' : ''}`} wrap={false}>
                                     <Col span={6}>
-                                        <h3>Current Patients</h3>
+                                        <p className="card-section-label">Current Patients</p>
 
                                         <Card className='first-card'>
                                             <List
@@ -114,7 +114,7 @@ function Dashboard() {
                                                             <List.Item.Meta
                                                                 avatar={<Avatar src={item.avatar} />}
                                                                 title={<div className='title-class'>
-                                                                    <h3>{item.title}</h3>
+                                                                    <span className="list-item-title">{item.title}</span>
                                                                 </div>}
                                                                 description={
                                                                     <div className='description-class'>
@@ -134,20 +134,20 @@ function Dashboard() {
                                         </Card>
                                     </Col>
                                     <Col span={6}>
-                                        <h3>Upcoming Patient</h3>
+                                        <p className="card-section-label">Upcoming Patient</p>
                                         <Card className='first-card'>
 
                                         </Card>
 
                                     </Col>
                                     <Col span={6}>
-                                        <h3>Total Patient</h3>
+                                        <p className="card-section-label">Total Patient</p>
                                         <Card className='first-card'>
 
                                         </Card>
                                     </Col>
                                     <Col span={6}>
-                                        <h3>Quick Add</h3>
+                                        <p className="card-section-label">Quick Add</p>
                                         <Card className='special-card'>
                                             <h2>Add New Patient</h2>
                                             <div className="add-img" onClick={() => navigate('/patients/add-patient')} style={{ cursor: 'pointer' }}>

@@ -205,7 +205,7 @@ function PrescriptionList() {
                     </div>
 
                     <div className="pagination-tab">
-                        <h3>Total Prescriptions ({total})</h3>
+                        <span className="count-label">Total Prescriptions ({total})</span>
                         <Pagination
                             current={page}
                             total={total}

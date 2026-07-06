@@ -8,7 +8,7 @@
 .header-title {
     margin-bottom: 8px;
     font-weight: 700;
-    font-size: 28px;
+    font-size: var(--text-xl);
     color: #0f172a;
     margin-top: 0;
 }
@@ -88,7 +88,7 @@
 }
 
 .help-text {
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: #94a3b8;
     margin-top: 6px;
     display: inline-block;
@@ -110,12 +110,12 @@
     font-weight: 700;
     margin-bottom: 8px;
     display: block;
-    font-size: 15px;
+    font-size: var(--text-base);
 }
 
 .pro-tip-text {
     color: #0f766e;
-    font-size: 13px;
+    font-size: var(--text-sm);
     line-height: 1.6;
     position: relative;
     z-index: 2;
@@ -156,7 +156,7 @@
 
 .capacity-label {
     color: #475569;
-    font-size: 13px;
+    font-size: var(--text-sm);
     font-weight: 500;
 }
 
@@ -199,7 +199,7 @@
 .export-draft {
     color: #0369a1;
     font-weight: 600;
-    font-size: 13px;
+    font-size: var(--text-sm);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -238,7 +238,7 @@
     color: #475569;
     border-radius: 12px;
     padding: 3px 12px;
-    font-size: 11px;
+    font-size: var(--text-xs);
     border: none;
     font-weight: 600;
 }

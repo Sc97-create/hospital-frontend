@@ -11,6 +11,7 @@
   --color-primary-light: #E6F9EF;   /* tinted background on default btn hover  */
   --color-primary-border:#B7E9D1;   /* border tint on default btn hover        */
   --color-primary-text:  #25D366;   /* text / icon in default btn hover        */
+  --color-muted-text:    #667085;   /* secondary / helper / caption text       */
 
   /* ── Spacing scale (8-point grid) ──────────────────────────────────────── */
   --space-1:  4px;    /* micro: icon gaps, badge padding             */
@@ -79,6 +80,21 @@ h2 { font-size: var(--text-lg);   font-weight: var(--weight-semibold); line-heig
 h3 { font-size: var(--text-md);   font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
 h4 { font-size: var(--text-base); font-weight: var(--weight-semibold); line-height: var(--leading-normal); }
 p  { font-size: var(--text-base); font-weight: var(--weight-regular);  line-height: var(--leading-relaxed); color: #1d1d1f; }
+
+/* Secondary / helper text — single shared utility (replaces per-module .muted-text) */
+.muted-text {
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+  margin: 0;
+}
+
+/* Count badge beside pagination — not a semantic heading */
+.count-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-muted-text);
+  margin: 0;
+}
 
 /* ─── Ant Design Global Overrides ────────────────────────────────────────────
    Controls all Ant Design component text sizes from this one block.

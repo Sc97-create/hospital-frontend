@@ -63,7 +63,7 @@
 .stats-tag {
     padding: 6px 12px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 
 .medicine-card {
@@ -95,7 +95,7 @@
 }
 
 .medicine-icon {
-    font-size: 22px;
+    font-size: var(--text-lg);
     color: #1677ff;
 }
 
@@ -131,7 +131,7 @@
 }
 
 .freq-badge {
-    font-size: 11px;
+    font-size: var(--text-xs);
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 20px;
@@ -154,7 +154,7 @@
 }
 
 .detail-item {
-    font-size: 13px !important;
+    font-size: var(--text-sm) !important;
     color: #6b7280 !important;
     display: flex;
     align-items: center;
@@ -173,7 +173,7 @@
 
 .action-btn {
     border-radius: 8px !important;
-    font-size: 13px !important;
+    font-size: var(--text-sm) !important;
     font-weight: 500 !important;
     padding: 4px 12px !important;
     height: 32px !important;

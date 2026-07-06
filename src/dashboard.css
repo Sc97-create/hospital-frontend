@@ -37,10 +37,16 @@
     justify-content: flex-start;
     
 }
-.title-class h3{
-    font-size: 13px;
+.card-section-label {
+    font-size: var(--text-sm);
     color: #6B7280;
-    font-weight: 600;
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-2);
+}
+.list-item-title {
+    font-size: var(--text-sm);
+    color: #6B7280;
+    font-weight: var(--weight-semibold);
 }
 .load-more-button{
     align-items: center;
@@ -72,8 +78,8 @@
 }
 
 .special-card h2 {
-    font-size: 22px;
-    font-weight: 600;
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
     color: #F9FAFB;
 }
 

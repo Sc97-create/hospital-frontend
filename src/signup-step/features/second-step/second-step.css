@@ -6,11 +6,6 @@
   margin-bottom: 24px;
 }
 
-.muted-text {
-  color: #667085;
-  margin: 0;
-}
-
 .button-row1 {
   display: flex;
   justify-content: space-between;

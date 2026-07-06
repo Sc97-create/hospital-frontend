@@ -97,6 +97,20 @@
 |---|---|
 | `src/dashboard.css` | Removed invalid `font-style: 'Roboto'` declaration — cleaned up during typography standardisation pass; font family is now inherited globally from `index.css` |
 
+### ✅ Fixed (High)
+
+| File | What changed |
+|---|---|
+| `src/index.css` | Added `--color-muted-text` token, global `.muted-text` utility, and `.count-label` for pagination badges. All remaining module-level duplicates consolidated here |
+| `src/dashboard.css` | Replaced global `h3` overrides with scoped `.card-section-label` and `.list-item-title` classes; special card `h2` uses `var(--text-lg)` |
+| `src/dashboard.tsx` | Card labels and list item names changed from `<h3>` to semantic `<p>`/`<span>` with scoped classes |
+| `src/patientmangement/patientlist/patient-list.tsx` | Pagination count changed from `<h3>` to `<span className="count-label">` |
+| `src/prescriptions/prescription-details.tsx` | Pagination count changed from `<h3>` to `<span className="count-label">` |
+| `src/signup-step/features/second-step/second-step.css` | Removed duplicate `.muted-text` — now inherits from `index.css` |
+| `src/signup-step/features/third-step/third-step.css` | Removed duplicate `.muted-text`; `password-rules` and `setup-checkbox` use `var(--text-sm)` |
+| `src/employees/add-employee/add-employee.css` | Removed hardcoded `font-family: 'Roboto'`; font sizes use CSS variables |
+| **10 CSS modules** | Migrated all remaining hardcoded font sizes (`20px`–`11px`) to CSS variables (`--text-xl` through `--text-xs`) across `beds.css`, `rooms.css`, `roomtype.css`, `add-prescription.css`, `prescription-details.css`, `prescription-preview.css`, `patient-profile.css`, `patient-list.css`, `pharmacy.css`, `employees.css`, `header.css`, `sidebar.css`, `Login.css`, `signup.css`, `add-pharmacy.css` |
+
 ---
 
 ## 7. Spacing Review

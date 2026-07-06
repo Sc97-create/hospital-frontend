@@ -15,10 +15,6 @@
   color: #1570ef;
 }
 
-.muted-text {
-  color: #667085;
-}
-
 .password-rules {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -27,7 +23,7 @@
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 16px;
-  font-size: 13px;
+  font-size: var(--text-sm);
 }
 
 .rule {
@@ -78,7 +74,7 @@
 }
 
 .setup-checkbox {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: #6B7280;
 }
 

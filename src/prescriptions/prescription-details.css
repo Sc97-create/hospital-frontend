@@ -63,7 +63,7 @@
 }
 
 .search-input1 .ant-input {
-    font-size: 14px;
+    font-size: var(--text-base);
     height: 100%;
 }
 
@@ -122,16 +122,17 @@
     color: #6B7280;
 }
 
-.pagination-tab h3 {
+.pagination-tab .count-label {
     width: auto;
     min-width: 150px;
     height: 30px;
     background-color: #6B7280;
-    font-size: 13px;
+    font-size: var(--text-sm);
     text-align: center;
     padding: 8px 12px 0;
     border-radius: 8px;
     color: #F5F5F5;
+    font-weight: var(--weight-semibold);
     margin: 0;
 }
 
@@ -153,7 +154,7 @@
 }
 
 .medicine-name {
-    font-size: 14px;
+    font-size: var(--text-base);
     text-decoration: underline;
     cursor: pointer;
     color: #1F2937;
@@ -161,7 +162,7 @@
 
 .more-tag {
     width: fit-content;
-    font-size: 11px;
+    font-size: var(--text-xs);
     border-radius: 10px;
     padding-inline: 8px;
 }

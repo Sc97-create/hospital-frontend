@@ -216,7 +216,7 @@ function PatientList() {
                             />
                         </div>
                         <div className="pagination-tab">
-                            <h3>Total Patients ({response?.data?.length || 0})</h3>
+                            <span className="count-label">Total Patients ({response?.data?.length || 0})</span>
                             <Pagination
                                 current={pagination.current}
                                 pageSize={pagination.pageSize}
