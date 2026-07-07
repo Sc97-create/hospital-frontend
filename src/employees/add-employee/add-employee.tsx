@@ -1,6 +1,4 @@
 import {
-    Avatar,
-    Badge,
     Breadcrumb,
     Button,
     Card,
@@ -16,17 +14,13 @@ import {
     Tag,
     TimePicker,
     Typography,
-    Upload,
 } from 'antd';
 
 import {
-    CameraOutlined,
     HomeOutlined,
+    IdcardOutlined,
     MailOutlined,
     PhoneOutlined,
-    PlusOutlined,
-    TeamOutlined,
-    UserOutlined,
 } from '@ant-design/icons';
 
 import './add-employee.css';
@@ -37,14 +31,32 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
-function AddEmployee() {
+const EMPLOYEE_ROLES = [
+    { value: 'doctor', label: 'Doctor' },
+    { value: 'nurse', label: 'Nurse' },
+    { value: 'pharmacist', label: 'Pharmacist' },
+    { value: 'receptionist', label: 'Receptionist' },
+    { value: 'attendant', label: 'Attendant' },
+    { value: 'admin', label: 'Admin' },
+];
 
+const DEPARTMENTS = [
+    { value: 'cardiology', label: 'Cardiology' },
+    { value: 'emergency', label: 'Emergency' },
+    { value: 'icu', label: 'ICU' },
+    { value: 'pharmacy', label: 'Pharmacy' },
+    { value: 'reception', label: 'Reception' },
+    { value: 'radiology', label: 'Radiology' },
+    { value: 'pediatrics', label: 'Pediatrics' },
+];
+
+function AddEmployee() {
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
 
     const handleSaveDraft = async () => {
         const values = form.getFieldsValue();
-        if (!values.name && !values.email) {
+        if (!values.first_name && !values.email) {
             messageApi.warning('Fill in at least a name or email before saving a draft');
             return;
         }
@@ -66,518 +78,311 @@ function AddEmployee() {
         <Layout>
             {contextHolder}
             <Sidebar />
-            <Layout className='employee-layout'>
+            <Layout className="employee-layout">
+                <Content className="employee-content">
+                    <div className="employee-header">
+                        <Breadcrumb
+                            items={[
+                                { href: '/dashboard', title: <HomeOutlined /> },
+                                { title: <Link to="/employees">Staff Management</Link> },
+                                { title: 'Add Employee' },
+                            ]}
+                        />
 
-                <Content className='employee-content'>
-
-                    {/* HEADER */}
-
-                    <div className='employee-header'>
-
-                        <div>
-
-                            <Breadcrumb>
-
-                                <Breadcrumb.Item href='/dashboard'>
-                                    <HomeOutlined />
-                                </Breadcrumb.Item>
-
-                                <Breadcrumb.Item>
-                                    <Link to="/employees">Staff Management</Link>
-                                </Breadcrumb.Item>
-
-                                <Breadcrumb.Item>
-                                    Add Employee
-                                </Breadcrumb.Item>
-
-                            </Breadcrumb>
-
-                            <div className='employee-title-row'>
-
-                                <Title level={2} className='employee-title'>
+                        <div className="employee-title-row">
+                            <div>
+                                <Title level={2} className="employee-title">
                                     Add Employee
                                 </Title>
-
-                                <Tag color='default'>
-                                    Draft
-                                </Tag>
-
+                                <Text type="secondary" className="employee-subtitle">
+                                    Register hospital staff with role, department, and shift details for scheduling and access control.
+                                </Text>
                             </div>
-
+                            <Tag color="default">Draft</Tag>
                         </div>
-
                     </div>
 
-                    <Form
-                        form={form}
-                        layout='vertical'
-                    >
-
-                        <Row gutter={[20, 20]}>
-
-                            {/* LEFT */}
-
-                            <Col xs={24} lg={16}>
-
-                                {/* PERSONAL INFO */}
-
-                                <Card
-                                    className='employee-card'
-                                    title='Personal Information'
-                                >
-
-                                    <Row gutter={[20, 20]}>
-
-                                        {/* PROFILE */}
-
-                                        <Col xs={24} sm={8} md={6} lg={6}>
-
-                                            <div className='upload-section'>
-
-                                                <Upload
-                                                    showUploadList={false}
-                                                >
-
-                                                    <div className='upload-box'>
-
-                                                        <CameraOutlined className='upload-icon' />
-
-                                                    </div>
-
-                                                </Upload>
-
-                                                <Text className='upload-text'>
-                                                    JPG or PNG, max 2MB
-                                                </Text>
-
-                                            </div>
-
-                                        </Col>
-
-                                        {/* FORM */}
-
-                                        <Col xs={24} sm={16} md={18} lg={18}>
-
-                                            <Row gutter={14}>
-
-                                                <Col xs={24} sm={12}>
-
-                                                    <Form.Item
-                                                        label='First Name'
-                                                        name='first_name'
-                                                        rules={[{ required: true, message: 'First name is required' }]}
-                                                    >
-
-                                                        <Input
-                                                            placeholder='e.g. John'
-                                                            className='input-form-layout'
-                                                        />
-
-                                                    </Form.Item>
-
-                                                </Col>
-
-                                                <Col xs={24} sm={12}>
-
-                                                    <Form.Item
-                                                        label='Last Name'
-                                                        name='last_name'
-                                                        rules={[{ required: true, message: 'Last name is required' }]}
-                                                    >
-
-                                                        <Input
-                                                            placeholder='e.g. Doe'
-                                                            className='input-form-layout'
-                                                        />
-
-                                                    </Form.Item>
-
-                                                </Col>
-
-                                                <Col xs={24} sm={12}>
-
-                                                    <Form.Item
-                                                        label='Gender'
-                                                        name='gender'
-                                                        rules={[{ required: true, message: 'Please select a gender' }]}
-                                                    >
-
-                                                        <Select
-                                                            placeholder='Select Gender'
-                                                            className='dropdown-input-class'
-                                                        >
-
-                                                            <Select.Option value='male'>
-                                                                Male
-                                                            </Select.Option>
-
-                                                            <Select.Option value='female'>
-                                                                Female
-                                                            </Select.Option>
-
-                                                        </Select>
-
-                                                    </Form.Item>
-
-                                                </Col>
-
-                                                <Col xs={24} sm={12}>
-
-                                                    <Form.Item
-                                                        label='Date of Birth'
-                                                        name='dob'
-                                                        rules={[{ required: true, message: 'Date of birth is required' }]}
-                                                    >
-
-                                                        <DatePicker
-                                                            className='date-picker-layout'
-                                                        />
-
-                                                    </Form.Item>
-
-                                                </Col>
-
-                                                <Col xs={24} sm={12}>
-
-                                                    <Form.Item
-                                                        label='Mobile Number'
-                                                        name='mobile'
-                                                        rules={[
-                                                            { required: true, message: 'Mobile number is required' },
-                                                            { pattern: /^\d{10}$/, message: 'Enter a valid 10-digit number' },
-                                                        ]}
-                                                    >
-
-                                                        <Input
-                                                            prefix={<PhoneOutlined />}
-                                                            className='input-form-layout'
-                                                            maxLength={10}
-                                                        />
-
-                                                    </Form.Item>
-
-                                                </Col>
-
-                                                <Col xs={24} sm={12}>
-
-                                                    <Form.Item
-                                                        label='Email Address'
-                                                        name='email'
-                                                        rules={[
-                                                            { required: true, message: 'Email address is required' },
-                                                            { type: 'email', message: 'Enter a valid email address' },
-                                                        ]}
-                                                    >
-
-                                                        <Input
-                                                            prefix={<MailOutlined />}
-                                                            className='input-form-layout'
-                                                        />
-
-                                                    </Form.Item>
-
-                                                </Col>
-
-                                                <Col span={24}>
-
-                                                    <Form.Item
-                                                        label='Address'
-                                                        name='address'
-                                                        rules={[{ required: true, message: 'Address is required' }]}
-                                                    >
-
-                                                        <TextArea
-                                                            rows={3}
-                                                            className='text-area-layout'
-                                                        />
-
-                                                    </Form.Item>
-
-                                                </Col>
-
-                                            </Row>
-
-                                        </Col>
-
-                                    </Row>
-
-                                </Card>
-
-                                {/* EMPLOYEE INFO */}
-
-                                <Card
-                                    className='employee-card top-space'
-                                    title='Employee Information'
-                                >
-
-                                    <Row gutter={16}>
-
-                                        <Col xs={24} sm={12}>
-
-                                            <Form.Item
-                                                label='Auto-generated ID'
-                                            >
-
-                                                <Input
-                                                    value='HMS-2024-001'
-                                                    disabled
-                                                    className='input-form-layout'
-                                                />
-
-                                            </Form.Item>
-
-                                        </Col>
-
-                                        <Col xs={24} sm={12}>
-
-                                            <Form.Item
-                                                label='Department'
-                                                name='department'
-                                                rules={[{ required: true, message: 'Please select a department' }]}
-                                            >
-
-                                                <Select className='dropdown-input-class' placeholder='Select department'>
-
-                                                    <Select.Option value='cardiology'>
-                                                        Cardiology
-                                                    </Select.Option>
-
-                                                    <Select.Option value='pharmacy'>
-                                                        Pharmacy
-                                                    </Select.Option>
-
-                                                    <Select.Option value='reception'>
-                                                        Reception
-                                                    </Select.Option>
-
-                                                </Select>
-
-                                            </Form.Item>
-
-                                        </Col>
-
-                                    </Row>
-
-                                    {/* ROLE */}
-
-                                    <div className='role-section'>
-
-                                        <Text className='role-title'>
-                                            Role Selection
-                                        </Text>
-
-                                        <div className='role-grid'>
-
-                                            <div className='role-card active-role'>
-                                                <UserOutlined />
-                                                <span>Doctor</span>
-                                            </div>
-
-                                            <div className='role-card'>
-                                                <TeamOutlined />
-                                                <span>Nurse</span>
-                                            </div>
-
-                                            <div className='role-card'>
-                                                <PlusOutlined />
-                                                <span>Pharmacist</span>
-                                            </div>
-
-                                            <div className='role-card'>
-                                                <UserOutlined />
-                                                <span>Receptionist</span>
-                                            </div>
-
-                                            <div className='role-card'>
-                                                <TeamOutlined />
-                                                <span>Attendant</span>
-                                            </div>
-
-                                            <div className='role-card'>
-                                                <UserOutlined />
-                                                <span>Admin</span>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                </Card>
-
-                                {/* SHIFT */}
-
-                                <Card
-                                    className='employee-card top-space'
-                                    title='Shift Assignment'
-                                >
-
-                                    <div className='shift-wrapper'>
-
-                                        <Radio.Group defaultValue='general'>
-
-                                            <Radio.Button value='general'>
-                                                General Shift
-                                            </Radio.Button>
-
-                                            <Radio.Button value='morning'>
-                                                Morning Shift
-                                            </Radio.Button>
-
-                                            <Radio.Button value='evening'>
-                                                Evening Shift
-                                            </Radio.Button>
-
-                                            <Radio.Button value='night'>
-                                                Night Shift
-                                            </Radio.Button>
-
-                                            <Radio.Button value='rotational'>
-                                                Rotational
-                                            </Radio.Button>
-
-                                        </Radio.Group>
-
-                                    </div>
-
-                                    <Row gutter={16} className='top-space'>
-
-                                        <Col xs={24} sm={12}>
-
-                                            <Form.Item
-                                                label='Start Time'
-                                                name='start_time'
-                                            >
-
-                                                <TimePicker
-                                                    className='time-picker-layout'
-                                                />
-
-                                            </Form.Item>
-
-                                        </Col>
-
-                                        <Col xs={24} sm={12}>
-
-                                            <Form.Item
-                                                label='End Time'
-                                                name='end_time'
-                                            >
-
-                                                <TimePicker
-                                                    className='time-picker-layout'
-                                                />
-
-                                            </Form.Item>
-
-                                        </Col>
-
-                                    </Row>
-
-                                </Card>
-
-                            </Col>
-
-                            {/* RIGHT */}
-
-                            <Col xs={24} lg={8}>
-
-                                <Card className='preview-card'>
-
-                                    <div className='preview-top'>
-
-                                        <Badge status='success' text='Active' />
-
-                                    </div>
-
-                                    <div className='preview-profile'>
-
-                                        <Avatar
-                                            size={90}
-                                            src='https://i.pravatar.cc/150'
+                    <Form form={form} layout="vertical" className="employee-form">
+                        <Card className="employee-card" title="Personal Information">
+                            <Row gutter={[16, 0]}>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="First Name"
+                                        name="first_name"
+                                        rules={[{ required: true, message: 'First name is required' }]}
+                                    >
+                                        <Input placeholder="e.g. John" className="input-form-layout" />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Last Name"
+                                        name="last_name"
+                                        rules={[{ required: true, message: 'Last name is required' }]}
+                                    >
+                                        <Input placeholder="e.g. Doe" className="input-form-layout" />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Gender"
+                                        name="gender"
+                                        rules={[{ required: true, message: 'Please select a gender' }]}
+                                    >
+                                        <Select placeholder="Select gender" className="dropdown-input-class">
+                                            <Select.Option value="male">Male</Select.Option>
+                                            <Select.Option value="female">Female</Select.Option>
+                                            <Select.Option value="other">Other</Select.Option>
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Date of Birth"
+                                        name="dob"
+                                        rules={[{ required: true, message: 'Date of birth is required' }]}
+                                    >
+                                        <DatePicker className="date-picker-layout" placeholder="Select date" />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Mobile Number"
+                                        name="mobile"
+                                        rules={[
+                                            { required: true, message: 'Mobile number is required' },
+                                            { pattern: /^\d{10}$/, message: 'Enter a valid 10-digit number' },
+                                        ]}
+                                    >
+                                        <Input
+                                            prefix={<PhoneOutlined />}
+                                            placeholder="10-digit mobile"
+                                            className="input-form-layout"
+                                            maxLength={10}
                                         />
+                                    </Form.Item>
+                                </Col>
 
-                                        <Text className='preview-id'>
-                                            HMS-2024-001
-                                        </Text>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Email Address"
+                                        name="email"
+                                        rules={[
+                                            { required: true, message: 'Email address is required' },
+                                            { type: 'email', message: 'Enter a valid email address' },
+                                        ]}
+                                    >
+                                        <Input
+                                            prefix={<MailOutlined />}
+                                            placeholder="work@hospital.com"
+                                            className="input-form-layout"
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                        <Title level={4}>
-                                            Dr. John Doe
-                                        </Title>
+                                <Col span={24}>
+                                    <Form.Item
+                                        label="Residential Address"
+                                        name="address"
+                                        rules={[{ required: true, message: 'Address is required' }]}
+                                    >
+                                        <TextArea
+                                            rows={2}
+                                            placeholder="Street, city, state, PIN code"
+                                            className="text-area-layout"
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Card>
 
-                                        <Tag color='blue'>
-                                            Doctor
-                                        </Tag>
+                        <Card className="employee-card top-space" title="Professional Details">
+                            <Row gutter={[16, 0]}>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item label="Employee ID">
+                                        <Input
+                                            value="HMS-2024-001"
+                                            disabled
+                                            className="input-form-layout"
+                                            prefix={<IdcardOutlined />}
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                    </div>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Role"
+                                        name="role"
+                                        rules={[{ required: true, message: 'Please select a role' }]}
+                                        extra="Determines system access and clinical responsibilities"
+                                    >
+                                        <Select
+                                            placeholder="Select role"
+                                            className="dropdown-input-class"
+                                            options={EMPLOYEE_ROLES}
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                    <div className='preview-section'>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Department"
+                                        name="department"
+                                        rules={[{ required: true, message: 'Please select a department' }]}
+                                    >
+                                        <Select
+                                            placeholder="Select department"
+                                            className="dropdown-input-class"
+                                            options={DEPARTMENTS}
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                        <Text strong>
-                                            Shift Summary
-                                        </Text>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item label="Specialization" name="specialization">
+                                        <Input
+                                            placeholder="e.g. Cardiologist, ICU Nurse"
+                                            className="input-form-layout"
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                        <p>
-                                            General Shift (09:00 - 17:00)
-                                        </p>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="License / Registration No."
+                                        name="license_number"
+                                        rules={[{ required: true, message: 'License number is required' }]}
+                                    >
+                                        <Input
+                                            placeholder="Medical council or board ID"
+                                            className="input-form-layout"
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                    </div>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item label="Qualification" name="qualification">
+                                        <Input
+                                            placeholder="e.g. MBBS, B.Pharm, GNM"
+                                            className="input-form-layout"
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                    <div className='preview-section'>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Joining Date"
+                                        name="joining_date"
+                                        rules={[{ required: true, message: 'Joining date is required' }]}
+                                    >
+                                        <DatePicker className="date-picker-layout" placeholder="Select date" />
+                                    </Form.Item>
+                                </Col>
 
-                                        <Text strong>
-                                            System Permissions
-                                        </Text>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Employment Type"
+                                        name="employment_type"
+                                        rules={[{ required: true, message: 'Please select employment type' }]}
+                                    >
+                                        <Select placeholder="Select type" className="dropdown-input-class">
+                                            <Select.Option value="full_time">Full-time</Select.Option>
+                                            <Select.Option value="part_time">Part-time</Select.Option>
+                                            <Select.Option value="contract">Contract</Select.Option>
+                                            <Select.Option value="locum">Locum / Visiting</Select.Option>
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
 
-                                        <ul className='permission-list'>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Emergency Contact Name"
+                                        name="emergency_contact_name"
+                                        rules={[{ required: true, message: 'Emergency contact name is required' }]}
+                                    >
+                                        <Input placeholder="Full name" className="input-form-layout" />
+                                    </Form.Item>
+                                </Col>
 
-                                            <li>Patient Records</li>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item
+                                        label="Emergency Contact Phone"
+                                        name="emergency_contact_phone"
+                                        rules={[
+                                            { required: true, message: 'Emergency contact phone is required' },
+                                            { pattern: /^\d{10}$/, message: 'Enter a valid 10-digit number' },
+                                        ]}
+                                    >
+                                        <Input
+                                            prefix={<PhoneOutlined />}
+                                            placeholder="10-digit number"
+                                            className="input-form-layout"
+                                            maxLength={10}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Card>
 
-                                            <li>Prescription Access</li>
+                        <Card className="employee-card top-space" title="Shift & Availability">
+                            <Text type="secondary" className="section-hint">
+                                Assign the default shift for rostering, OPD coverage, and ward duty planning.
+                            </Text>
 
-                                            <li>Billing Access</li>
+                            <Form.Item name="shift" initialValue="general" className="shift-field">
+                                <Radio.Group className="shift-wrapper">
+                                    <Radio.Button value="general">General Shift</Radio.Button>
+                                    <Radio.Button value="morning">Morning Shift</Radio.Button>
+                                    <Radio.Button value="evening">Evening Shift</Radio.Button>
+                                    <Radio.Button value="night">Night Shift</Radio.Button>
+                                    <Radio.Button value="rotational">Rotational</Radio.Button>
+                                </Radio.Group>
+                            </Form.Item>
 
-                                            <li>Inventory Management</li>
+                            <Row gutter={[16, 0]}>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item label="Shift Start Time" name="start_time">
+                                        <TimePicker className="time-picker-layout" format="HH:mm" placeholder="Start" />
+                                    </Form.Item>
+                                </Col>
 
-                                        </ul>
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item label="Shift End Time" name="end_time">
+                                        <TimePicker className="time-picker-layout" format="HH:mm" placeholder="End" />
+                                    </Form.Item>
+                                </Col>
 
-                                    </div>
-
-                                </Card>
-
-                            </Col>
-
-                        </Row>
-
+                                <Col xs={24} sm={12} lg={8}>
+                                    <Form.Item label="Weekly Off" name="weekly_off">
+                                        <Select placeholder="Select day" className="dropdown-input-class" allowClear>
+                                            <Select.Option value="sunday">Sunday</Select.Option>
+                                            <Select.Option value="monday">Monday</Select.Option>
+                                            <Select.Option value="saturday">Saturday</Select.Option>
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </Card>
                     </Form>
 
-                    {/* FOOTER */}
+                    <div className="employee-footer">
+                        <Button onClick={() => form.resetFields()}>Cancel</Button>
 
-                    <div className='employee-footer'>
-
-                        <Button onClick={() => form.resetFields()}>
-                            Cancel
-                        </Button>
-
-                        <div className='footer-right'>
-
-                            <Button onClick={handleSaveDraft}>
-                                Save Draft
-                            </Button>
-
-                            <Button type='primary' onClick={handleCreateEmployee}>
+                        <div className="footer-right">
+                            <Button onClick={handleSaveDraft}>Save Draft</Button>
+                            <Button type="primary" onClick={handleCreateEmployee}>
                                 Create Employee
                             </Button>
-
                         </div>
-
                     </div>
-
                 </Content>
-
             </Layout>
         </Layout>
     );
 }
 
 export default AddEmployee;
-

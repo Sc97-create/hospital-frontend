@@ -5,7 +5,7 @@ export let deptArray: Department[] = [];
 
 export const getDepartments = async () => {
     try {
-        const response = await GetDepartments("4c02d9f5-7388-4382-b2c7-aa3fe3852625", 1, 10);
+        const response = await GetDepartments(localStorage.getItem("organisation_id") || "", 1, 10);
         console.log(response);
         setDeptArray(response.data);
         return deptArray;

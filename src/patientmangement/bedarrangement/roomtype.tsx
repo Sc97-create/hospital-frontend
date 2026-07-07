@@ -39,7 +39,7 @@ export default function CreateBed() {
             id: "",
             name: values.roomType,
             is_default: values.isDefault || false,
-            organisation_id: "de6b9b6e-9fda-49cb-8828-80310924e707",
+            organisation_id: localStorage.getItem("organisation_id") || "",
             base_price: values.basePrice
         };
 

@@ -204,6 +204,16 @@
 | **High** | `add-prescription.tsx` | `<Sider>` used as form panel — cannot be dismissed; collapses to `0` on `lg` breakpoint, hiding form |
 | **High** | Multiple files | Destructive actions (Delete medicine, Discard Order) have no `Popconfirm` confirmation |
 
+### ✅ Fixed
+
+| File | What changed |
+|---|---|
+| `src/employees/add-permissions/add-permission.tsx` | Modal `width` → `min(900px, 95vw)` — no viewport overflow on mobile (also listed in §2 Responsive) |
+| `src/patientmangement/bedarrangement/beds.tsx` | Removed hidden Cancel via `cancelButtonProps`; success modal uses custom `footer` with a single accessible **Done** button |
+| `src/prescriptions/add-prescription.tsx` | Replaced `<Sider>` with desktop sidebar `div` + mobile `<Drawer>` (`Grid.useBreakpoint`, opens via **Add Medicine** button); form no longer collapses to `0` |
+| `src/prescriptions/add-prescription.tsx` | Delete medicine button wrapped in `<Popconfirm>` with danger confirmation |
+| `src/prescriptions/prescription-preview.tsx` | Discard Order uses `Modal.confirm` danger dialog (also listed in §3 CTA) |
+
 ---
 
 ## 13. Loading State Review

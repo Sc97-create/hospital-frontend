@@ -39,16 +39,18 @@ function SecondStep() {
     const [selectedRoomType, setSelectedRoomType] = useState<string | "">("");
     //const [charges, setcharges] = useState<string>("0");
 
+    const organisationId = localStorage.getItem("organisation_id") || "";
+
     const getAllRooms = async () => {
-        const response = await GetAvailableRooms("dce26168-eb8d-4723-a21e-2c33ad3ce39c", "10", "0");
+        const response = await GetAvailableRooms(organisationId, "10", "0");
         setRooms(response.data);
     }
     const getAllbeds = async () => {
-        const response = await GetAvailableBeds("dce26168-eb8d-4723-a21e-2c33ad3ce39c", "10", "0", selectedRoomId);
+        const response = await GetAvailableBeds(organisationId, "10", "0", selectedRoomId);
         setBeds(response.data);
     }
     const getAllRoomTypes = async () => {
-        const response = await GetRoomTypeByOrganisationID("dce26168-eb8d-4723-a21e-2c33ad3ce39c");
+        const response = await GetRoomTypeByOrganisationID(organisationId);
         setRoomType(response.data);
     }
 
@@ -60,7 +62,7 @@ function SecondStep() {
                     room_id: selectedRoomId,
                     bed_id: selectedBedId,
                     room_type: selectedRoomType,
-                    organisation_id: "dce26168-eb8d-4723-a21e-2c33ad3ce39c",
+                    organisation_id: organisationId,
                     appointment_id: "",
                     charges: values.bed_charges,
                     dischargeat: new Date()

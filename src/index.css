@@ -247,7 +247,7 @@ body,
   margin-bottom: var(--space-5) !important;
 }
 
-/* Row gutter fallback — ensures at least 16px column gap where not set */
-.ant-row:not([class*="gutter"]) {
-  gap: var(--space-4);
+/* Row gutter fallback — Ant Design rows use the gutter prop for spacing */
+.ant-row {
+  gap: 0;
 }

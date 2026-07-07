@@ -33,7 +33,7 @@ function AddManualForm() {
 
                     {/* ✅ Proper Card */}
                     <Card className="supplier-card" bordered={false}>
-                        <Form form={form} layout="vertical" onFinish={onFinish}>
+                        <Form form={form} layout="vertical" onFinish={onFinish} className="supplier-form">
 
                             <Form.Item
                                 label="Company Name"
@@ -51,7 +51,7 @@ function AddManualForm() {
                                 <Input placeholder="Full Name" />
                             </Form.Item>
 
-                            <Row gutter={[16, 16]}>
+                            <Row gutter={[16, 0]}>
                                 <Col xs={24} sm={12}>
                                     <Form.Item
                                         label="Email"

@@ -44,6 +44,55 @@
     font-weight: 600;
 }
 
+/* ─── Patient details form spacing ─────────────────────────────────────── */
+
+.firststepcard .patient-details-form.ant-form-vertical .ant-form-item .ant-form-item-label {
+    padding-bottom: 2px !important;
+    margin-bottom: 0 !important;
+    overflow: visible;
+}
+
+.firststepcard .patient-details-form .ant-form-item {
+    margin-bottom: var(--space-4) !important;
+}
+
+.firststepcard .patient-details-form .ant-form-item-label > label {
+    color: #374151;
+    font-weight: var(--weight-semibold);
+    height: auto !important;
+    min-height: unset !important;
+    line-height: var(--leading-snug);
+    margin-bottom: 0 !important;
+}
+
+.firststepcard .patient-details-form .ant-form-item-control {
+    margin-top: 0 !important;
+}
+
+.firststepcard .patient-details-form .ant-form-item-control-input {
+    min-height: unset !important;
+}
+
+.firststepcard .patient-details-form .ant-form-item-control-input-content {
+    min-height: unset;
+}
+
+.firststepcard .patient-details-form .ant-form-item-row {
+    row-gap: 0;
+    gap: 0;
+}
+
+.firststepcard .patient-details-form .input-form-layout,
+.firststepcard .patient-details-form .ant-select .ant-select-selector {
+    background-color: #ffffff !important;
+}
+
+.firststepcard .patient-details-form .ant-select-single .ant-select-selector {
+    height: 40px !important;
+    display: flex;
+    align-items: center;
+}
+
 .gender-form-layout {
     width: 100% !important;
     height: 40px !important;
@@ -121,10 +170,7 @@
     background-color: var(--color-primary-hover) !important;
     color: #F9FAFB !important;
 }
-.dropdown-input-class{
+.dropdown-input-class {
     width: 100% !important;
     height: 40px !important;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
 }

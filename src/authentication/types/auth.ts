@@ -4,7 +4,9 @@ export interface loginPayload{
 }
 export interface loginResponse{
     user_id:string;
-    accesstoken:string;
+    token:string;
     message:string;
+    organisation_id:string;
+    refresh_token:string;
 
 }

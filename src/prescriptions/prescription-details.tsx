@@ -55,7 +55,7 @@ function PrescriptionList() {
     const fetchPrescriptions = async (currentPage: number) => {
         setLoading(true);
         try {
-            const organisation_id = localStorage.getItem("organisation_id") || "4c02d9f5-7388-4382-b2c7-aa3fe3852625";
+            const organisation_id = localStorage.getItem("organisation_id") || "";
             const response = await FindAllPrescription(pageSize, currentPage, organisation_id);
             if (response.code === "200") {
                 setPrescriptions(response.data);

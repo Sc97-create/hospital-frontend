@@ -51,7 +51,7 @@ export default function CreateRooms() {
             room_per_floor: values.rooms_per_floor,
             starting_per_floor: values.starting_per_floor,
             prefix: values.prefix,
-            organisation_id: "de6b9b6e-9fda-49cb-8828-80310924e707",
+            organisation_id: localStorage.getItem("organisation_id") || "",
         };
 
         try {

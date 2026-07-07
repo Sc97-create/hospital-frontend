@@ -28,7 +28,7 @@ function FirstStep() {
             const values = await form.validateFields();
             const data = {
                 ...values,
-                organisation_id: localStorage.getItem("organisation_id") || "4c02d9f5-7388-4382-b2c7-aa3fe3852625",
+                organisation_id: localStorage.getItem("organisation_id") || "",
                 user_id: localStorage.getItem("user_id") || ""
             };
             const response = await CreateAppointment(data);
@@ -69,6 +69,7 @@ function FirstStep() {
                 <Form
                     layout='vertical'
                     form={form}
+                    className="patient-details-form"
                 >
                     <Row gutter={[16, 0]} >
                         <Col xs={24} sm={12}>
