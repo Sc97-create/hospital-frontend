@@ -1,16 +1,14 @@
-import { Breadcrumb, Button, Card, Col, DatePicker, Form, Input, Layout, Row, Select, Typography, type DatePickerProps } from "antd"
-import '../appointment-step/features/first-step-appointment'
+import { Breadcrumb, Button, Card, Col, Form, Input, Layout, Row } from "antd"
 import './add-manual-form.css'
-import { CheckOutlined, InfoCircleOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import Sidebar from "../sidebar"
 import Header from "../header"
 import { Link, Outlet } from "react-router-dom"
-const { Option } = Select
+
 function AddManualForm() {
 
     const [form] = Form.useForm();
 
-    const onFinish = (values: any) => {
+    const onFinish = (values: Record<string, unknown>) => {
         console.log("Form Values:", values);
     };
 
@@ -35,7 +33,7 @@ function AddManualForm() {
 
                     {/* ✅ Proper Card */}
                     <Card className="supplier-card" bordered={false}>
-                        <Form form={form} layout="vertical" onFinish={onFinish}>
+                        <Form form={form} layout="vertical" onFinish={onFinish} className="supplier-form">
 
                             <Form.Item
                                 label="Company Name"
@@ -53,7 +51,7 @@ function AddManualForm() {
                                 <Input placeholder="Full Name" />
                             </Form.Item>
 
-                            <Row gutter={[16, 16]}>
+                            <Row gutter={[16, 0]}>
                                 <Col xs={24} sm={12}>
                                     <Form.Item
                                         label="Email"

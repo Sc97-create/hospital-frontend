@@ -1,161 +1,140 @@
-.employee-layout {
-    background: #f5f7fb;
-    min-height: 100vh;
+.breadcrumb-layout {
+    margin-left: 12px;
+    margin-top: 24px;
+    padding-left: 8px;
 }
 
-.employee-content {
-    padding: 24px;
+.ant-breadcrumb .ant-breadcrumb-link span {
+    color: #6B7280;
 }
 
-.employee-header {
-    margin-bottom: 20px;
-}
-
-.employee-title-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 8px;
-}
-
-.employee-title {
-    margin: 0 !important;
-}
-
-.employee-card {
-    border-radius: 14px !important;
-    border: 1px solid #e4e7ec;
-}
-
-.top-space {
-    margin-top: 20px;
-}
-
-.upload-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.upload-box {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 2px dashed #cbd5e1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    background: #f8fafc;
-}
-
-.upload-icon {
-    font-size: 32px;
-    color: #1677ff;
-}
-
-.upload-text {
-    margin-top: 12px;
-    text-align: center;
-    font-size: 12px;
-    color: #667085;
-}
-
-.full-width {
+.main-layout {
+    margin: 16px;
     width: 100%;
 }
 
-.role-section {
-    margin-top: 10px;
-}
-
-.role-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #344054;
-}
-
-.role-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 14px;
-}
-
-.role-card {
-    height: 80px;
-    border: 1px solid #d0d5dd;
-    border-radius: 12px;
+.appointment-button {
+    width: 240px !important;
+    height: 40px !important;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-    background: white;
+    background-color: var(--color-primary) !important;
+    color: #F9FAFB !important;
+    border-radius: 8px;
+    font-weight: 600;
+    border-color: #E6F9EF;
+    box-shadow: none;
 }
 
-.role-card:hover {
-    border-color: #1677ff;
+.appointment-button:hover {
+    border-color: #E6F9EF !important;
+    box-shadow: none !important;
 }
 
-.active-role {
-    border: 2px solid #1677ff;
-    background: #eff6ff;
-}
-
-.shift-wrapper {
+.button-layout {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.preview-card {
-    border-radius: 14px !important;
-    border: 1px solid #e4e7ec;
-}
-
-.preview-top {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.preview-profile {
-    display: flex;
-    flex-direction: column;
+    justify-content: end;
     align-items: center;
-    margin-top: 12px;
+    margin-right: 32px;
 }
 
-.preview-id {
-    margin-top: 10px;
-    color: #667085;
+.search-layout {
+    display: flex;
+    margin-top: 20px;
+    justify-content: space-between;
+    margin-right: 24px;
+    align-items: center;
+}
+
+.search-input1 {
+    width: 300px !important;
+    height: 40px !important;
+    display: flex;
+    justify-content: flex-start;
+    padding: 12px;
+    background-color: #E6F9EF !important;
+    color: #1F2937 !important;
+    border-radius: 8px;
+}
+
+.search-input1 .ant-input {
+    font-size: var(--text-base);
+    height: 100%;
+}
+
+.search-input1 .ant-input-affix-wrapper {
+    height: 36px;
+    display: flex;
+    align-items: center;
+}
+
+.search-input1:hover,
+.search-input1:focus,
+.search-input1-focused,
+.search-input1:focus-within,
+.search-input1.ant-input-affix-wrapper:hover,
+.search-input1.ant-input-affix-wrapper-focused {
+    border-color: #B7E9D1 !important;
+    box-shadow: none !important;
+}
+
+.table-data {
+    margin-top: 18px;
+    margin-right: 24px;
+}
+
+.column-layout {
+    color: #1F2937;
     font-size: 12px;
+    font-weight: 600;
 }
 
-.preview-section {
-    margin-top: 24px;
+.ant-table-thead > tr > th.column-layout {
+    color: #6B7280;
+    font-weight: 600;
 }
 
-.permission-list {
+.other-layout {
+    color: #6B7280;
+}
+
+.ant-table-thead > tr > th.other-layout {
+    color: #6B7280;
+    font-weight: 600;
+}
+
+.code-badge {
+    background-color: #FFF9C4;
+    color: #000;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.pagination-tab {
     margin-top: 12px;
-    padding-left: 18px;
-}
-
-.employee-footer {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    border-top: 1px solid #e4e7ec;
-    padding: 16px 24px;
-    margin-top: 24px;
     display: flex;
     justify-content: space-between;
+    margin-right: 24px;
     align-items: center;
 }
 
-.footer-right {
-    display: flex;
-    gap: 12px;
+.pagination-tab,
+.ant-pagination .ant-pagination-total-text {
+    font-weight: 600;
+    color: #6B7280;
+}
+
+.pagination-tab .count-label {
+    width: auto;
+    min-width: 150px;
+    height: 30px;
+    background-color: #6B7280;
+    font-size: var(--text-sm);
+    text-align: center;
+    padding: 8px 12px 0;
+    border-radius: 8px;
+    color: #F5F5F5;
+    font-weight: var(--weight-semibold);
 }

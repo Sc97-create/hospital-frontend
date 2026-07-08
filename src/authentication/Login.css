@@ -45,19 +45,45 @@
 }
 
 .login-card h2 {
-    font-family: 'Roboto';
-    font-weight: bold;
+    font-weight: 700;
     margin-bottom: 24px;
 }
 
 /* Form spacing */
+.login-form.ant-form-vertical .ant-form-item .ant-form-item-label {
+    padding-bottom: 2px !important;
+    margin-bottom: 0 !important;
+    overflow: visible;
+}
+
 .login-form .ant-form-item {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-4) !important;
+}
+
+.login-form .ant-form-item-label > label {
+    margin-bottom: 0 !important;
+}
+
+.login-form .ant-form-item-control {
+    margin-top: 0 !important;
+}
+
+.login-form .ant-form-item-control-input {
+    min-height: unset !important;
+}
+
+.login-form .ant-form-item-row {
+    row-gap: 0;
+    gap: 0;
+}
+
+.login-form .button-input {
+    margin-bottom: 0 !important;
 }
 
 /* Button */
 .login-submit-button {
-    background-color: #25D366;
+    background-color: var(--color-primary);
     color: #F9FAFB;
     font-weight: bold;
 }
@@ -72,7 +98,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    font-size: 14px;
+    font-size: var(--text-sm);
 }
 
 .auth-links span {

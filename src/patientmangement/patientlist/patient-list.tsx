@@ -1,6 +1,6 @@
 import { Layout, Breadcrumb, Button, Input, Table, Tag, Pagination } from 'antd'
 import { useState, useEffect } from 'react'
-import type { TableColumnsType, TableColumnType, TableProps, TablePaginationConfig } from 'antd'
+import type { TableColumnsType, TablePaginationConfig } from 'antd'
 import './patient-list.css'
 import Sidebar from '../../sidebar'
 import datecheck from 'dayjs'
@@ -11,10 +11,8 @@ import {
     PlusCircleOutlined,
     SearchOutlined
 } from '@ant-design/icons'
-import HeaderLayout from '../../header'
 import { findMany } from '../api/patients'
 import type { Patientlistresponse } from '../types/patients'
-const { Search } = Input;
 
 const { Content } = Layout
 
@@ -210,13 +208,13 @@ function PatientList() {
                                 columns={columns}
                                 dataSource={currentData}
                                 showSorterTooltip={{ target: 'sorter-icon' }}
-                                scroll={{ y: 400 }}
+                                scroll={{ x: 'max-content', y: 400 }}
                                 pagination={false}
                                 loading={loading}
                             />
                         </div>
                         <div className="pagination-tab">
-                            <h3>Total Patients ({response?.data?.length || 0})</h3>
+                            <span className="count-label">Total Patients ({response?.data?.length || 0})</span>
                             <Pagination
                                 current={pagination.current}
                                 pageSize={pagination.pageSize}
@@ -232,7 +230,3 @@ function PatientList() {
 }
 
 export default PatientList
-
-function dayjs(date: Date) {
-    throw new Error('Function not implemented.')
-}

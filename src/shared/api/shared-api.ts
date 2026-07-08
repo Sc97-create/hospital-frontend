@@ -12,7 +12,7 @@ export const GetDepartments = async (organisationID: string, page: number, limit
     return response.data
 }
 
-export const GetDoctors = async (search: string, organisationID: string): Promise<any> => {
+export const GetDoctors = async (search: string, organisationID: string): Promise<unknown> => {
     const response = await apiClient.get(`/employee/getDoctors`,
         {
             params: {

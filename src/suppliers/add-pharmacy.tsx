@@ -1,12 +1,9 @@
-import { Breadcrumb, Button, Form, Input, Layout, Select, Tabs, type TabsProps } from "antd";
-import Sidebar from "../sidebar";
-import { Link, useParams } from "react-router-dom";
+import { Tabs, type TabsProps } from "antd";
 import './add-pharmacy.css'
 import AddManualForm from "./add-manual-form";
 import  UploadCsv from "./upload-inovice";
 
 export default function AddPharmacy() {
-    const { id } = useParams()
     const onChange = (key: string) => {
         console.log(key);
     };

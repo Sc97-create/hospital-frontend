@@ -1,5 +1,4 @@
 
-import React from 'react';
 import {  Layout, Dropdown, Space } from 'antd'
 import './header.css'
 const { Header } = Layout

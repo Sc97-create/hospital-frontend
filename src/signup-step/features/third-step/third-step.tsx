@@ -6,21 +6,21 @@ import {
     Row,
     Col,
     Checkbox,
-    Progress,
 } from "antd";
 import './third-step.css'
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import { createAdmin } from "./createadmin";
+import { useCreateAdmin } from "./createadmin";
 import type { CreateAdmin } from "../../types/third-step-signup";
+import type { UserData } from "../../types/common-api";
 import { useEffect, useState } from "react";
-import { updateAdmin } from "./updateadmin";
+import { useUpdateAdmin } from "./updateadmin";
 
 interface ThirdStepProps {
     organisationID: string;
     onSuccess: (userID: string) => void;
     onNext: () => void;
     onBack: () => void;
-    data: any;
+    data: UserData | null;
 }
 const Rule = ({ valid, text }: { valid: boolean; text: string }) => (
     <div className={`rule ${valid ? "success" : "pending"}`}>
@@ -31,8 +31,8 @@ const Rule = ({ valid, text }: { valid: boolean; text: string }) => (
     </div>
 ); // need to create seperate folder for reusable component
 function ThirdStep({ onSuccess, organisationID, onNext, onBack, data }: ThirdStepProps) {
-    const { mutate: create, isPending: isPendingAdmin } = createAdmin();
-    const { mutate: update, isPending: isPendingUpdate } = updateAdmin()
+    const { mutate: create, isPending: isPendingAdmin } = useCreateAdmin();
+    const { mutate: update, isPending: isPendingUpdate } = useUpdateAdmin();
     const [password, setPassword] = useState("");
     const [confirmpassword, setconfirmpassword] = useState("");
     const hasMinLength = password.length >= 8;
@@ -87,8 +87,8 @@ function ThirdStep({ onSuccess, organisationID, onNext, onBack, data }: ThirdSte
         if (data) {
             console.log(data)
             form.setFieldsValue({
-                first_name: data?.first_name ? data.first_name : 'random',
-                last_name: data?.last_name ? data.last_name : 'shit',
+                first_name: data?.first_name ?? '',
+                last_name: data?.last_name ?? '',
                 email_id: data?.email_id ? data.email_id : '',
                 mob_no: data?.phone_number ? data.phone_number : '',
 

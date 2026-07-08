@@ -1,20 +1,20 @@
 import { Button, Col, Form, Input, Progress, Row, Select } from 'antd'
 import './first-step.css'
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import type { OrgSignup } from '../../types/first-step-signup';
-import { createOrg } from './createOrganisation';
-import { updateOrg } from './updateOrganisation';
+import type { OrganisationData } from '../../types/common-api';
+import { useCreateOrg } from './createOrganisation';
+import { useUpdateOrg } from './updateOrganisation';
 
 type Props = {
-    data: any;
+    data: OrganisationData | null;
     onSuccess: (orgID: string) => void;
     OnNext: () => void;
 }
 
 function FirstStep({ data, onSuccess, OnNext }: Props) {
-    const [current, setCurrent] = useState(0);
-    const { mutate: createOrgFn, isPending: createOrgPending } = createOrg();
-    const { mutate: updateOrgFn, isPending: updateOrgPending } = updateOrg();
+    const { mutate: createOrgFn, isPending: createOrgPending } = useCreateOrg();
+    const { mutate: updateOrgFn, isPending: updateOrgPending } = useUpdateOrg();
     const [form] = Form.useForm<OrgSignup>();
     //console.log('get data', data)
     const OnFinish = (values: OrgSignup) => {

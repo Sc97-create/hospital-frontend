@@ -1,5 +1,5 @@
 .pharmacy-main-layout {
-    padding: 20px;
+    padding: var(--spacing-page);
     background: #f5f7fb;
     min-height: 100vh;
 }
@@ -9,28 +9,28 @@
 .notes-card {
     border-radius: 14px !important;
     border: 1px solid #ececec;
-    margin-bottom: 18px;
+    margin-bottom: var(--spacing-section);
 }
 
 .patient-name {
     margin: 0 !important;
-    font-size: 16px !important;
+    font-size: var(--text-md) !important;
 }
 
 .patient-subtext {
     color: #8c8c8c;
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 
 .info-label {
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: #8c8c8c;
     font-weight: 600;
 }
 
 .alert-card {
     border-radius: 12px;
-    margin-bottom: 14px;
+    margin-bottom: var(--space-3);
 }
 
 .interaction-alert {
@@ -50,23 +50,25 @@
 
 .table-title {
     margin: 0 !important;
-    font-size: 15px !important;
+    font-size: var(--text-md) !important;
 }
 
 .medicine-table .ant-table {
-    font-size: 13px;
+    font-size: var(--text-base);
 }
 
 .medicine-table .ant-table-thead>tr>th {
-    font-size: 11px;
-    color: #8c8c8c;
-    font-weight: 700;
-    background: #fafafa;
-    padding: 12px;
+    font-size: 12px !important;
+    color: #8c8c8c !important;
+    font-weight: 700 !important;
+    background: #fafafa !important;
+    padding: 12px 16px !important;
+    vertical-align: middle !important;
 }
 
 .medicine-table .ant-table-tbody>tr>td {
-    padding: 14px 12px;
+    padding: 12px 16px !important;
+    vertical-align: middle !important;
 }
 
 .medicine-info {
@@ -76,17 +78,17 @@
 }
 
 .medicine-name {
-    font-size: 14px;
+    font-size: var(--text-base);
     font-weight: 600;
 }
 
 .medicine-generic {
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: #8c8c8c;
 }
 
 .schedule-tag {
-    font-size: 10px;
+    font-size: var(--text-xs);
     border-radius: 6px;
     padding-inline: 6px;
 }
@@ -100,19 +102,24 @@
     align-items: center;
     justify-content: center;
     font-size: 12px;
+    margin: 0 auto;
 }
 
 .stock-status {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 8px;
+    font-size: var(--text-sm);
+    white-space: nowrap;
 }
 
 .stock-dot {
+    display: inline-block;
+    flex-shrink: 0;
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    margin-top: 1px;
 }
 
 .stock-status.success .stock-dot {
@@ -128,7 +135,7 @@
 }
 
 .dispense-btn {
-    font-size: 12px;
+    font-size: var(--text-sm);
     font-weight: 600;
 }
 
@@ -136,13 +143,14 @@
     width: 240px;
     margin-left: auto;
     margin-top: 18px;
+    padding-right: 4px;
 }
 
 .summary-row {
     display: flex;
     justify-content: space-between;
     margin-bottom: 8px;
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 
 .summary-row.total {

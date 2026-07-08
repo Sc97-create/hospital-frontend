@@ -37,10 +37,16 @@
     justify-content: flex-start;
     
 }
-.title-class h3{
-    font-size: 14px;
+.card-section-label {
+    font-size: var(--text-sm);
     color: #6B7280;
-    font-weight: bold;
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-2);
+}
+.list-item-title {
+    font-size: var(--text-sm);
+    color: #6B7280;
+    font-weight: var(--weight-semibold);
 }
 .load-more-button{
     align-items: center;
@@ -57,12 +63,6 @@
 .description-class .ant-badge.ant-badge-status .ant-badge-status-text{
     color: #6B7280;
 }
-h3 {
-    font-size: 14px;
-    font-style: 'Roboto';
-    color: #6B7280;
-    font-weight: bold;
-}
 
 .special-card {
     width: 300px;
@@ -78,6 +78,8 @@ h3 {
 }
 
 .special-card h2 {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
     color: #F9FAFB;
 }
 

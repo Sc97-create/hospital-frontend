@@ -15,7 +15,7 @@
     display: inline-block;
     margin-bottom: 8px;
     color: #6b7280;
-    font-size: 12px;
+    font-size: var(--text-xs);
     cursor: pointer;
 }
 
@@ -26,11 +26,42 @@
 
 .subtitle {
     color: #6b7280;
-    font-size: 14px;
+    font-size: var(--text-sm);
 }
 
 .ant-form-item {
     margin-bottom: 20px;
+}
+
+.supplier-card .supplier-form.ant-form-vertical .ant-form-item .ant-form-item-label {
+    padding-bottom: 2px !important;
+    margin-bottom: 0 !important;
+    overflow: visible;
+}
+
+.supplier-card .supplier-form .ant-form-item {
+    margin-bottom: var(--space-4) !important;
+}
+
+.supplier-card .supplier-form .ant-form-item-label > label {
+    margin-bottom: 0 !important;
+}
+
+.supplier-card .supplier-form .ant-form-item-control {
+    margin-top: 0 !important;
+}
+
+.supplier-card .supplier-form .ant-form-item-control-input {
+    min-height: unset !important;
+}
+
+.supplier-card .supplier-form .ant-form-item-row {
+    row-gap: 0;
+    gap: 0;
+}
+
+.supplier-card .ant-row {
+    gap: 0;
 }
 
 .form-actions {

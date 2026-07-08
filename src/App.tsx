@@ -1,4 +1,5 @@
 import './App.css'
+import { ConfigProvider } from 'antd'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Signup from './Signup'
 import Login from './authentication/Login'
@@ -11,14 +12,11 @@ import AddManualForm from './suppliers/add-manual-form'
 import Employees from './employees'
 import AddEmployee from './employees/add-employee/add-employee'
 import AuthGuard from './auth/authguard'
-import AddPermission from './employees/add-permissions/add-permission'
 import CreateBed from './patientmangement/bedarrangement/roomtype'
 import CreateRooms from './patientmangement/bedarrangement/rooms'
 import BedStep3 from './patientmangement/bedarrangement/beds'
 import FirstStep from './appointment-step/features/first-step-appointment'
 import SecondStep from './appointment-step/features/second-step-appointment'
-import ThirdStep from './signup-step/features/third-step/third-step'
-import PreviewAppointment from './appointment-step/features/third-step-appointment'
 import Appointment from './appointment-step/appointment'
 import PrescriptionDetails from './prescriptions/prescription-details'
 import AddPrescription from './prescriptions/add-prescription'
@@ -27,7 +25,16 @@ import GeneralInfo from './patientmangement/singlepatientdetail/patient-profile'
 function App() {
 
   return (
-    <>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#25D366',
+          colorPrimaryHover: '#20b858',
+          borderRadius: 8,
+          fontFamily: "'Roboto', sans-serif",
+        },
+      }}
+    >
       <div>
         <nav>
 
@@ -56,7 +63,7 @@ function App() {
           <Route path='/bed-arrangement/step-3' element={<BedStep3 />} />
         </Routes>
       </div>
-    </>
+    </ConfigProvider>
   )
 }
 

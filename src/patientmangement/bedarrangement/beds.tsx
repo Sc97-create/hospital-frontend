@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-    Layout, Card, Typography, Select, InputNumber, Checkbox, Form,
+    Layout, Card, Select, InputNumber, Form,
     Button, Table, Row, Col, Progress, Popconfirm,
-    message, Modal
+    Modal
 } from 'antd';
 import {
     AppstoreAddOutlined, ThunderboltOutlined
@@ -12,10 +12,8 @@ import Sidebar from '../../sidebar';
 import BedArrangementSteps from './bed-arrangement-steps';
 import './beds.css';
 import type { RoomData } from '../types/rooms';
-import type { GenerateBedModel, BedPreview, RoomBed, Beds, RoomsummaryResponse, RoomSummary } from '../types/beds';
-import { CreateBed, GenerateBeds, GetRoomSummaryByRoomType } from '../api/beds';
-
-const { Title } = Typography;
+import type { GenerateBedModel, BedPreview, Beds, RoomSummary } from '../types/beds';
+import { CreateBed, GenerateBeds } from '../api/beds';
 
 export default function BedStep3() {
     const navigate = useNavigate();
@@ -70,7 +68,6 @@ export default function BedStep3() {
     ];
 
     const [form] = Form.useForm();
-    const previewData = bedPreview.slice(0, 3);
 
     const [loading, setLoading] = useState(false);
 
@@ -85,7 +82,7 @@ export default function BedStep3() {
             const values = await form.validateFields();
             const payload: GenerateBedModel = {
                 beds_per_room: values.bedName, // Corresponds to beds per room
-                organisation_id: "de6b9b6e-9fda-49cb-8828-80310924e707",
+                organisation_id: localStorage.getItem("organisation_id") || "",
                 room_number: values.roomId, // Corresponds to selected array of room numbers
                 room_type_id: roomType?.data.room_type_id,
             };
@@ -124,7 +121,7 @@ export default function BedStep3() {
         try {
             setLoading(true);
             const payload: Beds = {
-                organisation_id: "de6b9b6e-9fda-49cb-8828-80310924e707",
+                organisation_id: localStorage.getItem("organisation_id") || "",
                 beds: bedPreview,
                 room_type_id: roomType?.data.room_type_id
 
@@ -152,13 +149,19 @@ export default function BedStep3() {
             <Modal
                 title="Configuration Saved"
                 open={isModalOpen}
-                onOk={() => {
-                    handleOk();
-                    navigate('/bed-arrangement');
-                }}
                 onCancel={handleCancel}
-                okText="Done"
-                cancelButtonProps={{ style: { display: 'none' } }}
+                footer={[
+                    <Button
+                        key="done"
+                        type="primary"
+                        onClick={() => {
+                            handleOk();
+                            navigate('/bed-arrangement');
+                        }}
+                    >
+                        Done
+                    </Button>,
+                ]}
             >
                 <p>Bed configuration has been completed successfully.</p>
             </Modal>
@@ -236,6 +239,7 @@ export default function BedStep3() {
                                 dataSource={bedPreview.slice(0, 3)}
                                 rowKey="key"
                                 pagination={false}
+                                scroll={{ x: 'max-content' }}
                                 className="custom-table-step3"
                             />
                             {bedPreview.length > 3 && (

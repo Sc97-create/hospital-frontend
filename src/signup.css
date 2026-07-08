@@ -24,7 +24,7 @@
 .app-title {
 
     color: #F9FAFB;
-    font-size: 16px;
+    font-size: var(--text-md);
     margin-top: 10px;
 
 }
@@ -57,7 +57,7 @@
 
 .app-title {
     margin: 0;
-    font-size: 16px;
+    font-size: var(--text-md);
     font-weight: 600;
 }
 

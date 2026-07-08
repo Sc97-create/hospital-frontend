@@ -1,67 +1,72 @@
-import { Card, Col, DatePicker, Form, Input, Layout, Row, Select, Switch, type DatePickerProps, Modal, message } from "antd"
+import { Card, Col, DatePicker, Form, Input, Layout, Row, Select, type DatePickerProps, Modal, message } from "antd"
 import './second-step-appointment.css'
-import type { RoomType, RoomTypeArr } from "../../patientmangement/types/roomtype";
+import type { RoomType } from "../../patientmangement/types/roomtype";
 import { useState } from "react";
-import type { RoomData, RoomDataArr } from "../../patientmangement/types/rooms";
-import type { Beddata, BedModel, RoomBed } from "../../patientmangement/types/beds";
+import type { RoomData } from "../../patientmangement/types/rooms";
+import type { BedModel } from "../../patientmangement/types/beds";
 import { GetAvailableRooms } from "../../patientmangement/api/rooms";
 import { GetAvailableBeds } from "../../patientmangement/api/beds";
 import { GetRoomTypeByOrganisationID } from "../../patientmangement/api/roomtype";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { createBedallotment } from "../api/second-step";
-import type { bedAllotment } from "../types/second-step.appointment";
-import dayjs from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 
 import { Button } from "antd"
 
 const { Option } = Select;
 
+interface SecondStepFormValues {
+    room_type: string;
+    room_number: string;
+    bed_number: string;
+    admitted_at?: Dayjs;
+    assigned_nurse: string;
+    bed_charges: string;
+    discharged_at?: Dayjs;
+}
+
 function SecondStep() {
     const { patientID } = useParams<{ patientID: string }>();
     const navigate = useNavigate();
 
-    const [form] = Form.useForm();
+    const [form] = Form.useForm<SecondStepFormValues>();
     const [modal, contextHolder] = Modal.useModal();
     const [roomtype, setRoomType] = useState<RoomType[]>();
     const [rooms, setRooms] = useState<RoomData[]>();
     const [beds, setBeds] = useState<BedModel[]>();
-    const [bedalloted, setbedalloted] = useState<bedAllotment>();
     const [selectedRoomId, setSelectedRoomId] = useState<string | "">("");
     const [selectedBedId, setSelectedBedId] = useState<string | "">("");
     const [selectedRoomType, setSelectedRoomType] = useState<string | "">("");
     //const [charges, setcharges] = useState<string>("0");
 
+    const organisationId = localStorage.getItem("organisation_id") || "";
+
     const getAllRooms = async () => {
-        const response = await GetAvailableRooms("dce26168-eb8d-4723-a21e-2c33ad3ce39c", "10", "0");
+        const response = await GetAvailableRooms(organisationId, "10", "0");
         setRooms(response.data);
     }
     const getAllbeds = async () => {
-        const response = await GetAvailableBeds("dce26168-eb8d-4723-a21e-2c33ad3ce39c", "10", "0", selectedRoomId);
+        const response = await GetAvailableBeds(organisationId, "10", "0", selectedRoomId);
         setBeds(response.data);
     }
     const getAllRoomTypes = async () => {
-        const response = await GetRoomTypeByOrganisationID("dce26168-eb8d-4723-a21e-2c33ad3ce39c");
+        const response = await GetRoomTypeByOrganisationID(organisationId);
         setRoomType(response.data);
     }
-    const createBedAllotment = async (values: any) => {
-        const payload: bedAllotment = {
-            patient_id: patientID ? patientID : "",
-            room_id: selectedRoomId,
-            bed_id: selectedBedId,
-            room_type: selectedRoomType,
-            organisation_id: "dce26168-eb8d-4723-a21e-2c33ad3ce39c",
-            appointment_id: "",
-            charges: values.bed_charges,
-            dischargeat: new Date()
-        }
-        const response = await createBedallotment(payload);
-        setbedalloted(response.data);
-    }
 
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = async (values: SecondStepFormValues) => {
         try {
             if (selectedRoomId || selectedBedId) {
-                await createBedallotment(values);
+                await createBedallotment({
+                    patient_id: patientID ?? "",
+                    room_id: selectedRoomId,
+                    bed_id: selectedBedId,
+                    room_type: selectedRoomType,
+                    organisation_id: organisationId,
+                    appointment_id: "",
+                    charges: values.bed_charges,
+                    dischargeat: new Date()
+                });
             }
             message.success('Appointment created successfully!');
             navigate(`/patients`);
@@ -91,12 +96,12 @@ function SecondStep() {
     }
 
 
-    const disabledDate = (current: any) => {
+    const disabledDate = (current: Dayjs) => {
         // Can not select days before today
         return current && current < dayjs().startOf('day');
     };
 
-    const onChange: DatePickerProps['onChange'] = (date, dateString) => {
+    const onChange: DatePickerProps['onChange'] = (date) => {
         if (!date) return;
 
         // Get selected date
@@ -148,7 +153,7 @@ function SecondStep() {
                                         const selectedType = roomtype?.find(rt => rt.id === value);
                                         setSelectedRoomType(value);
                                         if (selectedType) {
-                                            form.setFieldsValue({ bed_charges: selectedType.base_price });
+                                            form.setFieldsValue({ bed_charges: String(selectedType.base_price) });
                                         }
                                     }}
                                 >
@@ -275,14 +280,7 @@ function SecondStep() {
                 <Button
                     type="primary"
                     onClick={form.submit}
-
-                    // disabled={form.getFieldsError().length > 0}
-                    style={{
-                        borderRadius: 8,
-                        backgroundColor: "#25D366",
-                        width: 80,
-                        fontWeight: "600",
-                    }}
+                    style={{ borderRadius: 8, minWidth: 100, fontWeight: 600 }}
                 >
                     Submit
                 </Button>

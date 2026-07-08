@@ -60,11 +60,7 @@
 }
 
 .search-input1 .ant-input {
-    font-family: 'Roboto';
-}
-
-.search-input1 .ant-input {
-    font-size: 14px;
+    font-size: var(--text-base);
 }
 
 .search-input1 .ant-input-affix-wrapper {
@@ -84,6 +80,7 @@
 
 .column-layout {
     color: #1F2937;
+    font-size: 12px;
     font-weight: 600;
 }
 
@@ -104,7 +101,7 @@
 }
 
 .tag-layout {
-    font-size: 14px !important;
+    font-size: var(--text-sm) !important;
     padding: 4px 12px !important;
     border-radius: 6px !important;
     text-transform: capitalize;
@@ -140,13 +137,14 @@
     color: #6B7280;
 }
 
-.pagination-tab h3 {
+.pagination-tab .count-label {
     width: 150px;
     height: 30px;
     background-color: #6B7280;
-    font-size: 14px;
+    font-size: var(--text-sm);
     text-align: center;
     padding-top: 8px;
     border-radius: 8px;
     color: #F5F5F5;
+    font-weight: var(--weight-semibold);
 }

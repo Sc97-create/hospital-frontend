@@ -1,14 +1,6 @@
-import { Col, Dropdown, Form, Input, Row, Select, Space, Tag, Tooltip, Card, AutoComplete } from "antd";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import {
-    DownOutlined,
-    SearchOutlined,
-} from '@ant-design/icons'
+import { Col, Form, Input, Row, Select, Card } from "antd";
 import './first-step-appointment.css'
 import type { PersonalInfo } from "../types/first-step-appointment";
-import { GetDepartments } from "../../shared/api/shared-api";
-import type { Department } from "../../shared/types/share-type";
-const { Option } = Select;
 const handleChange = (value: string) => {
     console.log(`selected ${value}`);
 };
@@ -18,8 +10,6 @@ const handleChange = (value: string) => {
 import { Button } from 'antd';
 import { CreateAppointment } from "../api/first-step-appointment";
 import { useNavigate } from "react-router-dom";
-import { GetDoctors } from "../../shared/api/shared-api";
-import { getDepartments } from "../../shared/shared";
 
 export interface FirstStepRef {
     validate: () => Promise<PersonalInfo>;
@@ -31,12 +21,6 @@ function FirstStep() {
 
     const [form] = Form.useForm<PersonalInfo>();
     const navigate = useNavigate();
-    const [SymInput, setSympInput] = useState('');
-    const [showSympAll, setSympShowAll] = useState(false);
-    const [symptomtags, setSymptomTags] = useState<string[]>([])
-    const [doctors, setDoctors] = useState<string>("");
-    const [options, setOptions] = useState([]);
-    const [loading, setLoading] = useState(false);
 
     
     const handleSubmit = async () => {
@@ -44,7 +28,7 @@ function FirstStep() {
             const values = await form.validateFields();
             const data = {
                 ...values,
-                organisation_id: localStorage.getItem("organisation_id") || "4c02d9f5-7388-4382-b2c7-aa3fe3852625",
+                organisation_id: localStorage.getItem("organisation_id") || "",
                 user_id: localStorage.getItem("user_id") || ""
             };
             const response = await CreateAppointment(data);
@@ -53,10 +37,10 @@ function FirstStep() {
                 if (typeof response.data === 'string') {
                     id = response.data;
                 } else {
-                    id = response.data.patient_id || response.data.id;
+                    id = response.data.patient_id || response.data.id || "";
                 }
-            } else if ((response as any)?.patient_id) {
-                id = (response as any).patient_id;
+            } else if (response?.patient_id) {
+                id = response.patient_id;
             }
             if (id) {
                 navigate(`/patients`);
@@ -71,7 +55,7 @@ function FirstStep() {
 
     //const displayCondTags = showCond ? conditionTags : conditionTags.slice(0, 2);
     return (
-        <>
+        <div className="appointment-form-container">
             <Card className="firststepcard">
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div>
@@ -85,18 +69,27 @@ function FirstStep() {
                 <Form
                     layout='vertical'
                     form={form}
+                    className="patient-details-form"
                 >
                     <Row gutter={[16, 0]} >
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Name" name="name" >
-                                <Input placeholder="what we call you" className='input-form-layout' />
+                            <Form.Item
+                                label="Name"
+                                name="name"
+                                rules={[{ required: true, message: 'Patient name is required' }]}
+                            >
+                                <Input placeholder="Full name" className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Blood Group" name="blood_group">
+                            <Form.Item
+                                label="Blood Group"
+                                name="blood_group"
+                                rules={[{ required: true, message: 'Please select a blood group' }]}
+                            >
                                 <Select
                                     className='dropdown-input-class'
-                                    placeholder='select your blood group'
+                                    placeholder='Select blood group'
                                     options={[
                                         { value: 'A+', label: 'A+' },
                                         { value: 'A-', label: 'A-' },
@@ -111,43 +104,74 @@ function FirstStep() {
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Age" name="age">
-                                <Input type="number" placeholder="are you 21?" className='input-form-layout' />
+                            <Form.Item
+                                label="Age"
+                                name="age"
+                                rules={[
+                                    { required: true, message: 'Age is required' },
+                                    { type: 'number', min: 0, max: 150, message: 'Enter a valid age (0–150)', transform: (v) => Number(v) },
+                                ]}
+                            >
+                                <Input type="number" placeholder="Age in years" className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label='Phone number' name="mobile_number">
-                                <Input type='tel' placeholder='we are trying to reach you' maxLength={10} className='input-form-layout' />
+                            <Form.Item
+                                label='Phone Number'
+                                name="mobile_number"
+                                rules={[
+                                    { required: true, message: 'Phone number is required' },
+                                    { pattern: /^\d{10}$/, message: 'Enter a valid 10-digit phone number' },
+                                ]}
+                            >
+                                <Input type='tel' placeholder='10-digit mobile number' maxLength={10} className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label='Gender' name="gender" >
+                            <Form.Item
+                                label='Gender'
+                                name="gender"
+                                rules={[{ required: true, message: 'Please select a gender' }]}
+                            >
                                 <Select
                                     className='dropdown-input-class'
                                     onChange={handleChange}
-                                    placeholder='its upto you'
+                                    placeholder='Select gender'
                                     options={[
                                         { value: 'female', label: 'Female' },
                                         { value: 'male', label: 'Male' },
-                                        { value: 'not prefer to say', label: 'Not Prefer To Say' },
-
+                                        { value: 'not prefer to say', label: 'Prefer not to say' },
                                     ]}
                                 />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label='Email ID' name="email_id">
-                                <Input placeholder='we want to notify you' type='email' className='input-form-layout' />
+                            <Form.Item
+                                label='Email ID'
+                                name="email_id"
+                                rules={[{ type: 'email', message: 'Enter a valid email address' }]}
+                            >
+                                <Input placeholder='Email address (optional)' type='email' className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Weight" name="weight">
-                                <Input type="number" placeholder="don't be overweight" className='input-form-layout' />
+                            <Form.Item
+                                label="Weight (kg)"
+                                name="weight"
+                                rules={[
+                                    { type: 'number', min: 0, max: 500, message: 'Enter a valid weight', transform: (v) => Number(v) },
+                                ]}
+                            >
+                                <Input type="number" placeholder="Weight in kg (optional)" className='input-form-layout' />
                             </Form.Item>
                         </Col>
                         <Col xs={24} sm={12}>
-                            <Form.Item label="Address" name="address">
-                                <Input placeholder="where do you live?" className='input-form-layout' />
+                            <Form.Item
+                                label="Address"
+                                name="address"
+                                rules={[{ required: true, message: 'Address is required' }]}
+                            >
+                                <Input placeholder="Street / locality" className='input-form-layout' />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -158,17 +182,12 @@ function FirstStep() {
                 <Button
                     type="primary"
                     onClick={handleSubmit}
-                    style={{
-                        borderRadius: 8,
-                        backgroundColor: "#25D366",
-                        width: 80,
-                        fontWeight: "600",
-                    }}
+                    style={{ borderRadius: 8, minWidth: 100, fontWeight: 600 }}
                 >
                     Submit
                 </Button>
             </div>
-        </>
+        </div>
     )
 
 }

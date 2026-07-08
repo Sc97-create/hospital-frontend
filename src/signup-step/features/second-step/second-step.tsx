@@ -13,10 +13,11 @@ import {
 import './second-step.css'
 import { useSecondSignup } from "./useSecondStepSignup";
 import type { SecondSignupPayload } from "../../types/second-step-signup";
-import { useEffect, useState } from "react";
+import type { OrganisationData } from "../../types/common-api";
+import { useEffect } from "react";
 
 interface SecondStepProps {
-  data: any
+  data: OrganisationData | null;
   organisationID: string;
   OnUpdate(): void
   onNext: () => void;
@@ -28,8 +29,6 @@ const { Option } = Select;
 function SecondStep({ data, OnUpdate, organisationID, onNext, onBack }: SecondStepProps) {
   const { mutate, isPending } = useSecondSignup();
   const [form] = Form.useForm<SecondSignupPayload>();
-  const [auditLogs, setAuditLogs] = useState(true);
-  const [emergencyAccess, setEmergencyAccess] = useState(false);
 
   useEffect(() => {
     if (data) {

@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
-    Typography, Steps, Card, Input, Row, Col, Button,
-    Select, Progress, Table, Layout, Tag, InputNumber, Form,
+    Card, Input, Row, Col, Button,
+    Progress, Layout, InputNumber, Form,
     message
 } from 'antd';
 import {
-    LockOutlined, DownloadOutlined, DeleteOutlined,
+    LockOutlined,
     ArrowLeftOutlined, InfoCircleFilled
 } from '@ant-design/icons';
 import Sidebar from '../../sidebar';
 import './rooms.css';
 import BedArrangementSteps from './bed-arrangement-steps';
 import { useNavigate, useLocation } from 'react-router-dom';
-import type { Rooms } from '../types/rooms';
+import type { RoomData, Rooms } from '../types/rooms';
+import type { RoomTypeResponse } from '../types/roomtype';
 import { CreateRoom } from '../api/rooms';
+
+interface CreateRoomsFormValues {
+    number_of_floors: number;
+    rooms_per_floor: number;
+    starting_per_floor: number;
+    prefix: string;
+}
 
 export default function CreateRooms() {
     const navigate = useNavigate();
@@ -21,9 +29,9 @@ export default function CreateRooms() {
     // const { id } = useParams<{ id: string }>();
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [roomArray, setRoomArray] = useState<any[]>([]);
+    const [roomArray, setRoomArray] = useState<RoomData[]>([]);
 
-    const roomtype = location.state?.roomtypedata;
+    const roomtype = location.state?.roomtypedata as RoomTypeResponse;
 
 
     useEffect(() => {
@@ -34,7 +42,7 @@ export default function CreateRooms() {
 
 
 
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: CreateRoomsFormValues) => {
         setLoading(true);
 
         const payload: Rooms = {
@@ -43,7 +51,7 @@ export default function CreateRooms() {
             room_per_floor: values.rooms_per_floor,
             starting_per_floor: values.starting_per_floor,
             prefix: values.prefix,
-            organisation_id: "de6b9b6e-9fda-49cb-8828-80310924e707",
+            organisation_id: localStorage.getItem("organisation_id") || "",
         };
 
         try {

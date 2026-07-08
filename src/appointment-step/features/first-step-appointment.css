@@ -24,15 +24,13 @@
     border-radius: 8px;
     border-color: #E5E7EB !important;
     box-shadow: none !important;
-    font-family: 'Roboto';
     color: #1F2937;
     align-items: center;
 }
 
 .input-form-layout::placeholder {
-    color: #7b7e85 ;
-    font-family: 'Roboto';
-    font-size: 14px ;
+    color: #7b7e85;
+    font-size: var(--text-sm);
 }
 
 .input-form-layout:hover {
@@ -41,10 +39,58 @@
 }
 
 .ant-form-item .ant-form-item-label>label {
-    font-family: 'Roboto';
-    font-size: 14px;
+    font-size: var(--text-sm);
     color: #6B7280;
     font-weight: 600;
+}
+
+/* ─── Patient details form spacing ─────────────────────────────────────── */
+
+.firststepcard .patient-details-form.ant-form-vertical .ant-form-item .ant-form-item-label {
+    padding-bottom: 2px !important;
+    margin-bottom: 0 !important;
+    overflow: visible;
+}
+
+.firststepcard .patient-details-form .ant-form-item {
+    margin-bottom: var(--space-4) !important;
+}
+
+.firststepcard .patient-details-form .ant-form-item-label > label {
+    color: #374151;
+    font-weight: var(--weight-semibold);
+    height: auto !important;
+    min-height: unset !important;
+    line-height: var(--leading-snug);
+    margin-bottom: 0 !important;
+}
+
+.firststepcard .patient-details-form .ant-form-item-control {
+    margin-top: 0 !important;
+}
+
+.firststepcard .patient-details-form .ant-form-item-control-input {
+    min-height: unset !important;
+}
+
+.firststepcard .patient-details-form .ant-form-item-control-input-content {
+    min-height: unset;
+}
+
+.firststepcard .patient-details-form .ant-form-item-row {
+    row-gap: 0;
+    gap: 0;
+}
+
+.firststepcard .patient-details-form .input-form-layout,
+.firststepcard .patient-details-form .ant-select .ant-select-selector {
+    background-color: #ffffff !important;
+}
+
+.firststepcard .patient-details-form .ant-select-single .ant-select-selector {
+    height: 40px !important;
+    display: flex;
+    align-items: center;
 }
 
 .gender-form-layout {
@@ -56,11 +102,10 @@
 .ant-select-single .ant-select-selector {
     color: #1F2937;
     background-color: #F9FAFB !important;
-    font-size: 14px !important;
+    font-size: var(--text-base) !important;
     border-color: #E5E7EB !important;
     box-shadow: none !important;
     border-radius: 8px !important;
-
 }
 
 .ant-select-single .ant-select-selector:hover {
@@ -103,35 +148,22 @@
     margin-bottom: 12px;
    
 }
-.step-button-wrapper {
-    max-width: 800px;
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 24px;
-}
 .submit-appointment-form{
-   
     display: flex;
     margin-left: 850px;
     width: 150px;
     height: 30px;
-    background-color: #25D366;
+    background-color: var(--color-primary);
     border-radius: 8px;
-    border-color: #25D366 !important;
+    border-color: var(--color-primary) !important;
     color: #F9FAFB;
     font-weight: 600;
-    font-family: 'Roboto';
-
 }
 .submit-appointment-form:hover{
-    background-color: #25D366 !important;
+    background-color: var(--color-primary-hover) !important;
     color: #F9FAFB !important;
 }
-.dropdown-input-class{
+.dropdown-input-class {
     width: 100% !important;
     height: 40px !important;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
 }

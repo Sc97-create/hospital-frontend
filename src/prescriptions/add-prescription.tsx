@@ -1,6 +1,6 @@
 // PrescriptionPage.tsx
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Layout,
     Form,
@@ -8,16 +8,21 @@ import {
     Col,
     Card,
     Input,
+    InputNumber,
     Select,
     Radio,
     Button,
     Typography,
     Space,
+    Divider,
     Tag,
     Pagination,
     Breadcrumb,
     AutoComplete,
     message,
+    Drawer,
+    Popconfirm,
+    Grid,
 } from "antd";
 
 import {
@@ -28,69 +33,57 @@ import {
     CheckOutlined,
     SearchOutlined,
     CalendarOutlined,
-    ClockCircleOutlined,
     HomeOutlined,
+    PlusOutlined,
 } from "@ant-design/icons";
 
 import "./add-prescription.css";
 import Sidebar from "../sidebar";
-import { Header } from "antd/es/layout/layout";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import type { CreatePrescription, medicineResponse, UpdatePrescriptionStatus } from "./types/prescriptionmodel";
+import type { CreatePrescription, Medicine, medicineResponse, SearchMedicineItem, UpdatePrescriptionStatus } from "./types/prescriptionmodel";
 import { CreatePrescriptionApi, FindOnePrescription, SearchMedicines, UpdatePrescription, UpdateStatus } from "./api/prescription";
+import type { DefaultOptionType } from "antd/es/select";
 
-const { Sider, Content } = Layout;
+const { Content } = Layout;
 const { Text, Title } = Typography;
 const { Option } = Select;
 
-const medicines = [
-    {
-        id: 1,
-        name: "Dolo 650",
-        dosage: "650mg",
-        duration: "5 Days",
-        food: "After Food",
-        type: "Tablet",
-        timing: "Morning 1 Afternoon 0 Night 1",
-    },
-    {
-        id: 2,
-        name: "Amoxicillin",
-        dosage: "500mg",
-        duration: "7 Days",
-        food: "Before Food",
-        type: "Capsule",
-        timing: "Morning 1 Afternoon 1 Night 1",
-    },
-    {
-        id: 3,
-        name: "B-Complex",
-        dosage: "2ml",
-        duration: "3 Days",
-        food: "Doesn't Matter",
-        type: "Injection",
-        timing: "Morning 0 Afternoon 0 Night 1",
-    },
-];
+interface MedicineOption extends DefaultOptionType {
+    medicine: SearchMedicineItem;
+}
+
+interface PrescriptionFormValues {
+    medicine: string;
+    medicine_id: string;
+    morning: string | number;
+    afternoon: string | number;
+    night: string | number;
+    dosage: string;
+    duration: string | number;
+    duration_type: string;
+    food_instruction: string;
+    medicine_type: string;
+}
 
 function AddPrescription() {
     const params = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [searchValue, setSearchValue] = useState('');
     const [findonePrescriptionData, setFindOnePrescriptionData] = useState<medicineResponse[]>()
     const [prescriptionID, setPrescriptionID] = useState<string>('')
     const [currentPage, setCurrentPage] = useState(1);
     const [totalMedicines, setTotalMedicines] = useState(0);
     const pageSize = 3;
-    // const [medicineOptions, setMedicineOptions] = useState<any[]>([]);
 
     const [form] = Form.useForm();
 
-    const [medicineOptions, setMedicineOptions] = useState<any[]>([]);
+    const [medicineOptions, setMedicineOptions] = useState<MedicineOption[]>([]);
 
-    const [medicines, setMedicines] = useState<any[]>([]);
+    const [medicines] = useState<Medicine[]>([]);
     const [created_at, setCreatedAt] = useState<string>();
     const [isSent, setIsSent] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const screens = Grid.useBreakpoint();
+    const isMobile = !screens.md;
     const handleUpdateStatus = async (payload: UpdatePrescriptionStatus) => {
         const response = await UpdateStatus(payload);
         if (response.code === "200") {
@@ -108,7 +101,7 @@ function AddPrescription() {
         }
         try {
             const response = await SearchMedicines(value);
-            const formatted = response.data.map((item: any) => ({
+            const formatted = response.data.map((item: SearchMedicineItem) => ({
                 value: item.name,
                 label: (
                     <div className="medicine-option">
@@ -136,7 +129,7 @@ function AddPrescription() {
         setCreatedAt(findoneesponse.data.created_at.toString());
         setCurrentPage(page);
     }
-    const handleFinalize = async (values: any) => {
+    const handleFinalize = async (values: PrescriptionFormValues) => {
         // 1. Format the new medicine from the current form values
         const newMedicine = {
             medicine_id: values.medicine_id,
@@ -156,8 +149,8 @@ function AddPrescription() {
 
         const finalPayload: CreatePrescription = {
             patient_id: params.id || "",
-            organisation_id: "4c02d9f5-7388-4382-b2c7-aa3fe3852625",
-            prescribed_by: "55e59798-a5d2-4c93-86fb-387dd92a0c8c",
+            organisation_id: localStorage.getItem("organisation_id") || "",
+            prescribed_by: localStorage.getItem("user_id") || "",
             medicine_array: updatedMedicines,
             prescription_id: prescriptionID ? prescriptionID : "",
         };
@@ -167,21 +160,19 @@ function AddPrescription() {
                 const response = await CreatePrescriptionApi(finalPayload);
                 if (response.code === "200") {
                     message.success("Prescription updated successfully!");
-                    // setMedicines(updatedMedicines); // Update the list on the right  
                     findonePresc(response.data.id, currentPage)
                     setPrescriptionID(response.data.id)
                     form.resetFields();
-                    // Clear the form for the next entry
+                    setDrawerOpen(false);
                 }
             } else {
                 const response = await UpdatePrescription(finalPayload);
                 if (response.code === "200") {
                     message.success("Prescription updated successfully!");
-                    // setMedicines(updatedMedicines); // Update the list on the right  
                     findonePresc(response.data.id, currentPage)
                     setPrescriptionID(response.data.id)
                     form.resetFields();
-                    // Clear the form for the next entry
+                    setDrawerOpen(false);
                 }
             }
         } catch (err) {
@@ -189,6 +180,134 @@ function AddPrescription() {
             message.error("Failed to update prescription");
         }
     }
+
+    const medicineForm = (
+        <Form
+            form={form}
+            layout="vertical"
+            className="medicine-form"
+            onFinish={handleFinalize}
+        >
+            <Form.Item
+                label="Search Medicine"
+                name="medicine"
+                className="search-medicine-item"
+                rules={[{ required: true, message: 'Please search medicine' }]}
+                required
+            >
+                <AutoComplete
+                    className="medicine-search"
+                    options={medicineOptions}
+                    onSearch={searchMedicine}
+                    onSelect={(value, option) => {
+                        const med = (option as MedicineOption).medicine;
+                        form.setFieldsValue({
+                            medicine: value,
+                            medicine_id: med.id,
+                            dosage: med.strength,
+                            medicine_type: med.form,
+                        });
+                    }}
+                >
+                    <Input
+                        prefix={<SearchOutlined />}
+                        placeholder="Search medicine..."
+                    />
+                </AutoComplete>
+            </Form.Item>
+
+            <div className="medicine-form-section">
+            <Form.Item
+                label="Dosage per day"
+                className="frequency-section"
+            >
+                <Row gutter={8} className="frequency-row" wrap={false}>
+                    <Col flex="1">
+                        <span className="freq-col-label">Morning</span>
+                        <Form.Item name="morning" initialValue={1} noStyle>
+                            <InputNumber min={0} max={9} controls={false} className="full-width freq-input" aria-label="Morning dose" />
+                        </Form.Item>
+                    </Col>
+                    <Col flex="1">
+                        <span className="freq-col-label">Afternoon</span>
+                        <Form.Item name="afternoon" initialValue={1} noStyle>
+                            <InputNumber min={0} max={9} controls={false} className="full-width freq-input" aria-label="Afternoon dose" />
+                        </Form.Item>
+                    </Col>
+                    <Col flex="1">
+                        <span className="freq-col-label">Night</span>
+                        <Form.Item name="night" initialValue={1} noStyle>
+                            <InputNumber min={0} max={9} controls={false} className="full-width freq-input" aria-label="Night dose" />
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Form.Item>
+
+            <Row gutter={8} className="details-row" wrap={false}>
+                <Col flex="1">
+                    <Form.Item label="Dosage" name="dosage">
+                        <Input
+                            readOnly
+                            placeholder="Auto-filled"
+                            className="read-only-input full-width"
+                        />
+                    </Form.Item>
+                </Col>
+                <Col flex="1">
+                    <Form.Item label="Medicine Type" name="medicine_type">
+                        <Input
+                            readOnly
+                            placeholder="Auto-filled"
+                            className="read-only-input full-width"
+                        />
+                    </Form.Item>
+                </Col>
+            </Row>
+
+            </div>
+
+            <Form.Item label="Duration" className="duration-field">
+                <Row gutter={8} className="duration-row" wrap={false}>
+                    <Col flex="0 0 96px">
+                        <Form.Item name="duration" initialValue={1} noStyle>
+                            <InputNumber min={1} max={365} controls={false} placeholder="1" className="full-width duration-input" />
+                        </Form.Item>
+                    </Col>
+                    <Col flex="1">
+                        <Form.Item name="duration_type" initialValue="Days" noStyle>
+                            <Select className="full-width duration-select">
+                                <Option value="Days">Days</Option>
+                                <Option value="Weeks">Weeks</Option>
+                                <Option value="Months">Months</Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Form.Item>
+
+            <Divider className="form-divider" />
+
+            <Form.Item
+                label="Food Instruction"
+                name="food_instruction"
+                initialValue="after"
+            >
+                <Radio.Group className="food-radio">
+                    <Radio value="before">Before Food</Radio>
+                    <Radio value="after">After Food</Radio>
+                    <Radio value="any">Doesn't Matter</Radio>
+                </Radio.Group>
+            </Form.Item>
+
+            <Form.Item name="medicine_id" hidden>
+                <Input />
+            </Form.Item>
+
+            <Button type="primary" size="large" block className="add-btn" htmlType="submit">
+                Add Medicine
+            </Button>
+        </Form>
+    );
 
     return (
         <Layout>
@@ -206,203 +325,29 @@ function AddPrescription() {
                     </Breadcrumb>
                 </div>
 
-
                 <Layout className="prescription-layout">
-                    {/* LEFT PANEL - Form */}
-                    <Sider width={420} className="prescription-sidebar" breakpoint="lg" collapsedWidth="0" trigger={null}>
-                        <Title level={4} className="sidebar-title">
-                            Add Medicine
-                        </Title>
+                    {!isMobile && (
+                        <div className="prescription-sidebar prescription-sidebar-desktop">
+                            <Title level={4} className="sidebar-title">
+                                Add Medicine
+                            </Title>
+                            {medicineForm}
+                        </div>
+                    )}
 
-                        <Form
-                            form={form}
-                            layout="vertical"
-                            className="medicine-form"
-                            onFinish={handleFinalize}
-                        >
-                            <Form.Item
-                                label="Search Medicine"
-                                name="medicine"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Please search medicine',
-                                    },
-                                ]}
+                    <Content className="prescription-content">
+                        <div className="prescription-content-body">
+                        {isMobile && (
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                size="large"
+                                className="open-medicine-drawer-btn"
+                                onClick={() => setDrawerOpen(true)}
                             >
-
-                                <AutoComplete
-                                    className="medicine-search"
-                                    options={medicineOptions}
-                                    onSearch={searchMedicine}
-                                    onSelect={(value, option: any) => {
-                                        const med = option.medicine;
-                                        form.setFieldsValue({
-                                            medicine: value,
-                                            medicine_id: med.id,
-                                            dosage: med.strength,
-                                            medicine_type: med.form,
-                                        });
-                                    }}
-                                >
-
-                                    <Input
-                                        prefix={<SearchOutlined />}
-                                        placeholder="Search medicine..."
-                                        size="large"
-                                    />
-
-                                </AutoComplete>
-
-                            </Form.Item>
-
-                            <Form.Item name="medicine_id" hidden>
-                                <Input />
-                            </Form.Item>
-
-
-
-                            {/* Timing */}
-                            <Row gutter={12}>
-                                <Col span={8}>
-                                    <Form.Item
-                                        label="Morning"
-                                        name="morning"
-                                        initialValue={1}
-                                    >
-
-                                        <Input
-                                            className="full-width"
-                                            size="large"
-                                            min={0}
-                                        />
-
-                                    </Form.Item>
-                                </Col>
-
-                                <Col span={8}>
-                                    <Form.Item
-                                        label="Afternoon"
-                                        name="afternoon"
-                                        initialValue={1}
-                                    >
-
-                                        <Input
-                                            className="full-width"
-                                            size="large"
-                                            min={0}
-                                        />
-
-                                    </Form.Item>
-                                </Col>
-
-                                <Col span={8}>
-                                    <Form.Item
-                                        label="Night"
-                                        name="night"
-                                        initialValue={1}
-                                    >
-
-                                        <Input
-                                            className="full-width"
-                                            size="large"
-                                            min={0}
-                                        />
-
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-
-                            <Row gutter={12}>
-                                <Col span={12}>
-                                    <Form.Item
-                                        label="Dosage"
-                                        name="dosage"
-                                    >
-                                        <Input
-                                            readOnly
-                                            placeholder="Dosage"
-                                            size="large"
-                                            className="read-only-input"
-                                        />
-                                    </Form.Item>
-                                </Col>
-
-                                <Col span={12}>
-                                    <Form.Item
-                                        label="Medicine Type"
-                                        name="medicine_type"
-                                    >
-                                        <Input
-                                            readOnly
-                                            placeholder="Type"
-                                            size="large"
-                                            className="read-only-input"
-                                        />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-
-                            {/* Duration */}
-
-                            <Row gutter={12}>
-                                <Col span={12}>
-                                    <Form.Item
-                                        label="Duration"
-                                        name="duration"
-                                        initialValue={1}
-                                    >
-                                        <Input
-                                            placeholder="5"
-                                            size="large"
-                                            className="top-spacing"
-                                        />
-                                    </Form.Item>
-                                </Col>
-
-                                <Col span={12}>
-                                    <Form.Item
-                                        label="Day"
-                                        name="duration_type"
-                                        initialValue="Days"
-                                    >
-                                        <Select
-                                            defaultValue="Days"
-                                            size="large"
-                                            className="full-width top-spacing"
-                                        >
-                                            <Option value="Days">Days</Option>
-                                            <Option value="Weeks">Weekly</Option>
-                                            <Option value="Months">Monthly</Option>
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-
-
-                            <Form.Item
-                                label="Food Instruction"
-                                name="food_instruction"
-                                initialValue="after"
-                            >
-                                <Radio.Group className="food-radio">
-                                    <Space>
-                                        <Radio value="before">Before Food</Radio>
-                                        <Radio value="after">After Food</Radio>
-                                        <Radio value="any">Doesn't Matter</Radio>
-                                    </Space>
-                                </Radio.Group>
-                            </Form.Item>
-
-                            {/* Add Button */}
-                            <Button type="primary" size="large" block className="add-btn" htmlType="submit">
                                 Add Medicine
                             </Button>
-                        </Form>
-                    </Sider>
-
-                    {/* RIGHT PANEL */}
-                    <Content className="prescription-content">
+                        )}
                         {/* Header */}
                         <Row justify="space-between" align="middle">
                             <Col>
@@ -490,14 +435,22 @@ function AddPrescription() {
                                                 >
                                                     Edit
                                                 </Button>
-                                                <Button
-                                                    danger
-                                                    type="text"
-                                                    icon={<DeleteOutlined />}
-                                                    className="action-btn delete-btn"
+                                                <Popconfirm
+                                                    title="Remove medicine?"
+                                                    description="This medicine will be removed from the prescription."
+                                                    okText="Delete"
+                                                    okType="danger"
+                                                    onConfirm={() => message.warning('Delete medicine API not yet connected')}
                                                 >
-                                                    Delete
-                                                </Button>
+                                                    <Button
+                                                        danger
+                                                        type="text"
+                                                        icon={<DeleteOutlined />}
+                                                        className="action-btn delete-btn"
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </Popconfirm>
                                             </Space>
                                         </Col>
                                     </Row>
@@ -518,6 +471,8 @@ function AddPrescription() {
                         </div>
 
 
+
+                        </div>
 
                         {/* Footer Buttons */}
                         <Row justify="end" gutter={8} className="footer-actions">
@@ -544,6 +499,20 @@ function AddPrescription() {
                             </Col>
                         </Row>
                     </Content>
+
+                    {isMobile && (
+                        <Drawer
+                            title="Add Medicine"
+                            placement="bottom"
+                            open={drawerOpen}
+                            onClose={() => setDrawerOpen(false)}
+                            height="min(90vh, 720px)"
+                            className="prescription-medicine-drawer"
+                            destroyOnClose={false}
+                        >
+                            {medicineForm}
+                        </Drawer>
+                    )}
                 </Layout>
             </Layout>
         </Layout >

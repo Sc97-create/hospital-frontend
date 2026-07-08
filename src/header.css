@@ -19,7 +19,7 @@
     justify-content: center;
     gap: 8px;
     h3{
-        font-size: 16px;
+        font-size: var(--text-base);
         margin-bottom: 0px;
     }
    
@@ -32,7 +32,6 @@
     flex-direction: column;
 }
 .ant-dropdown-menu .ant-dropdown-menu-title-content {
-    font-family: 'Roboto';
     font-size: 14px;
     font-weight: bold;
     color: #6B7280;

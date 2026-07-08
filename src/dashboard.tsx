@@ -1,22 +1,11 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Flex, Layout, Dropdown, Space, Avatar } from 'antd'
-import { Button, Menu, theme, Row, Col, Card, List, Skeleton,Badge } from 'antd';
+import { Flex, Layout, Avatar } from 'antd'
+import { Button, Row, Col, Card, List, Skeleton, Badge } from 'antd';
 import { useNavigate } from "react-router-dom";
-import {
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    UploadOutlined,
-    UserOutlined,
-    VideoCameraOutlined,
-    DownOutlined,
-} from '@ant-design/icons';
 import './dashboard.css'
 import { useState } from 'react';
 import Sidebar from './sidebar';
 import HeaderLayout from './header';
-const { Header, Footer, Sider, Content } = Layout
-const PageSize = 2
+const { Content } = Layout
 const patientData = [
     {
         'avatar': '/user.png',
@@ -61,29 +50,10 @@ const patientData = [
         'doctor':'rajesh sangolli'
     }
 ]
-const items = [
-    {
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                Logout
-            </a>
-        ),
-        key: '0'
-    },
-    {
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                Settings
-            </a>
-        ),
-        key: '1'
-    }
-]
 
 function Dashboard() {
     const navigate=useNavigate();
-    const [collapse, setCollapse] = useState(false)
-    const [hover, setHover] = useState(false);
+    const [collapse] = useState(false)
     const [visibleCount, setVisibleCount] = useState(2);
     const handleLoadMore = () => {
         setVisibleCount(prev => Math.min(prev + 2, patientData.length));
@@ -100,7 +70,7 @@ function Dashboard() {
                             <Content className='content-layout'>
                                 <Row gutter={[8, 8]} className={`first-row ${collapse ? 'collapsed-row' : ''}`} wrap={false}>
                                     <Col span={6}>
-                                        <h3>Current Patients</h3>
+                                        <p className="card-section-label">Current Patients</p>
 
                                         <Card className='first-card'>
                                             <List
@@ -114,7 +84,7 @@ function Dashboard() {
                                                             <List.Item.Meta
                                                                 avatar={<Avatar src={item.avatar} />}
                                                                 title={<div className='title-class'>
-                                                                    <h3>{item.title}</h3>
+                                                                    <span className="list-item-title">{item.title}</span>
                                                                 </div>}
                                                                 description={
                                                                     <div className='description-class'>
@@ -134,20 +104,20 @@ function Dashboard() {
                                         </Card>
                                     </Col>
                                     <Col span={6}>
-                                        <h3>Upcoming Patient</h3>
+                                        <p className="card-section-label">Upcoming Patient</p>
                                         <Card className='first-card'>
 
                                         </Card>
 
                                     </Col>
                                     <Col span={6}>
-                                        <h3>Total Patient</h3>
+                                        <p className="card-section-label">Total Patient</p>
                                         <Card className='first-card'>
 
                                         </Card>
                                     </Col>
                                     <Col span={6}>
-                                        <h3>Quick Add</h3>
+                                        <p className="card-section-label">Quick Add</p>
                                         <Card className='special-card'>
                                             <h2>Add New Patient</h2>
                                             <div className="add-img" onClick={() => navigate('/patients/add-patient')} style={{ cursor: 'pointer' }}>

@@ -42,8 +42,16 @@ export interface medicineResponse {
     food_instruction: string,
 }
 
+export interface SearchMedicineItem {
+    id: string;
+    name: string;
+    generic_name: string;
+    strength: string;
+    form: string;
+}
+
 export interface SearchMedicineResponse {
-    data: medicineResponse[];
+    data: SearchMedicineItem[];
     message: string;
 }
 export interface findOneResponse {
@@ -63,7 +71,7 @@ export interface PrescriptionListItem {
     prescribed_by: string;
     prescription_date: string;
     status: string;
-    medicines?: any[];
+    medicines?: medicineResponse[];
 }
 
 export interface FindManyResponse {
@@ -74,4 +82,9 @@ export interface FindManyResponse {
 }
 export interface UpdatePrescriptionStatus {
     prescription_id: string;
+}
+
+export interface UpdateStatusResponse {
+    code: string;
+    message: string;
 }

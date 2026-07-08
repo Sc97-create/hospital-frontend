@@ -1,4 +1,3 @@
-import React from 'react';
 import Sidebar from '../sidebar';
 import { Breadcrumb, Layout } from 'antd';
 import './appointment.css'

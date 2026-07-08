@@ -1,19 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { Form, message, Typography, Steps, Card, Input, Row, Col, Switch, Button, Layout, InputNumber } from 'antd';
+import { useEffect, useState } from 'react';
+import { Form, message, Typography, Card, Input, Row, Col, Switch, Button, Layout, InputNumber } from 'antd';
 import { EditOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import './roomtype.css';
 import Sidebar from '../../sidebar';
 import BedArrangementSteps from './bed-arrangement-steps';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CreateRoomType, GetRoomType } from '../api/roomtype';
-import { type RoomTypeResponse, type RoomType } from '../types/roomtype';
+import { type RoomType } from '../types/roomtype';
 
 const { Title, Text } = Typography;
+
+interface RoomTypeFormValues {
+    roomType: string;
+    basePrice: number;
+    isDefault?: boolean;
+}
 
 export default function CreateBed() {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [roomtypedata, setRoomTypeData] = useState<RoomTypeResponse>();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -27,14 +32,14 @@ export default function CreateBed() {
         }
     }, [location.state, form]);
 
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: RoomTypeFormValues) => {
         setLoading(true);
 
         const payload: RoomType = {
             id: "",
             name: values.roomType,
             is_default: values.isDefault || false,
-            organisation_id: "de6b9b6e-9fda-49cb-8828-80310924e707",
+            organisation_id: localStorage.getItem("organisation_id") || "",
             base_price: values.basePrice
         };
 
@@ -44,7 +49,6 @@ export default function CreateBed() {
             if (res.data["room_type_id"]) {
                 console.log("data", res.data["room_type_id"])
                 const getData = await GetRoomType(res.data["room_type_id"]);
-                setRoomTypeData(getData);
                 console.log("get data", getData)
                 navigate(`/bed-arrangement/step-2`, { state: { roomtypedata: getData } });
             }

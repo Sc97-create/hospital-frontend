@@ -1,14 +1,12 @@
 .inovice-upload-info {
-    font-family: "Roboto";
-    font-size: 14px;
+    font-size: var(--text-sm);
     color: #6B7280;
     font-weight: 600;
     margin-bottom: .2rem;
 }
 
 .invoice-upload-info-medium {
-    font-family: "Roboto";
-    font-size: 10px;
+    font-size: var(--text-xs);
     color: #6B7280;
     font-weight: 600;
     margin-bottom: .5rem;
@@ -25,8 +23,7 @@
     border-width: 10px;
 
     p {
-        font-size: 10px;
-        font-family: "Roboto";
+        font-size: var(--text-xs);
         font-weight: 600;
     }
 
@@ -49,13 +46,11 @@
 }
 
 .info-bar h4 {
-  font-size: 14px;
   margin: 0;
 }
 
 .info-bar p {
-  font-family: "Roboto";
-  font-size: 10px;
+  font-size: var(--text-xs);
   margin: 2px 0 0 0;
   color: #3f8f6b;
 }
@@ -76,12 +71,12 @@
 }
 
 .file-icon {
-  font-size: 16px;
-  color: #e74c3c; /* PDF red */
+  font-size: var(--text-md);
+  color: #e74c3c;
 }
 .status-text {
-  padding-left: 24px; /* icon (16px) + gap (8px) */
-  font-size: 10px;
+  padding-left: 24px;
+  font-size: var(--text-xs);
   margin: 2px 0 0 0;
   color: #3f8f6b;
 }
@@ -91,8 +86,8 @@
   align-items: center;
 }
 .status-icon {
-  font-size: 18px;
-  color: #52c41a; /* AntD success green */
+  font-size: var(--text-md);
+  color: #52c41a;
 }
 .medicine-table{
     margin-top: 1rem;

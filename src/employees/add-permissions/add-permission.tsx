@@ -1,6 +1,6 @@
 import { Modal, Card, Checkbox, Row, Col, Button, Spin } from "antd";
 import './add-permission.css'
-import { GetPermissions } from "../api/add-permissions";
+import { GetPermissions, type Permission, type PermissionModule } from "../api/add-permissions";
 import { useEffect, useState } from "react";
 
 
@@ -9,9 +9,13 @@ interface AddPermissionProps {
     onClose: () => void;
 }
 
+interface SelectedPermission {
+    module_id: string;
+    permission_id: string;
+}
 
 function AddPermission({ open, onClose }: AddPermissionProps) {
-    const [selectedPermissions, setSelectedPermissions] = useState<any[]>([]);
+    const [selectedPermissions, setSelectedPermissions] = useState<SelectedPermission[]>([]);
     const toTitleCase = (text: string) => {
         return text
             .replace(/_/g, " ")
@@ -40,14 +44,14 @@ function AddPermission({ open, onClose }: AddPermissionProps) {
         console.log("selectedPermissions", selectedPermissions)
 
     }
-    const [permissions, setPermissions] = useState<any[]>([]);
-    const [modules, SetModules] = useState<any[]>([])
+    const [permissions, setPermissions] = useState<Permission[]>([]);
+    const [modules, SetModules] = useState<PermissionModule[]>([])
     const [loading, setLoading] = useState(false)
     const fetchPermissions = async () => {
         setLoading(true)
         const data = await GetPermissions();
-        SetModules(data["modules"])
-        setPermissions(data["permissions"])
+        SetModules(data.modules)
+        setPermissions(data.permissions)
         setLoading(false)
     }
     const handleClose = () => {
@@ -55,33 +59,6 @@ function AddPermission({ open, onClose }: AddPermissionProps) {
         setPermissions([]);
         SetModules([]);
         onClose();
-    };
-    const handleSelectAll = (moduleId: string, checked: boolean) => {
-        setSelectedPermissions((prev) => {
-            const filtered = prev.filter(
-                (p) => String(p.module_id) !== String(moduleId)
-            );
-
-            if (!checked) return filtered;
-
-            const allPerms = permissions.map((perm) => ({
-                module_id: String(moduleId),
-                permission_id: String(perm.id)
-            }));
-
-            return [...filtered, ...allPerms];
-        });
-    };
-    const isAllSelected = (moduleId: string) => {
-        if (permissions.length === 0) return false;
-
-        return permissions.every((perm) =>
-            selectedPermissions.some(
-                (p) =>
-                    String(p.module_id) === String(moduleId) &&
-                    String(p.permission_id) === String(perm.id)
-            )
-        );
     };
     useEffect(() => {
         if (open) {
@@ -93,7 +70,7 @@ function AddPermission({ open, onClose }: AddPermissionProps) {
     return (
         <Modal
             open={open}
-            width={900}
+            width="min(900px, 95vw)"
             footer={null}
             onCancel={handleClose}
             title="Assign Permissions to Employee"
@@ -109,16 +86,15 @@ function AddPermission({ open, onClose }: AddPermissionProps) {
                             transform: "translate(-50%, -50%)",
                         }}
                     />
-                ) : modules.map((module: any) => (
+                ) : modules.map((module) => (
                     <Col span={12} key={module.id}>
                         <Card
                             size="small"
                             title={toTitleCase(module.name)}
-                            //extra={<Checkbox onChange={(e) => handleSelectAll(module.id, e.target.checked)}>Select All</Checkbox>}
                             style={{ borderRadius: 10 }}
                         >
                             <Row gutter={[8, 8]}>
-                                {permissions.map((perm: any) => (
+                                {permissions.map((perm) => (
                                     <Col span={12} key={perm.id}>
                                         <Checkbox value={`${module.id}_${perm.id}`} onChange={(e) => handlePermissionChange(module.id, perm.id, e.target.checked)}>
                                             {toTitleCase(perm.name)}

@@ -1,5 +1,5 @@
 import './Login.css'
-import { Row, Col, Card, Form, Input, Button, Checkbox, Space } from "antd";
+import { Row, Col, Card, Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import type { loginPayload } from './types/auth';
@@ -11,8 +11,9 @@ function Login() {
         try {
             const data = await LoginReq(values)
             console.log("data", data)
-            localStorage.setItem("access_token", data.accesstoken)
+            localStorage.setItem("access_token", data.token)
             localStorage.setItem("user_id", data.user_id)
+            localStorage.setItem("organisation_id", data.organisation_id)
 
             navigate('/dashboard')
         } catch (error) {
@@ -71,14 +72,7 @@ function Login() {
                                         </Button>
                                     </Form.Item>
                                     <Form.Item className="button-input">
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                width: "100%",   // 👈 important
-                                            }}
-                                        >
+                                        <div className="auth-links">
                                             <span>
                                                 Don't have Account? <Link to="/signup">Sign Up</Link>
                                             </span>

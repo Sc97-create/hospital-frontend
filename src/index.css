@@ -1,8 +1,62 @@
+/* ─── Type Scale ─────────────────────────────────────────────────────────────
+   Single source of truth for all font sizes and weights.
+   To change the scale app-wide, edit these variables only.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --font-family: 'Roboto', sans-serif;
+
+  /* ── Brand colours ──────────────────────────────────────────────────────── */
+  --color-primary:       #25D366;   /* primary CTA background / border         */
+  --color-primary-hover: #20b858;   /* primary CTA hover                       */
+  --color-primary-light: #E6F9EF;   /* tinted background on default btn hover  */
+  --color-primary-border:#B7E9D1;   /* border tint on default btn hover        */
+  --color-primary-text:  #25D366;   /* text / icon in default btn hover        */
+  --color-muted-text:    #667085;   /* secondary / helper / caption text       */
+
+  /* ── Spacing scale (8-point grid) ──────────────────────────────────────── */
+  --space-1:  4px;    /* micro: icon gaps, badge padding             */
+  --space-2:  8px;    /* compact: inline gaps, tight rows            */
+  --space-3:  12px;   /* small: form field gap, tag padding          */
+  --space-4:  16px;   /* base: standard gap, card inner padding      */
+  --space-5:  20px;   /* medium: section padding                     */
+  --space-6:  24px;   /* large: between cards                        */
+  --space-8:  32px;   /* xl: major section breaks                    */
+  --space-10: 40px;   /* 2xl: page-level separation                  */
+  --space-12: 48px;   /* 3xl: hero / top-of-page padding             */
+
+  /* ── Semantic spacing aliases ───────────────────────────────────────────── */
+  --spacing-page:    24px;   /* content area inset (all sides)          */
+  --spacing-section: 18px;   /* gap between cards / sections            */
+  --spacing-card:    20px;   /* card internal top/bottom padding        */
+
+  /* Sizes */
+  --text-xs:   11px;   /* timestamps, footnotes, badge text          */
+  --text-sm:   13px;   /* secondary / helper / caption text          */
+  --text-base: 15px;   /* body text, table cells, form inputs        */
+  --text-md:   17px;   /* card headings, sub-headers (h3)            */
+  --text-lg:   22px;   /* page / section headings (h2)               */
+  --text-xl:   28px;   /* page title (h1)                            */
+
+  /* Weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* Line heights */
+  --leading-tight:  1.2;
+  --leading-snug:   1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html, body {
@@ -19,17 +73,127 @@ html, body {
   padding: 0;
   overflow-x: hidden;
 }
+
+/* ─── HTML Heading Scale ─────────────────────────────────────────────────── */
+h1 { font-size: var(--text-xl);   font-weight: var(--weight-bold);     line-height: var(--leading-tight);  letter-spacing: -0.02em; }
+h2 { font-size: var(--text-lg);   font-weight: var(--weight-semibold); line-height: var(--leading-tight);  letter-spacing: -0.01em; }
+h3 { font-size: var(--text-md);   font-weight: var(--weight-semibold); line-height: var(--leading-snug); }
+h4 { font-size: var(--text-base); font-weight: var(--weight-semibold); line-height: var(--leading-normal); }
+p  { font-size: var(--text-base); font-weight: var(--weight-regular);  line-height: var(--leading-relaxed); color: #1d1d1f; }
+
+/* Secondary / helper text — single shared utility (replaces per-module .muted-text) */
+.muted-text {
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+  margin: 0;
+}
+
+/* Count badge beside pagination — not a semantic heading */
+.count-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-muted-text);
+  margin: 0;
+}
+
+/* ─── Ant Design Global Overrides ────────────────────────────────────────────
+   Controls all Ant Design component text sizes from this one block.
+   No individual CSS file needs to set font-size on Ant components.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Font family propagation — !important needed to beat Ant Design 5 CSS-in-JS injection */
+*,
+*::before,
+*::after,
 body,
 .ant-typography,
 .ant-card,
 .ant-tag,
 .ant-btn,
-.ant-input {
-  font-family: 'Roboto', sans-serif;
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select,
+.ant-select-selector,
+.ant-picker,
+.ant-modal,
+.ant-modal-content,
+.ant-drawer,
+.ant-form,
+.ant-form-item,
+.ant-table,
+.ant-table-thead,
+.ant-table-tbody,
+.ant-menu,
+.ant-menu-item,
+.ant-dropdown,
+.ant-dropdown-menu,
+.ant-pagination,
+.ant-tabs,
+.ant-breadcrumb,
+.ant-tooltip,
+.ant-popover,
+.ant-message,
+.ant-notification,
+.ant-badge,
+.ant-checkbox-wrapper,
+.ant-radio-wrapper {
+  font-family: var(--font-family) !important;
 }
 
+/* Tables */
+.ant-table                         { font-size: var(--text-base) !important; }
+.ant-table-thead > tr > th         { font-size: 12px !important; font-weight: var(--weight-semibold) !important; text-transform: uppercase; letter-spacing: 0.04em; }
+.ant-table-tbody > tr > td         { font-size: var(--text-base) !important; }
+
+/* Inputs & selects */
+.ant-input,
+.ant-input-affix-wrapper input     { font-size: var(--text-base) !important; }
+.ant-select-selector,
+.ant-select-selection-item         { font-size: var(--text-base) !important; }
+.ant-picker-input > input          { font-size: var(--text-base) !important; }
+
+/* Buttons */
+.ant-btn                           { font-size: var(--text-base) !important; }
+
+/* Tags */
+.ant-tag                           { font-size: var(--text-sm) !important; }
+
+/* Form labels */
+.ant-form-item-label > label       { font-size: var(--text-sm) !important; }
+.ant-form-item-explain             { font-size: var(--text-sm) !important; }
+
+/* Breadcrumb */
+.ant-breadcrumb                    { font-size: var(--text-sm) !important; }
+.ant-breadcrumb-link               { font-size: var(--text-sm) !important; }
+
+/* Pagination */
+.ant-pagination                    { font-size: var(--text-sm) !important; }
+.ant-pagination-total-text         { font-size: var(--text-sm) !important; }
+
+/* Sidebar navigation */
+.ant-menu-item > .ant-menu-title-content,
+.ant-menu-submenu-title            { font-size: 14px !important; }
+
+/* Dropdown menus */
+.ant-dropdown-menu-item            { font-size: 14px !important; }
+
+/* Modals & drawers */
+.ant-modal-title                   { font-size: var(--text-md) !important; font-weight: var(--weight-semibold) !important; }
+.ant-drawer-title                  { font-size: var(--text-md) !important; font-weight: var(--weight-semibold) !important; }
+
+/* Tabs */
+.ant-tabs-tab                      { font-size: var(--text-sm) !important; }
+.ant-tabs-tab-active               { font-weight: var(--weight-semibold) !important; }
+
+/* Ant Typography component */
+.ant-typography h1, h1.ant-typography { font-size: var(--text-xl)   !important; font-weight: var(--weight-bold) !important; }
+.ant-typography h2, h2.ant-typography { font-size: var(--text-lg)   !important; font-weight: var(--weight-semibold) !important; }
+.ant-typography h3, h3.ant-typography { font-size: var(--text-md)   !important; font-weight: var(--weight-semibold) !important; }
+.ant-typography h4, h4.ant-typography { font-size: var(--text-base) !important; font-weight: var(--weight-semibold) !important; }
+.ant-typography.ant-typography-secondary { font-size: var(--text-sm) !important; }
+
 .app-tag {
-    font-size: 13px !important;
+    font-size: var(--text-sm) !important;
     padding: 2px 12px !important;
     border-radius: 6px !important;
     text-transform: capitalize;
@@ -41,20 +205,49 @@ body,
     height: 28px !important;
 }
 
-/* Global CTA button overrides */
+/* Global CTA button overrides — single source of truth via CSS variables */
 .ant-btn-primary {
-  background-color: #25D366 !important;
-  border-color: #25D366 !important;
+  background-color: var(--color-primary) !important;
+  border-color:     var(--color-primary) !important;
 }
 
 .ant-btn-primary:not(:disabled):hover {
-  background-color: #20b858 !important;
-  border-color: #20b858 !important;
+  background-color: var(--color-primary-hover) !important;
+  border-color:     var(--color-primary-hover) !important;
 }
 
-/* Global default button hover overrides */
+/* Default button hover */
 .ant-btn:not(.ant-btn-primary):not(:disabled):hover {
-  color: #25D366 !important;
-  border-color: #B7E9D1 !important;
-  background-color: #E6F9EF !important;
+  color:            var(--color-primary-text)   !important;
+  border-color:     var(--color-primary-border) !important;
+  background-color: var(--color-primary-light)  !important;
+}
+
+/* ─── Global Spacing Utilities ───────────────────────────────────────────────
+   Enforces consistent breathing room across every content page.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Standard page content inset — override per-page if needed */
+.ant-layout-content {
+  padding: var(--spacing-page);
+}
+
+/* Cards stacked vertically get consistent gap between them */
+.ant-card + .ant-card {
+  margin-top: var(--spacing-section);
+}
+
+/* Breadcrumb top breathing room */
+.ant-breadcrumb {
+  padding: var(--space-3) var(--spacing-page) !important;
+}
+
+/* Form items vertical rhythm */
+.ant-form-item {
+  margin-bottom: var(--space-5) !important;
+}
+
+/* Row gutter fallback — Ant Design rows use the gutter prop for spacing */
+.ant-row {
+  gap: 0;
 }

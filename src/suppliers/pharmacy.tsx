@@ -1,182 +1,194 @@
-import { Breadcrumb, Button, Card, Col, Drawer, Input, Layout, Row, Tag, Typography } from "antd"
+import { Breadcrumb, Button, Input, Layout, Pagination, Table, Tag } from "antd"
+import type { TableColumnsType } from "antd"
 import Sidebar from "../sidebar"
-import Header from "../header"
 import './pharmacy.css'
-import { MedicineBoxOutlined, PlusCircleOutlined, PlusOutlined, SearchOutlined, ShopOutlined } from '@ant-design/icons'
+import { HomeOutlined, PlusCircleOutlined, SearchOutlined, ShopOutlined } from '@ant-design/icons'
 import { Content } from "antd/es/layout/layout"
-import { Outlet, useMatch, useNavigate, useParams } from "react-router-dom"
-import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useMemo, useState } from "react"
+
+interface Supplier {
+    id: string;
+    name: string;
+    location: string;
+    status: "active" | "closed";
+    orders: number;
+}
+
+interface SupplierRow extends Supplier {
+    key: string;
+}
+
+const suppliers: Supplier[] = [
+    {
+        id: "PL-9920-X",
+        name: "PharmaLink Distribution",
+        location: "New Jersey, USA",
+        status: "active",
+        orders: 12,
+    },
+    {
+        id: "GML-1044-A",
+        name: "Global Med Logics",
+        location: "Geneva, Switzerland",
+        status: "closed",
+        orders: 5,
+    },
+    {
+        id: "APX-5511-B",
+        name: "Apex Health Supplies",
+        location: "Local Warehouse",
+        status: "active",
+        orders: 24,
+    },
+    {
+        id: "CRYO-2234-L",
+        name: "CryoPharma Express",
+        location: "Toronto, Canada",
+        status: "closed",
+        orders: 8,
+    },
+    {
+        id: "MED-7788-Z",
+        name: "MediCore Supplies",
+        location: "Mumbai, India",
+        status: "active",
+        orders: 18,
+    },
+];
 
 function AddPharmacy() {
     const navigate = useNavigate()
-    const isAddOpen = useMatch("/pharmacy/add")
-    const [open, setOpen] = useState(false);
-    const { id } = useParams();
-    const showDrawer = () => {
-        setOpen(true);
-    };
-    const { Title, Text } = Typography;
+    const [page, setPage] = useState(1)
+    const pageSize = 10
+    const totalSuppliers = 124
 
-    interface Supplier {
-        id: string;
-        name: string;
-        location: string;
-        status: "active" | "closed";
-        orders: number;
-    }
+    const dataSource: SupplierRow[] = useMemo(
+        () => suppliers.map((supplier) => ({ ...supplier, key: supplier.id })),
+        []
+    )
 
-    const suppliers: Supplier[] = [
+    const columns: TableColumnsType<SupplierRow> = [
         {
-            id: "PL-9920-X",
-            name: "PharmaLink Distribution",
-            location: "New Jersey, USA",
-            status: "active",
-            orders: 12,
+            title: "Code",
+            dataIndex: "id",
+            className: "column-layout",
+            render: (id: string) => <span className="code-badge">{id}</span>,
         },
         {
-            id: "GML-1044-A",
-            name: "Global Med Logics",
-            location: "Geneva, Switzerland",
-            status: "closed",
-            orders: 5,
+            title: "Supplier Name",
+            dataIndex: "name",
+            className: "other-layout",
         },
         {
-            id: "APX-5511-B",
-            name: "Apex Health Supplies",
-            location: "Local Warehouse",
-            status: "active",
-            orders: 24,
+            title: "Location",
+            dataIndex: "location",
+            className: "other-layout",
         },
         {
-            id: "CRYO-2234-L",
-            name: "CryoPharma Express",
-            location: "Toronto, Canada",
-            status: "closed",
-            orders: 8,
+            title: "Active Contracts",
+            dataIndex: "orders",
+            className: "other-layout",
+            render: (orders: number) => `${orders} active orders`,
         },
         {
-            id: "MED-7788-Z",
-            name: "MediCore Supplies",
-            location: "Mumbai, India",
-            status: "active",
-            orders: 18,
-        }
-    ];
+            title: "Status",
+            dataIndex: "status",
+            align: "center",
+            render: (status: Supplier["status"]) => (
+                <Tag color={status === "active" ? "green" : "red"} bordered className="app-tag">
+                    {status === "active" ? "Active" : "Closed"}
+                </Tag>
+            ),
+        },
+        {
+            title: "Action",
+            key: "action",
+            align: "center",
+            render: (_, record) => (
+                <Button
+                    type="primary"
+                    size="small"
+                    className="fill-stock-btn"
+                    onClick={() => navigate(`/suppliers/${record.id}/fill-stock`)}
+                >
+                    Fill Stock
+                </Button>
+            ),
+        },
+    ]
 
-    const onClose = () => {
-        setOpen(false);
-    };
     return (
-        <>
+        <Layout>
+            <Sidebar />
             <Layout>
-                <Sidebar />
-                <Layout>
-                    <Header />
-                    <div className="breadcrumb-layout">
-                        <Breadcrumb >
-                            <Breadcrumb.Item>
+                <Breadcrumb
+                    className="breadcrumb-layout"
+                    items={[
+                        {
+                            href: "/dashboard",
+                            title: <HomeOutlined />,
+                        },
+                        {
+                            title: (
+                                <>
+                                    <ShopOutlined />
+                                    <span>Suppliers</span>
+                                </>
+                            ),
+                        },
+                    ]}
+                />
 
-                                Suppliers
-                            </Breadcrumb.Item>
-                            <Breadcrumb.Item>
-                                Suppliers List
-                            </Breadcrumb.Item>
-                        </Breadcrumb>
+                <Content className="main-layout">
+                    <div className="button-layout">
+                        <Button
+                            className="appointment-button"
+                            icon={<PlusCircleOutlined />}
+                            onClick={() => navigate("/suppliers/add")}
+                        >
+                            Add New Supplier
+                        </Button>
                     </div>
-                    <Content className="supplier-container">
 
-
-                        <div className="supplier-wrapper">
-
-                            {/* Header */}
-                            <div className="supplier-header">
-                                <div>
-                                    <Title level={3}>Supplier Selection</Title>
-                                    <Text className="subtitle">
-                                        Choose a registered supplier to begin your purchase entry or create a new partner profile for the pharmacy network.
-                                    </Text>
-                                </div>
-
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("add")}>
-                                    Add New Supplier
-                                </Button>
-                            </div>
-
-                            {/* Search + Filters */}
-                            <div className="search-bar">
-                                <Input
-                                    placeholder="Search by supplier name, license, or city..."
-                                    prefix={<SearchOutlined />}
-                                    className="search-input"
+                    <div className="search-layout">
+                        <Input
+                            placeholder="Search by supplier name, license, or city..."
+                            className="search-input1"
+                            suffix={
+                                <SearchOutlined
+                                    style={{ cursor: "pointer", width: "14px", height: "14px" }}
                                 />
+                            }
+                        />
+                    </div>
 
-                                <Button className="action-btn">Filters</Button>
-                                <Button className="action-btn">Sort</Button>
-                            </div>
+                    <div className="table-data">
+                        <Table<SupplierRow>
+                            columns={columns}
+                            dataSource={dataSource}
+                            pagination={false}
+                            scroll={{ x: "max-content", y: 400 }}
+                            showSorterTooltip={{ target: "sorter-icon" }}
+                        />
+                    </div>
 
-                            {/* Supplier Cards */}
-                            <div className="supplier-grid">
-                                {suppliers.map((supplier) => (
-                                    <Card key={supplier.id} className="supplier-card" hoverable>
-
-                                        {/* Header */}
-                                        <div className="card-header">
-                                            <Tag color={supplier.status === "active" ? "green" : "red"} className="app-tag">
-                                                {supplier.status === "active" ? "Active" : "Closed"}
-                                            </Tag>
-                                        </div>
-
-                                        {/* Body */}
-                                        <div className="card-body">
-                                            <Title level={5} className="supplier-title">
-                                                {supplier.name}
-                                            </Title>
-
-                                            <Text type="secondary" className="supplier-info">
-                                                ID: {supplier.id} | {supplier.location}
-                                            </Text>
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="card-footer">
-                                            <div className="contract-info">
-                                                <span className="contracts-label">Active Contracts</span>
-                                                <span className="contracts-value">
-                                                    {supplier.orders} active orders
-                                                </span>
-                                            </div>
-
-                                            <Button
-                                                type="primary"
-                                                size="small"
-                                                className="add-medicine-btn"
-                                                onClick={() => navigate(`/suppliers/${supplier.id}/add-medicines`)}
-                                            >
-                                                Add Medicines →
-                                            </Button>
-                                        </div>
-
-                                    </Card>
-
-                                ))}
-                            </div>
-
-
-
-                            {/* Load More */}
-                            <div className="load-more">
-                                <Button>Load More Suppliers</Button>
-                                <Text className="footer-text">
-                                    Showing 5 of 124 registered suppliers
-                                </Text>
-                            </div>
-
-                        </div>
-
-                    </Content>
-                </Layout>
+                    <div className="pagination-tab">
+                        <span className="count-label">
+                            Total Suppliers ({totalSuppliers})
+                        </span>
+                        <Pagination
+                            current={page}
+                            pageSize={pageSize}
+                            total={totalSuppliers}
+                            onChange={(nextPage) => setPage(nextPage)}
+                            showSizeChanger={false}
+                        />
+                    </div>
+                </Content>
             </Layout>
-        </>
+        </Layout>
     )
 }
+
 export default AddPharmacy
