@@ -21,6 +21,9 @@ import Appointment from './appointment-step/appointment'
 import PrescriptionDetails from './prescriptions/prescription-details'
 import AddPrescription from './prescriptions/add-prescription'
 import GeneralInfo from './patientmangement/singlepatientdetail/patient-profile'
+import AddAppointment from './patientmangement/patient-appointment/addAppointment'
+import AppointmentsPage from './patientmangement/patient-appointment/appointment-list'
+import AppointmentDetails from './patientmangement/patient-appointment/appointment-details'
 
 function App() {
 
@@ -56,11 +59,14 @@ function App() {
           <Route path='/employees' element={<AuthGuard> <Employees /> </AuthGuard>} />
           <Route path='/employees/add-employee' element={<AuthGuard><AddEmployee /></AuthGuard>} />
           <Route path='/prescription' element={<AuthGuard><PrescriptionDetails /> </AuthGuard>} />
-          <Route path='/prescription/add-prescription/:id' element={<AuthGuard><AddPrescription /></AuthGuard>} />
+          <Route path='/prescription/add-prescription/:appointmentID' element={<AuthGuard><AddPrescription /></AuthGuard>} />
           <Route path='/prescription/:id' element={<AuthGuard><PrescPreview /></AuthGuard>} />
           <Route path='/bed-arrangement' element={<CreateBed />} />
           <Route path='/bed-arrangement/step-2' element={<CreateRooms />} />
           <Route path='/bed-arrangement/step-3' element={<BedStep3 />} />
+          <Route path ='/patients/addappointment/:patientID' element={<AuthGuard><AddAppointment /></AuthGuard>} />
+          <Route path='/appointment/preview/:appointmentID' element={<AuthGuard><AppointmentDetails /></AuthGuard>} />
+          <Route path='/appointments'element={<AppointmentsPage/>}/>
         </Routes>
       </div>
     </ConfigProvider>

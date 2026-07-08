@@ -77,38 +77,32 @@ function PrescriptionList() {
             title: "Code",
             dataIndex: "code",
             key: "code",
-            className: "column-layout",
-            render: (text: string, record: PrescriptionListItem) => (
-                <span
-                    className="code-badge"
-                    onClick={() => navigate(`/prescription/${record.id}`)}
-                >
-                    {text}
-                </span>
+            render: (text: string) => (
+                <Tag color="yellow">{text}</Tag>
             ),
         },
         {
             title: "Doctor",
             dataIndex: "prescribed_by",
             key: "doctor",
-            className: "other-layout",
+            color: "#6B7280",
         },
         {
             title: "Issued On",
             dataIndex: "created_at",
             key: "created_at",
-            className: "other-layout",
-            render: (date: string) => new Date(date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
+            color: "#6B7280",
+            render: (date: string) => new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
             }),
         },
         {
             title: "Medicines",
             key: "medicines",
-            className: "other-layout",
-            render: (_: unknown, record: PrescriptionListItem) => {
+            color: "#6B7280",
+            render: (_: any, record: PrescriptionListItem) => {
                 const meds = record.medicines || [];
                 const firstMed = meds.length > 0 ? meds[0].medicine_name || "Unknown Medicine" : "No medicines";
                 const moreCount = meds.length > 1 ? meds.length - 1 : 0;
@@ -132,7 +126,7 @@ function PrescriptionList() {
             title: "Pharma Status",
             dataIndex: "status",
             key: "status",
-            align: "center" as const,
+            color: "#6B7280",
             render: (status: string) => (
                 <Tag color={getStatusColor(status)} bordered className="app-tag">
                     {status}

@@ -1,0 +1,71 @@
+.appointment-history-container {
+  padding: 24px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.appointment-history-header {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.appointment-filter {
+  background: #f5f7fb;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.appointment-filter .ant-segmented-item-selected {
+  background: #25d366 !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+}
+
+.appointment-filter .ant-segmented-item-selected * {
+  color: #ffffff !important;
+}
+
+.ant-table-wrapper {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ant-table-thead > tr > th {
+  background: #fafafa !important;
+  font-weight: 600;
+}
+
+.ant-tag {
+  min-width: 90px;
+  text-align: center;
+}
+.appointment-filter {
+  background: #f5f7fb;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.appointment-filter .ant-segmented-item {
+  padding: 0 20px;
+  font-size: 14px !important;
+  line-height: 34px;
+  min-height: 34px;
+}
+
+.appointment-filter .ant-segmented-item-label {
+  padding: 0;
+  font-size: 14px !important;
+  font-weight: 400;
+}
+
+.appointment-filter .ant-segmented-item-selected {
+  background: #25d366 !important;
+  color: #fff !important;
+  border-radius: 6px;
+}
+
+.appointment-filter .ant-segmented-item-selected .ant-segmented-item-label {
+  color: #fff !important;
+}

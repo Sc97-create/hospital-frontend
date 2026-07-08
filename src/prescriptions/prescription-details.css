@@ -94,10 +94,6 @@
     font-weight: 600;
 }
 
-.ant-table-thead > tr > th.column-layout {
-    color: #6B7280;
-    font-weight: 600;
-}
 
 .other-layout {
     color: #6B7280;
@@ -149,15 +145,12 @@
 
 .medicine-cell {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    justify-content: center; /* <- likely culprit */
 }
 
 .medicine-name {
-    font-size: var(--text-base);
-    text-decoration: underline;
-    cursor: pointer;
-    color: #1F2937;
+    width: 100%;
 }
 
 .more-tag {

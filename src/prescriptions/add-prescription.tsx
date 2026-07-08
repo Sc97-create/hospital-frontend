@@ -66,7 +66,7 @@ interface PrescriptionFormValues {
 }
 
 function AddPrescription() {
-    const params = useParams<{ id: string }>();
+    const params = useParams<{ appointmentID: string }>();
     const navigate = useNavigate();
     const [findonePrescriptionData, setFindOnePrescriptionData] = useState<medicineResponse[]>()
     const [prescriptionID, setPrescriptionID] = useState<string>('')
@@ -148,7 +148,7 @@ function AddPrescription() {
         const updatedMedicines = [...medicines, newMedicine];
 
         const finalPayload: CreatePrescription = {
-            patient_id: params.id || "",
+            appointment_id: params.appointmentID || "",
             organisation_id: localStorage.getItem("organisation_id") || "",
             prescribed_by: localStorage.getItem("user_id") || "",
             medicine_array: updatedMedicines,
@@ -491,7 +491,7 @@ function AddPrescription() {
                                     type="primary"
                                     icon={<CheckOutlined />}
                                     className="finalize-btn"
-                                    onClick={() => handleUpdateStatus({ prescription_id: prescriptionID })}
+                                    onClick={() => handleUpdateStatus({ prescription_id: prescriptionID, appointment_id: params.appointmentID ? params.appointmentID : "" })}
                                     disabled={isSent || !prescriptionID}
                                 >
                                     {isSent ? "Prescription Sent" : "Finalize Prescription"}

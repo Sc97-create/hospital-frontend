@@ -1,5 +1,5 @@
 export interface CreatePrescription {
-    patient_id: string;
+    appointment_id: string;
     organisation_id: string;
     prescribed_by: string;
     medicine_array: Medicine[];
@@ -82,9 +82,5 @@ export interface FindManyResponse {
 }
 export interface UpdatePrescriptionStatus {
     prescription_id: string;
-}
-
-export interface UpdateStatusResponse {
-    code: string;
-    message: string;
+    appointment_id:string;
 }

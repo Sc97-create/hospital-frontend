@@ -2,12 +2,13 @@ import { Card, Tag, Button, Layout, Breadcrumb } from "antd"
 import './patient-profile.css'
 import { useEffect, useState } from "react";
 import { findOne } from "../api/patients";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import type { patientlist } from "../types/patients";
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import Sidebar from "../../sidebar";
 import { Content } from "antd/es/layout/layout";
 import PatientOverview from "./patient-overview";
+import PatientAppointmentHistory from "./patient-appointment-history";
 
 
 
@@ -16,6 +17,8 @@ function GeneralInfo() {
     const patientID = params.patientID;
     const [patient, setPatient] = useState<patientlist | null>(null);
     const [activeTab, setActiveTab] = useState('overview');
+    const navigate =useNavigate();
+
 
     useEffect(() => {
         if (patientID) {
@@ -102,8 +105,8 @@ function GeneralInfo() {
 
                                     {/* Actions */}
                                     <div className="patient-action-buttons">
-                                        <Button type="primary">Add Appointment</Button>
-                                        <Button type="primary">Prescription</Button>
+                                        <Button type="primary" onClick={()=>navigate(`/patients/addappointment/${patientID}`)}>Add Appointment</Button>
+                                        <Button type="primary" onClick={()=>navigate(`/prescription`)}>Prescription</Button>
                                         <Button>Vitals</Button>
                                         <Button>Lab Report</Button>
                                         <Button>Billing</Button>
@@ -128,17 +131,17 @@ function GeneralInfo() {
                                     <PatientOverview patient={patient} />
                                 )}
 
-                                {/* {activeTab === 'appointments' && (
-                                    <PatientAppointments patient={patient} />
+                                { activeTab === 'appointments' && (
+                                    <PatientAppointmentHistory patient={patient} />
                                 )}
 
-                                {activeTab === 'prescriptions' && (
+                                {/* {activeTab === 'prescriptions' && (
                                     <PatientPrescriptions patient={patient} />
                                 )}
 
                                 {activeTab === 'vitals' && (
                                     <PatientVitals patient={patient} />
-                                )} */}
+                                )} */} 
 
                             </div>
 

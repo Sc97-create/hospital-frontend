@@ -38,9 +38,7 @@ function PatientList() {
             className: 'column-layout',
             showSorterTooltip: { target: 'full-header' },
             render: (text: string) => (
-                <span style={{ backgroundColor: '#FFF9C4', color: '#000', padding: '4px 8px', borderRadius: '6px', fontWeight: '600' }}>
-                    {text}
-                </span>
+                <Tag color="yellow">{text}</Tag>
             )
         },
         {
