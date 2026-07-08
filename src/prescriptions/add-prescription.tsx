@@ -336,6 +336,7 @@ function AddPrescription() {
                     )}
 
                     <Content className="prescription-content">
+                        <div className="prescription-content-body">
                         {isMobile && (
                             <Button
                                 type="primary"
@@ -470,6 +471,8 @@ function AddPrescription() {
                         </div>
 
 
+
+                        </div>
 
                         {/* Footer Buttons */}
                         <Row justify="end" gutter={8} className="footer-actions">

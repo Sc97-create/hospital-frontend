@@ -55,7 +55,7 @@ function FirstStep() {
 
     //const displayCondTags = showCond ? conditionTags : conditionTags.slice(0, 2);
     return (
-        <>
+        <div className="appointment-form-container">
             <Card className="firststepcard">
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div>
@@ -187,7 +187,7 @@ function FirstStep() {
                     Submit
                 </Button>
             </div>
-        </>
+        </div>
     )
 
 }

@@ -148,13 +148,6 @@
     margin-bottom: 12px;
    
 }
-.step-button-wrapper {
-    max-width: 800px;
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 24px;
-}
 .submit-appointment-form{
     display: flex;
     margin-left: 850px;
