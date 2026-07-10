@@ -27,19 +27,19 @@ export interface createPrescResponseData {
     id: string;
 }
 export interface medicineResponse {
+    prescription_id: string;
     medicine_id: string;
     medicine_name: string;
-    quantity: number,
-    dosage: string,
+    medicine_form: string;
+    quantity: number;
     frequency: {
-        morning: number,
-        afternoon: number,
-        night: number
-    },
-    duration_day: number,
-    duration_type: string,
-    medicine_type: string,
-    food_instruction: string,
+        morning: number;
+        afternoon: number;
+        night: number;
+    };
+    duration_day: number;
+    duration_type: string;
+    food_instruction: string;
 }
 
 export interface SearchMedicineItem {
@@ -80,7 +80,15 @@ export interface FindManyResponse {
     code: string;
     message: string;
 }
+
+export type PrescriptionStatusFilter = "all" | "draft" | "sent";
 export interface UpdatePrescriptionStatus {
     prescription_id: string;
-    appointment_id:string;
+    appointment_id: string;
+}
+
+export interface UpdateStatusResponse {
+    data: string;
+    code: string;
+    message: string;
 }

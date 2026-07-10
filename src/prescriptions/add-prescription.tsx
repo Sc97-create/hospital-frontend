@@ -394,17 +394,17 @@ function AddPrescription() {
                                                     </Title>
 
                                                     <Space size={12} className="medicine-meta">
-                                                        <Tag color="blue" className="dosage-tag">{item.dosage}</Tag>
+                                                        <Tag color="blue" className="dosage-tag">{item.medicine_form}</Tag>
 
                                                         <div className="frequency-badges">
-                                                            <span className={`freq-badge ${item.frequency.morning > 0 ? 'active' : ''}`}>
-                                                                M: {item.frequency.morning}
+                                                            <span className={`freq-badge ${item.frequency?.morning > 0 ? 'active' : ''}`}>
+                                                                M: {item.frequency?.morning ?? 0}
                                                             </span>
-                                                            <span className={`freq-badge ${item.frequency.afternoon > 0 ? 'active' : ''}`}>
-                                                                A: {item.frequency.afternoon}
+                                                            <span className={`freq-badge ${item.frequency?.afternoon > 0 ? 'active' : ''}`}>
+                                                                A: {item.frequency?.afternoon ?? 0}
                                                             </span>
-                                                            <span className={`freq-badge ${item.frequency.night > 0 ? 'active' : ''}`}>
-                                                                N: {item.frequency.night}
+                                                            <span className={`freq-badge ${item.frequency?.night > 0 ? 'active' : ''}`}>
+                                                                N: {item.frequency?.night ?? 0}
                                                             </span>
                                                         </div>
                                                     </Space>
@@ -415,11 +415,9 @@ function AddPrescription() {
                                                         </Text>
                                                         <span className="separator">•</span>
                                                         <Text type="secondary" className="detail-item">
-                                                            {item.food_instruction} food
-                                                        </Text>
-                                                        <span className="separator">•</span>
-                                                        <Text type="secondary" className="detail-item">
-                                                            {item.medicine_type}
+                                                            {item.food_instruction === "any"
+                                                                ? "Doesn't matter"
+                                                                : `${item.food_instruction} food`}
                                                         </Text>
                                                     </div>
                                                 </div>

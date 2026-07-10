@@ -191,6 +191,26 @@ A dedicated `/pharmacy/inventory` view for ongoing stock management:
 
 Actions: Adjust stock, View movement history, Fill from supplier.
 
+### 6.1 Relationship to Clinic Overview (`/dashboard`)
+
+The full inventory table above is the **canonical pharmacy workspace**. The clinic Overview dashboard shows a **compact alert cousin** only — not a duplicate inventory grid.
+
+| Surface | Route | Scope |
+|---------|-------|-------|
+| Overview pharmacy alerts (`W-INV`) | `/dashboard` | Counts + top 5 low/expiring + pending GRN; CTAs into inventory / fill-stock |
+| Inventory dashboard | `/pharmacy/inventory` | Full SKU table, filters, adjust stock, movement history |
+| Fill Stock / GRN | `/suppliers/:supplierId/fill-stock` | Receive stock session (this document §§4–5) |
+
+**Product rules (shared with `dashboard-requirements.md`):**
+
+- Show Overview `W-INV` only when `inventory_enabled` (Phase 2).
+- Reuse the same stock chips as `src/prescriptions/prescription-preview.tsx`: In Stock / Low / Out.
+- KPI definitions must match: Low stock count, Expiring in 30 days, Pending GRN.
+- Deep links from Overview: “Open inventory” → `/pharmacy/inventory`; “Fill stock” → suppliers fill-stock flow.
+- Pharmacist role: Overview is an alert day board; deep work stays on inventory + GRN screens.
+
+See **[dashboard-requirements.md](dashboard-requirements.md)** §7.8 (Inventory alerts), §7.6 (Quick actions), §11 Phase 2, and DASH-03 Pharmacist layout.
+
 ---
 
 ## 7. Data Model (Suggested)
