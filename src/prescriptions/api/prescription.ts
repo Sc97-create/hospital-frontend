@@ -1,5 +1,16 @@
 import apiClient from "../../lib/api-client";
-import type { createPrescResponse, CreatePrescription, FindManyResponse, findOneResponse, SearchMedicineResponse, UpdatePrescriptionStatus, UpdateStatusResponse } from "../types/prescriptionmodel";
+import type {
+    BillingCreatePayload,
+    BillingCreateResponse,
+    createPrescResponse,
+    CreatePrescription,
+    DispenseCheckoutResponse,
+    FindManyResponse,
+    findOneResponse,
+    SearchMedicineResponse,
+    UpdatePrescriptionStatus,
+    UpdateStatusResponse,
+} from "../types/prescriptionmodel";
 
 export const SearchMedicines = async (name: string): Promise<SearchMedicineResponse> => {
     const response = await apiClient.get(`/medicine/searchMedicine?name=${name}`)
@@ -55,5 +66,21 @@ export const GetByStatus = async (
 }
 export const UpdateStatus = async (updateprescription: UpdatePrescriptionStatus): Promise<UpdateStatusResponse> => {
     const response = await apiClient.patch(`/prescription/updateStatus`, updateprescription)
+    return response.data
+}
+
+/** Batch-aware lines for pharmacist checkout (FEFO / stock decrement). */
+export const GetDispenseCheckoutLines = async (
+    prescription_id: string,
+): Promise<DispenseCheckoutResponse> => {
+    const response = await apiClient.get(`/prescription/getMedicineInfo/${prescription_id}`)
+    return response.data
+}
+
+/** Confirm & Pay — create bill and decrement inventory per batch take. */
+export const CreateBilling = async (
+    payload: BillingCreatePayload,
+): Promise<BillingCreateResponse> => {
+    const response = await apiClient.post(`/billing/create`, payload)
     return response.data
 }

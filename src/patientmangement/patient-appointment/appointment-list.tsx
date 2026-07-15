@@ -4,39 +4,49 @@ import {
     Input,
     Select,
     Tag,
-    Space,
     Typography,
     Pagination,
-    Dropdown,
-    Tabs,
     Layout,
     Breadcrumb,
-    DatePicker,
     Button,
+    message,
+    Dropdown,
 } from "antd";
 import {
     SearchOutlined,
     LeftOutlined,
     RightOutlined,
     HomeOutlined,
+    DownOutlined,
+    LoadingOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
 import "./appointment-list.css";
 import Sidebar from "../../sidebar";
 import { Content } from "antd/es/layout/layout";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GetDoctors } from "../../shared/api/shared-api";
-import { GetAppointmentsByOrganisationID } from "../api/appointments";
-import type { AppointmentOrg, appointmentPayload } from "../types/appointments";
+import { GetAppointmentsByOrganisationID, updateStatus } from "../api/appointments";
+import type { AppointmentOrg } from "../types/appointments";
 
 const { Title, Text } = Typography;
+const SEARCH_DEBOUNCE_MS = 400;
+
 interface Doctor {
     id: string;
     username: string;
 }
 
-
+const APPOINTMENT_STATUS_OPTIONS = [
+    { value: "scheduled", label: "Scheduled", color: "green" },
+    { value: "upcoming", label: "Upcoming", color: "cyan" },
+    { value: "ongoing", label: "Ongoing", color: "gold" },
+    { value: "completed", label: "Completed", color: "success" },
+    { value: "cancelled", label: "Cancelled", color: "red" },
+    { value: "reschedule_required", label: "Reschedule Required", color: "orange" },
+    { value: "missed", label: "Missed", color: "volcano" },
+] as const;
 
 const getVisitTag = (type: string) => {
     switch (type) {
@@ -50,48 +60,79 @@ const getVisitTag = (type: string) => {
             return <Tag color="orange">OPD</Tag>;
 
         default:
-            return <Tag color="blue">New Patient</Tag>;;
+            return <Tag color="blue">New Patient</Tag>;
     }
 };
 
+const getStatusMeta = (status: string) => {
+    return (
+        APPOINTMENT_STATUS_OPTIONS.find((opt) => opt.value === status) ?? {
+            value: status,
+            label: status,
+            color: "default",
+        }
+    );
+};
+
 const getStatusTag = (status: string) => {
-    switch (status) {
-        case "scheduled":
-            return <Tag color="green">Scheduled</Tag>;
-
-        case "completed":
-            return <Tag color="success">Completed</Tag>;
-
-        case "cancelled":
-            return <Tag color="red">Cancelled</Tag>;
-        case "ongoing":
-            return <Tag color="yellow">Ongoing</Tag>
-        case "reschedule_required":
-            return <Tag color="gold">Reschedule Required</Tag>;
-        case "missed":
-            return <Tag color="orange">Missed</Tag>;
-        case "upcoming":
-            return <Tag color="cyan">Upcoming</Tag>;
-        default:
-            return <Tag>{status}</Tag>;
-    }
+    const match = getStatusMeta(status);
+    return <Tag color={match.color}>{match.label}</Tag>;
 };
 //add appointment code
 //send appointmentid
 const AppointmentsPage: React.FC = () => {
-    const { RangePicker } = DatePicker;
+    const [messageApi, contextHolder] = message.useMessage();
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [selectedDoctor, setSelectedDoctor] = useState<number | undefined>();
     const [selectedDate, setSelectedDate] = useState<string | undefined>();
     const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
     const [selectedVisitType, setSelectedVisitType] = useState<string | undefined>();
+    const [searchInput, setSearchInput] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
     const [loading, setLoading] = useState(false);
+    const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
     const navigate = useNavigate();
-    //const [totalAppointments, setTotalAppointments] = useState<number>(42);
     const [appointmentsData, setAppointmentsData] = useState<AppointmentOrg[]>([]);
     const [appointmentcount, setAppntmentCount] = useState<number>(0);
+    const organisationId = localStorage.getItem("organisation_id") || "";
+
+    const handleStatusChange = async (appointmentId: string, nextStatus: string) => {
+        const previous = appointmentsData.find((a) => a.appointment_id === appointmentId);
+        if (!previous || previous.status === nextStatus) return;
+
+        setUpdatingStatusId(appointmentId);
+        setAppointmentsData((rows) =>
+            rows.map((row) =>
+                row.appointment_id === appointmentId ? { ...row, status: nextStatus } : row,
+            ),
+        );
+
+        try {
+            const resp = await updateStatus({
+                appointment_id: appointmentId,
+                status: nextStatus,
+            });
+            if (resp.code !== "200") {
+                throw new Error(resp.message || "Status update failed");
+            }
+            messageApi.success("Appointment status updated");
+        } catch (error) {
+            console.error("Failed to update appointment status:", error);
+            setAppointmentsData((rows) =>
+                rows.map((row) =>
+                    row.appointment_id === appointmentId
+                        ? { ...row, status: previous.status }
+                        : row,
+                ),
+            );
+            messageApi.error("Failed to update status. Try again.");
+        } finally {
+            setUpdatingStatusId(null);
+        }
+    };
+
     const columns = [
         {
             title: "CODE",
@@ -166,8 +207,42 @@ const AppointmentsPage: React.FC = () => {
             dataIndex: "status",
             color: "#6B7280",
             key: "status",
-            width: 180,
-            render: (_: string, record: AppointmentOrg) => getStatusTag(record.status),
+            width: 200,
+            render: (_: string, record: AppointmentOrg) => {
+                const meta = getStatusMeta(record.status);
+                const isUpdating = updatingStatusId === record.appointment_id;
+
+                return (
+                    <Dropdown
+                        trigger={["click"]}
+                        disabled={isUpdating}
+                        menu={{
+                            selectable: true,
+                            selectedKeys: [record.status],
+                            items: APPOINTMENT_STATUS_OPTIONS.map((opt) => ({
+                                key: opt.value,
+                                label: getStatusTag(opt.value),
+                            })),
+                            onClick: ({ key }) => handleStatusChange(record.appointment_id, key),
+                        }}
+                    >
+                        <Tag
+                            color={meta.color}
+                            className={`appointment-status-tag ${isUpdating ? "is-loading" : ""}`}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Change status for ${record.appointment_code}`}
+                        >
+                            {meta.label}
+                            {isUpdating ? (
+                                <LoadingOutlined className="appointment-status-caret" />
+                            ) : (
+                                <DownOutlined className="appointment-status-caret" />
+                            )}
+                        </Tag>
+                    </Dropdown>
+                );
+            },
         },
         {
             title: "APPOINTMENT DATE",
@@ -178,12 +253,30 @@ const AppointmentsPage: React.FC = () => {
             render: (_: string, record: AppointmentOrg) => <div className="doctor-name">{dayjs(record.appointment_date).format("DD MMM YYYY")}</div>,
         },
     ];
-    const organisationId = localStorage.getItem("organisation_id") || "";
 
     useEffect(() => {
-        // Fetch appointments with default pagination: limit 10, page_no 0
-        getAppointmentByOrgID(0, 10);
-    }, []);
+        const nextSearch = searchInput.trim();
+        if (nextSearch === debouncedSearch) return;
+        const timer = window.setTimeout(() => {
+            setDebouncedSearch(nextSearch);
+            setCurrentPage(1);
+        }, SEARCH_DEBOUNCE_MS);
+        return () => window.clearTimeout(timer);
+    }, [searchInput, debouncedSearch]);
+
+    useEffect(() => {
+        getAppointmentByOrgID(
+            currentPage - 1,
+            pageSize,
+            selectedDoctor,
+            selectedDate,
+            selectedStatus,
+            selectedVisitType,
+            debouncedSearch,
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on page / search / filters
+    }, [currentPage, pageSize, debouncedSearch, selectedDoctor, selectedDate, selectedStatus, selectedVisitType]);
+
     const getDoctors = async () => {
         try {
             const response = await GetDoctors("", organisationId);
@@ -191,17 +284,20 @@ const AppointmentsPage: React.FC = () => {
         } catch (error) {
             console.error("Error fetching doctors:", error);
         }
-    }
+    };
+
     const getAppointmentByOrgID = async (
         page: number = 0,
         limit: number = 10,
         doctor_id?: number,
         date?: string,
         status?: string,
-        visit_type?: string
+        visit_type?: string,
+        search?: string,
     ) => {
         try {
-            setLoading(true)
+            setLoading(true);
+            const trimmedSearch = search?.trim() || "";
             const appointmentGetPayload = {
                 organisation_id: organisationId,
                 doctor_id: doctor_id ? doctor_id.toString() : "",
@@ -210,38 +306,32 @@ const AppointmentsPage: React.FC = () => {
                 visit_type: visit_type || "",
                 page_no: page,
                 limit: limit,
-            }
+                ...(trimmedSearch ? { search: trimmedSearch } : {}),
+            };
             const response = await GetAppointmentsByOrganisationID(appointmentGetPayload);
-            setAppointmentsData(response.data);
-            setAppntmentCount(response.total);
-            console.log("Appointments fetched successfully:", response);
+            setAppointmentsData(response.data || []);
+            setAppntmentCount(response.total || 0);
         } catch (error) {
             console.error("Error fetching appointments:", error);
+            messageApi.error("Failed to load appointments");
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
-    const handleFilterChange = (
-        dateValue?: string,
-        doctorValue?: number,
-        statusValue?: string,
-        visitTypeValue?: string
-    ) => {
-        console.log("value", dateValue, doctorValue, statusValue, visitTypeValue);
+    const clearFilters = () => {
+        setSearchInput("");
+        setDebouncedSearch("");
+        setSelectedDate(undefined);
+        setSelectedDoctor(undefined);
+        setSelectedStatus(undefined);
+        setSelectedVisitType(undefined);
         setCurrentPage(1);
-        getAppointmentByOrgID(
-            0,
-            pageSize,
-            doctorValue ?? selectedDoctor,
-            dateValue ?? selectedDate,
-            statusValue ?? selectedStatus,
-            visitTypeValue ?? selectedVisitType
-        );
-    }
-    
+    };
+
     return (
         <Layout>
+            {contextHolder}
             <Sidebar />
             <Content>
                 <Breadcrumb className="appointment-breadcrumb-layout">
@@ -269,23 +359,14 @@ const AppointmentsPage: React.FC = () => {
                             placeholder="Search patient name, mobile number, or appointment ID"
                             prefix={<SearchOutlined />}
                             className="search-input"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                         />
 
-                        <Button type="link" size="small">
+                        <Button type="link" size="small" onClick={clearFilters}>
                             Clear Filters
                         </Button>
                     </div>
-
-                    {/* <Tabs
-                        size="small"
-                        defaultActiveKey="today"
-                        items={[
-                            { key: "today", label: "Today" },
-                            { key: "upcoming", label: "Upcoming" },
-                            { key: "new", label: "New Patients" },
-                            { key: "follow", label: "Follow Ups" },
-                        ]}
-                    /> */}
 
                     <div className="filter-row">
                         <Select
@@ -302,8 +383,7 @@ const AppointmentsPage: React.FC = () => {
                             ]}
                             onChange={(value) => {
                                 setSelectedDate(value);
-
-                                handleFilterChange(value ? value : "", selectedDoctor, selectedStatus, selectedVisitType);
+                                setCurrentPage(1);
                             }}
                         />
 
@@ -320,7 +400,7 @@ const AppointmentsPage: React.FC = () => {
                             onFocus={getDoctors}
                             onChange={(value) => {
                                 setSelectedDoctor(value);
-                                handleFilterChange(selectedDate, value, selectedStatus, selectedVisitType);
+                                setCurrentPage(1);
                             }}
                         />
 
@@ -330,18 +410,13 @@ const AppointmentsPage: React.FC = () => {
                             className="filter-select"
                             allowClear
                             value={selectedStatus}
-                            options={[
-                                { value: "scheduled", label: "Scheduled" },
-                                { value: "completed", label: "Completed" },
-                                { value: "cancelled", label: "Cancelled" },
-                                { value: "ongoing", label: "Ongoing" },
-                                { value: "reschedule_required", label: "Reschedule Required" },
-                                { value: "missed", label: "Missed" },
-                                { value: "upcoming", label: "Upcoming" },
-                            ]}
+                            options={APPOINTMENT_STATUS_OPTIONS.map((opt) => ({
+                                value: opt.value,
+                                label: opt.label,
+                            }))}
                             onChange={(value) => {
                                 setSelectedStatus(value);
-                                handleFilterChange(selectedDate, selectedDoctor, value ? value : "", selectedVisitType);
+                                setCurrentPage(1);
                             }}
                         />
 
@@ -358,7 +433,7 @@ const AppointmentsPage: React.FC = () => {
                             ]}
                             onChange={(value) => {
                                 setSelectedVisitType(value);
-                                handleFilterChange(selectedDate, selectedDoctor, selectedStatus, value ? value : "");
+                                setCurrentPage(1);
                             }}
                         />
                     </div>
@@ -368,6 +443,7 @@ const AppointmentsPage: React.FC = () => {
                             size="small"
                             columns={columns}
                             dataSource={appointmentsData || []}
+                            rowKey="appointment_id"
                             pagination={false}
                             loading={loading}
                             rowClassName={(record) =>
@@ -377,7 +453,9 @@ const AppointmentsPage: React.FC = () => {
 
                         <div className="table-footer">
                             <Text type="secondary">
-                                Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, appointmentcount)} of {appointmentcount} appointments
+                                {appointmentcount === 0
+                                    ? "No appointments"
+                                    : `Showing ${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, appointmentcount)} of ${appointmentcount} appointments`}
                             </Text>
 
                             <Pagination
@@ -387,17 +465,7 @@ const AppointmentsPage: React.FC = () => {
                                 pageSize={pageSize}
                                 prevIcon={<LeftOutlined />}
                                 nextIcon={<RightOutlined />}
-                                onChange={(page) => {
-                                    setCurrentPage(page);
-                                    getAppointmentByOrgID(
-                                        page - 1,
-                                        pageSize,
-                                        selectedDoctor,
-                                        selectedDate,
-                                        selectedStatus,
-                                        selectedVisitType
-                                    );
-                                }}
+                                onChange={(page) => setCurrentPage(page)}
                             />
                         </div>
                     </div>

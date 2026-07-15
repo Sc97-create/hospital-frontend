@@ -89,6 +89,12 @@
     border-radius: 6px;
 }
 
+.supplier-credit-input.ant-input-number,
+.supplier-credit-input .ant-input-number-input {
+    height: 40px;
+    border-radius: 6px;
+}
+
 /* Actions */
 .form-actions {
     display: flex;

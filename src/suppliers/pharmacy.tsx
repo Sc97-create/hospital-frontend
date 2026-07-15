@@ -1,79 +1,94 @@
-import { Breadcrumb, Button, Input, Layout, Pagination, Table, Tag } from "antd"
+import { Breadcrumb, Button, Dropdown, Input, Layout, Pagination, Table, Tag, message } from "antd"
 import type { TableColumnsType } from "antd"
 import Sidebar from "../sidebar"
 import './pharmacy.css'
-import { HomeOutlined, PlusCircleOutlined, SearchOutlined, ShopOutlined } from '@ant-design/icons'
+import {
+    DownOutlined,
+    HomeOutlined,
+    PlusCircleOutlined,
+    SearchOutlined,
+    ShopOutlined,
+} from '@ant-design/icons'
 import { Content } from "antd/es/layout/layout"
 import { useNavigate } from "react-router-dom"
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
+import { GetSuppliersByOrgID } from "./api/supplier"
+import type { SupplierListItem } from "./types/supplier"
 
-interface Supplier {
-    id: string;
-    name: string;
-    location: string;
-    status: "active" | "closed";
-    orders: number;
+const SUPPLIER_STATUS_OPTIONS = [
+    { value: "Active", label: "Active", color: "green" },
+    { value: "Inactive", label: "Inactive", color: "red" },
+] as const;
+
+function normalizeStatus(status: string): string {
+    const lower = status?.toLowerCase();
+    if (lower === "active") return "Active";
+    if (lower === "inactive") return "Inactive";
+    return status || "—";
 }
 
-interface SupplierRow extends Supplier {
-    key: string;
+function getStatusMeta(status: string) {
+    const normalized = normalizeStatus(status);
+    return (
+        SUPPLIER_STATUS_OPTIONS.find((opt) => opt.value === normalized) ?? {
+            value: normalized,
+            label: normalized,
+            color: "default" as const,
+        }
+    );
 }
 
-const suppliers: Supplier[] = [
-    {
-        id: "PL-9920-X",
-        name: "PharmaLink Distribution",
-        location: "New Jersey, USA",
-        status: "active",
-        orders: 12,
-    },
-    {
-        id: "GML-1044-A",
-        name: "Global Med Logics",
-        location: "Geneva, Switzerland",
-        status: "closed",
-        orders: 5,
-    },
-    {
-        id: "APX-5511-B",
-        name: "Apex Health Supplies",
-        location: "Local Warehouse",
-        status: "active",
-        orders: 24,
-    },
-    {
-        id: "CRYO-2234-L",
-        name: "CryoPharma Express",
-        location: "Toronto, Canada",
-        status: "closed",
-        orders: 8,
-    },
-    {
-        id: "MED-7788-Z",
-        name: "MediCore Supplies",
-        location: "Mumbai, India",
-        status: "active",
-        orders: 18,
-    },
-];
-
-function AddPharmacy() {
+function Pharmacy() {
     const navigate = useNavigate()
+    const [messageApi, contextHolder] = message.useMessage()
     const [page, setPage] = useState(1)
     const pageSize = 10
-    const totalSuppliers = 124
+    const [suppliers, setSuppliers] = useState<SupplierListItem[]>([])
+    const [totalSuppliers, setTotalSuppliers] = useState(0)
+    const [loading, setLoading] = useState(false)
+    const organisationId = localStorage.getItem("organisation_id") || ""
 
-    const dataSource: SupplierRow[] = useMemo(
-        () => suppliers.map((supplier) => ({ ...supplier, key: supplier.id })),
-        []
-    )
+    const fetchSuppliers = async (pageNo: number) => {
+        if (!organisationId) {
+            messageApi.error("Missing organisation — please log in again")
+            return
+        }
+        setLoading(true)
+        try {
+            const response = await GetSuppliersByOrgID(organisationId, pageSize, pageNo)
+            const rows = Array.isArray(response?.data) ? response.data : []
+            const total = Number(response?.total)
+            setSuppliers(rows)
+            setTotalSuppliers(Number.isFinite(total) ? total : 0)
+        } catch (error) {
+            console.error("Failed to load suppliers:", error)
+            messageApi.error("Failed to load suppliers")
+            setSuppliers([])
+            setTotalSuppliers(0)
+        } finally {
+            setLoading(false)
+        }
+    }
 
-    const columns: TableColumnsType<SupplierRow> = [
+    useEffect(() => {
+        fetchSuppliers(page)
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when page changes
+    }, [page, organisationId])
+
+    const handleStatusChange = (supplierId: string, nextStatus: string) => {
+        setSuppliers((rows) =>
+            rows.map((row) =>
+                row.id === supplierId ? { ...row, supplier_status: nextStatus } : row,
+            ),
+        );
+    };
+
+    const columns: TableColumnsType<SupplierListItem> = [
         {
             title: "Code",
-            dataIndex: "id",
+            dataIndex: "supplier_code",
             className: "column-layout",
-            render: (id: string) => <span className="code-badge">{id}</span>,
+            render: (code: string) => <span className="code-badge">{code || "—"}</span>,
         },
         {
             title: "Supplier Name",
@@ -81,25 +96,67 @@ function AddPharmacy() {
             className: "other-layout",
         },
         {
-            title: "Location",
-            dataIndex: "location",
+            title: "Contact",
+            dataIndex: "contact_number",
             className: "other-layout",
+            render: (value?: string) => value || "—",
         },
         {
-            title: "Active Contracts",
-            dataIndex: "orders",
+            title: "Email",
+            dataIndex: "email",
             className: "other-layout",
-            render: (orders: number) => `${orders} active orders`,
+            render: (value?: string) => value || "—",
+        },
+        {
+            title: "Payment Terms",
+            dataIndex: "payment_terms",
+            className: "other-layout",
+            render: (value?: string) => value || "—",
+        },
+        {
+            title: "Created",
+            dataIndex: "created_at",
+            className: "other-layout",
+            render: (value?: string) => value || "—",
         },
         {
             title: "Status",
-            dataIndex: "status",
+            dataIndex: "supplier_status",
             align: "center",
-            render: (status: Supplier["status"]) => (
-                <Tag color={status === "active" ? "green" : "red"} bordered className="app-tag">
-                    {status === "active" ? "Active" : "Closed"}
-                </Tag>
-            ),
+            width: 140,
+            render: (status: string, record) => {
+                const meta = getStatusMeta(status);
+                return (
+                    <Dropdown
+                        trigger={["click"]}
+                        menu={{
+                            selectable: true,
+                            selectedKeys: [normalizeStatus(status)],
+                            items: SUPPLIER_STATUS_OPTIONS.map((opt) => ({
+                                key: opt.value,
+                                label: (
+                                    <Tag color={opt.color} bordered className="app-tag">
+                                        {opt.label}
+                                    </Tag>
+                                ),
+                            })),
+                            onClick: ({ key }) => handleStatusChange(record.id, key),
+                        }}
+                    >
+                        <Tag
+                            color={meta.color}
+                            bordered
+                            className="supplier-status-tag app-tag"
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Change status for ${record.name}`}
+                        >
+                            {meta.label}
+                            <DownOutlined className="supplier-status-caret" />
+                        </Tag>
+                    </Dropdown>
+                );
+            },
         },
         {
             title: "Action",
@@ -110,7 +167,15 @@ function AddPharmacy() {
                     type="primary"
                     size="small"
                     className="fill-stock-btn"
-                    onClick={() => navigate(`/suppliers/${record.id}/fill-stock`)}
+                    onClick={() =>
+                        navigate(`/suppliers/${record.id}/fill-stock`, {
+                            state: {
+                                supplierName: record.name,
+                                supplierCode: record.supplier_code,
+                                supplierStatus: record.supplier_status,
+                            },
+                        })
+                    }
                 >
                     Fill Stock
                 </Button>
@@ -120,6 +185,7 @@ function AddPharmacy() {
 
     return (
         <Layout>
+            {contextHolder}
             <Sidebar />
             <Layout>
                 <Breadcrumb
@@ -164,11 +230,14 @@ function AddPharmacy() {
                     </div>
 
                     <div className="table-data">
-                        <Table<SupplierRow>
+                        <Table<SupplierListItem>
                             columns={columns}
-                            dataSource={dataSource}
+                            dataSource={suppliers}
+                            rowKey="id"
+                            loading={loading}
                             pagination={false}
                             scroll={{ x: "max-content", y: 400 }}
+                            locale={{ emptyText: "No suppliers yet" }}
                             showSorterTooltip={{ target: "sorter-icon" }}
                         />
                     </div>
@@ -191,4 +260,4 @@ function AddPharmacy() {
     )
 }
 
-export default AddPharmacy
+export default Pharmacy

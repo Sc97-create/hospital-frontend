@@ -1,0 +1,248 @@
+/* Page uses global .ant-layout-content padding — avoid double outer margin. */
+.fill-stock-page {
+    min-height: 100%;
+}
+
+.fill-stock-breadcrumb.ant-breadcrumb {
+    /* Global breadcrumb already has padding; keep only a quiet top rhythm. */
+    padding: 8px 0 0 !important;
+    margin: 0 0 16px !important;
+}
+
+.fill-stock-breadcrumb.ant-breadcrumb .ant-breadcrumb-link,
+.fill-stock-breadcrumb.ant-breadcrumb li {
+    color: #6b7280;
+}
+
+.fill-stock-content {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    padding-bottom: 48px;
+}
+
+.fill-stock-header-card {
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 1px solid #e5e7eb;
+}
+
+.fill-stock-header-card .ant-card-body {
+    padding: 20px 24px;
+}
+
+.fill-stock-supplier-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-bottom: 16px;
+}
+
+.fill-stock-supplier-name {
+    margin: 0 !important;
+    font-size: var(--text-lg, 18px);
+    font-weight: 600;
+    color: #111827;
+}
+
+.fill-stock-supplier-code {
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.fill-stock-invoice-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.fill-stock-invoice-row .ant-form-item {
+    margin-bottom: 0 !important;
+    min-width: 200px;
+    flex: 1;
+}
+
+.fill-stock-mode-section {
+    margin-top: 4px;
+}
+
+.fill-stock-mode-title {
+    margin: 0 0 4px !important;
+    font-size: var(--text-lg, 18px);
+    font-weight: 600;
+    color: #111827;
+}
+
+.fill-stock-mode-subtitle {
+    color: #6b7280;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.fill-stock-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+@media (max-width: 720px) {
+    .fill-stock-mode-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/*
+ * Global `index.css` rule `.ant-card + .ant-card { margin-top }` breaks side-by-side
+ * mode cards — neutralize it inside this grid.
+ */
+.fill-stock-mode-grid > .ant-card + .ant-card {
+    margin-top: 0 !important;
+}
+
+.fill-stock-mode-card.ant-card {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    height: 100%;
+    min-height: 168px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0 !important;
+}
+
+.fill-stock-mode-card .ant-card-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 auto;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.fill-stock-mode-card:hover {
+    border-color: #25d366;
+    background: #f6fef9;
+}
+
+.fill-stock-mode-card:focus-visible {
+    outline: 2px solid #25d366;
+    outline-offset: 2px;
+}
+
+.fill-stock-mode-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #e6f9ef;
+    color: #059669;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 4px;
+    flex-shrink: 0;
+}
+
+.fill-stock-mode-card-title {
+    margin: 0 !important;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.fill-stock-mode-card-desc {
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.45;
+    margin: 0;
+    flex: 1;
+}
+
+.fill-stock-manual-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.fill-stock-medicine-search {
+    flex: 1;
+    min-width: 260px;
+}
+
+.fill-stock-medicine-search .ant-select-selector,
+.fill-stock-medicine-search .ant-input-affix-wrapper {
+    border-radius: 8px !important;
+    min-height: 40px;
+}
+
+.fill-stock-medicine-option-name {
+    font-weight: 500;
+    color: #111827;
+}
+
+.fill-stock-medicine-option-generic {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.fill-stock-line-table .ant-table-thead > tr > th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+
+.fill-stock-unit-hint {
+    display: block;
+    margin: -8px 0 16px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.fill-stock-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: 24px;
+    padding: 14px 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.fill-stock-footer-summary {
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.fill-stock-footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fill-stock-back-mode {
+    margin-bottom: 16px;
+}
+
+.fill-stock-empty {
+    padding: 40px 24px;
+    text-align: center;
+    color: #6b7280;
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 12px;
+}

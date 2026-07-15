@@ -149,3 +149,17 @@
     font-weight: var(--weight-semibold);
     margin: 0;
 }
+
+.supplier-status-tag {
+    margin-inline-end: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.supplier-status-caret {
+    font-size: 10px;
+    opacity: 0.8;
+}
