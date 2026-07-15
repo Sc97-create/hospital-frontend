@@ -26,6 +26,24 @@
     font-size: var(--text-xs);
     color: #8c8c8c;
     font-weight: 600;
+    letter-spacing: 0.02em;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.patient-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 28px 48px;
+}
+
+.patient-meta__item {
+    min-width: 110px;
+}
+
+.patient-card .ant-card-body {
+    padding: 20px 24px;
 }
 
 .alert-card {
@@ -190,4 +208,73 @@
     height: 40px;
     border-radius: 10px;
     font-weight: 600;
+}
+
+.schedule-tag--active {
+    background: #e6f9ef;
+    border-color: #b7e9d1;
+    color: #0f766e;
+}
+
+/* Skeleton — mirrors patient header + medicine table */
+
+.rx-skel-patient__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.rx-skel-patient__meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.rx-skel-patient__meta .ant-skeleton {
+    width: 110px;
+}
+
+.rx-skel-table {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.rx-skel-table__head {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.4fr 1fr 0.6fr;
+    gap: 12px;
+    padding: 0 4px 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.rx-skel-table__col-label {
+    font-size: var(--text-xs);
+    color: #8c8c8c;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.rx-skel-table__row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.4fr 1fr 0.6fr;
+    gap: 12px;
+    align-items: center;
+}
+
+.rx-skel-footer {
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .rx-skel-table__head,
+    .rx-skel-table__row {
+        grid-template-columns: 1fr;
+    }
+
+    .rx-skel-table__head {
+        display: none;
+    }
 }

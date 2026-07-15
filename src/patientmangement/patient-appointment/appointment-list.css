@@ -40,6 +40,27 @@
   flex-wrap: wrap;
 }
 
+.appointment-status-tag {
+  margin-inline-end: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-inline: 10px;
+  line-height: 22px;
+  user-select: none;
+}
+
+.appointment-status-tag.is-loading {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+.appointment-status-caret {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
 .filter-select {
   width: 140px;
 }

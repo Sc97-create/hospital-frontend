@@ -19,11 +19,10 @@ function Sidebar() {
     const navigate = useNavigate();
     const [collapse, setCollapse] = useState(false);
     const [hover, setHover] = useState(false);
-    const routeMap: Record<'/patients' | '/appointment' | '/suppliers' | '/employees' | '/bed-arrangement' | '/prescription', string> = {
+    const routeMap: Record<'/patients' | '/appointment' | '/suppliers' | '/employees' | '/prescription', string> = {
         '/patients': '/patients',
         '/suppliers': '/suppliers',
         "/employees": '/employees',
-        "/bed-arrangement": '/bed-arrangement',
         "/prescription": '/prescription',
         "/appointment":'/appointments',
     };
@@ -98,11 +97,6 @@ function Sidebar() {
                                 key: '/employees',
                                 icon: <UserOutlined />,
                                 label: 'Employees'
-                            },
-                            {
-                                key: '/bed-arrangement',
-                                icon: <UserOutlined />,
-                                label: 'Bed Arrangement'
                             },
                             {
                                 key: '/prescription',

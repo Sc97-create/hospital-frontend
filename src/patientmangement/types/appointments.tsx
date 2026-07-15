@@ -28,6 +28,7 @@ export interface appointmentGetPayload {
     visit_type: string;
     page_no: number;
     limit: number;
+    search?: string;
 }
 export interface AppointmentOrg {
     appointment_id: string;

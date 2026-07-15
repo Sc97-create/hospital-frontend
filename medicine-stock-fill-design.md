@@ -1,318 +1,284 @@
-# Medicine Stock Fill — Design Spec (Pharmacist)
+# Medicine Stock Fill — Design Spec (MVP)
 
-## 1. Context in Your Codebase
+## 1. Purpose & Scope
 
-You already have partial plumbing for this feature:
+When a user clicks **Fill Stock** on a supplier (`/suppliers/:id/fill-stock`), they open a **Goods Receipt (GRN)** session: identify the supplier invoice, add medicines with batch details, then confirm posting into inventory.
 
-| What exists | Status |
+| In scope (v1) | Out of scope (later) |
 |---|---|
-| Supplier list with **Fill Stock** button | `src/suppliers/pharmacy.tsx` — navigates to `/suppliers/:id/fill-stock` |
-| Fill Stock route | **Missing** in `src/App.tsx` |
-| Invoice upload (PDF OCR) | `src/suppliers/upload-inovice.tsx` — mock only |
-| Manual supplier form | `src/suppliers/add-manual-form.tsx` |
-| Tabbed entry (Manual + Invoice) | `src/suppliers/add-pharmacy.tsx` — **not wired** to routes |
-| Medicine search API | `GET /medicine/searchMedicine` |
-| Stock status UI pattern | `src/prescriptions/prescription-preview.tsx` (In Stock / Low / Out) |
-| Pharmacist role | Defined in employees, **not enforced** in routing |
+| Invoice no. + date required on session | Purchase order linking |
+| Two entry modes: Manual · Upload Invoice PDF | Full OCR auto-post without review |
+| Manual: search medicine → line items | Barcode scan |
+| Line fields: batch, expiry, qty, MRP | Free qty schemes (10+2) |
+| Derived unit selling price from MRP + pack size | Inventory dashboard / FEFO dispense |
+| Confirm Yes/No modal with summary | Stock adjustments / returns |
+| Draft save | Role enforcement beyond AuthGuard |
 
-The **Fill Stock** flow is the natural bridge between supplier procurement and the pharmacist's dispensing view.
-
----
-
-## 2. What Top Pharmacy POS Systems Do (Inspiration)
-
-Patterns from Odoo Pharmacy POS, Norak Pharma, Pharmacy Inventory Pro, and RxFlow-style fulfillment dashboards:
-
-### Core Workflows
-
-1. **Goods Receipt (GRN)** — receive stock against supplier invoice/PO
-2. **Batch + expiry tracking** — every stock-in line has batch no., mfg date, expiry
-3. **FEFO** — First Expiry, First Out when dispensing
-4. **Barcode-first entry** — scan to add lines fast at counter
-5. **Invoice OCR** — upload PDF → auto-extract line items → pharmacist verifies
-6. **Stock adjustment** — damaged/expired/returned quantities with audit trail
-7. **Reorder alerts** — min/max thresholds, low-stock chips
-8. **Role-based views** — pharmacist sees receive/verify; admin sees suppliers/POs
-
-### UI Patterns Worth Borrowing
-
-- **Split-pane layout**: left = line items being received, right = invoice/PO summary
-- **Inline editable table** — qty, batch, expiry, MRP, purchase price per row
-- **Status chips** — draft → verifying → confirmed → posted to inventory
-- **Verification checklist** — pharmacist signs off before stock goes live
-- **Dense data tables** with sticky header + row-level actions
-- **Quick search** with autocomplete (reuse your `SearchMedicines` API)
+Related: [`prescription-checkout-design.md`](prescription-checkout-design.md) (dispensing uses posted stock later).
 
 ---
 
-## 3. Design Goals
+## 2. Corrected Approach (vs original idea)
 
-| Goal | Why |
+### What stays from your proposal
+
+1. **Two mode cards** after opening Fill Stock — Manual Entry vs Upload Invoice PDF  
+2. **Invoice number at the top** — required; this is the audit key for “which stock came in on this invoice”  
+3. **Manual path** — search medicine → add line → batch, expiry, qty, price  
+4. **Confirm popup** before posting to inventory  
+
+### What to correct
+
+| Your idea | Correction | Why |
+|---|---|---|
+| Price = MRP, and “selling_price from qty × MRP” | Enter **MRP (pack)**. **Unit selling price** = `MRP ÷ pack_size`. Optionally enter **purchase/cost price** from the invoice. | Qty × MRP is a **line total**, not a selling price. Confusing them breaks margin and billed unit price. |
+| Unit price = f(qty, MRP) | Unit price = f(**MRP, pack size**). Qty only scales **line total**. | Pack of 10 at MRP ₹30 → unit ₹3.00; qty 500 means 500 units × ₹3 (or 50 packs × ₹30 depending on qty unit — pick one rule and stick to it). |
+| Cards only | Cards to **choose mode**, then work inside that mode (with ability to switch). Invoice fields stay visible in both. | Cards alone don’t scale for 20+ lines; editable table does. |
+| Bare Yes/No | Confirm modal must show **invoice #, line count, total units, invoice value**. | Accidental post is high risk. |
+| Optional invoice no. | **Invoice no. required before Add / Upload**. | Without it you cannot group or audit stock fills. |
+
+### Pricing model (locked for MVP)
+
+```
+Pack MRP          → what is printed on the strip/bottle (user enters)
+Pack size         → from medicine master (e.g. 10 tabs/strip); show read-only
+Unit selling price → MRP ÷ pack_size   (auto, editable override later if needed)
+Qty               → number of sellable units being received (tablets/caps/ml)
+Line total (MRP)  → unit_selling_price × qty   (display only)
+
+Purchase / cost   → optional in v1, recommended: amount paid to supplier for this line
+                    (or per-unit cost). Comes from invoice; used for inventory valuation.
+```
+
+**Do not** treat MRP as purchase price. Pharmacies buy below MRP; patients are typically billed at (or near) MRP / unit selling price.
+
+**Example**
+
+| Field | Value |
 |---|---|
-| Fast data entry | Pharmacists receive 50–200 SKUs per delivery |
-| Error prevention | Wrong batch/expiry = patient safety risk |
-| Audit trail | Regulatory compliance (who received what, when) |
-| Fits existing stack | Ant Design 5, React Router 7, your green `#25D366` theme |
-| Two entry modes | Manual (small deliveries) + Invoice upload (bulk) |
+| Medicine | Dolo 650 |
+| Pack size | 15 tablets |
+| MRP (pack) | ₹30.00 |
+| Unit selling price | ₹2.00 (auto) |
+| Qty received | 500 tablets |
+| Line MRP value | ₹1,000.00 |
+| Purchase cost (optional) | ₹14.00 / pack or ₹700 line |
 
 ---
 
-## 4. User Flow
+## 3. User Flow
 
 ```mermaid
 flowchart TD
-    A[Suppliers List] -->|Fill Stock| B[Stock Fill Session]
-    B --> C{Entry Mode}
-    C -->|Manual| D[Search/Scan Medicine]
-    C -->|Invoice PDF| E[Upload + OCR Extract]
-    E --> F[Review Extracted Lines]
-    D --> G[Add Line Items]
-    F --> G
-    G --> H[Enter Batch / Expiry / Qty / Price]
-    H --> I[Preview Stock Impact]
-    I --> J{Confirm?}
-    J -->|Yes| K[Post to Inventory API]
-    J -->|Save Draft| L[Draft saved]
-    K --> M[Success + Print GRN]
+    A[Suppliers list] -->|Fill Stock| B[Fill Stock session]
+    B --> C[Enter Invoice No + Date]
+    C --> D{Choose entry mode}
+    D -->|Manual Entry card| E[Search medicine + Add line]
+    D -->|Upload Invoice PDF card| F[Upload PDF]
+    F --> G[Review extracted lines]
+    G --> E
+    E --> H[Edit batch / expiry / qty / MRP]
+    H --> I[Save Draft optional]
+    H --> J[Confirm modal: Yes / No]
+    J -->|No| H
+    J -->|Yes| K[Post batches to inventory]
+    K --> L[Success + back to suppliers]
 ```
 
 ---
 
-## 5. Screen Design — Fill Stock (`/suppliers/:supplierId/fill-stock`)
+## 4. Screen Design
 
-### 5.1 Page Header
+### 4.1 Shared session header (always visible)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  ← Suppliers  /  PharmaLink Distribution  /  Fill Stock         │
-│                                                                  │
-│  Supplier: PharmaLink Distribution (PL-9920-X)                  │
-│  Invoice #: [________]    Date: [date picker]    PO #: [____]   │
-│                                                                  │
-│  [Manual Entry]  [Upload Invoice]          Status: ● Draft    │
-└─────────────────────────────────────────────────────────────────┘
+← Suppliers  /  PharmaLink Distribution  /  Fill Stock
+
+Supplier: PharmaLink Distribution   PL-9920-X   ● Active
+Invoice No. * [INV-2026-089]     Invoice Date * [15/07/2026]
+Status: Draft
 ```
 
-Reuse your existing `Tabs` pattern from `add-pharmacy.tsx`.
+- Invoice No. required, unique per org (or per supplier+org).  
+- Disable Add / Upload until invoice no. is filled.  
+- Show validation if duplicate invoice already posted.
 
-### 5.2 Manual Entry Tab
+### 4.2 Step 1 — Mode chooser (two cards)
 
-**Top bar**
+```
+How do you want to add stock?
 
-- Medicine search (reuse `SearchMedicines` from `add-prescription.tsx`)
-- Barcode input (future: scan → resolve medicine)
-- **+ Add Row** button
+┌──────────────────────────┐  ┌──────────────────────────┐
+│  Manual Entry            │  │  Upload Invoice PDF      │
+│  Search medicines and    │  │  Upload supplier PDF to  │
+│  enter batch, expiry,    │  │  extract line items,     │
+│  qty, MRP                │  │  then review & edit      │
+└──────────────────────────┘  └──────────────────────────┘
+```
 
-**Editable line-item table**
+Cards are **mode entry**, not persistent marketing tiles. After choice, show a compact mode switcher (segmented control or tabs) so the user can change mode without losing the invoice header.
 
-| Medicine | Generic / Strength | Batch No. | Expiry | Qty | Unit | MRP | Cost | Actions |
+### 4.3 Manual Entry
+
+**Toolbar**
+
+- Medicine search (reuse `SearchMedicines`)  
+- **+ Add line** (adds selected medicine with empty batch/expiry/qty/MRP)
+
+**Line table**
+
+| Medicine | Batch No. * | Expiry * | Qty * | Pack size | MRP (₹) * | Unit price (₹) | Line total | |
 |---|---|---|---|---|---|---|---|---|
-| Dolo 650 | Paracetamol 650mg | B-2024-001 | Mar 2027 | 500 | Tab | ₹30 | ₹18 | ✏️ 🗑 |
-| Amoxicillin 500mg | Amoxicillin | B-2024-088 | Jan 2026 | 200 | Cap | ₹45 | ₹28 | ✏️ 🗑 |
+| Dolo 650 | B-2401 | Mar 2027 | 500 | 15 | 30.00 | 2.00 | ₹1,000 | 🗑 |
+| Amox 500 | B-0882 | Jan 2027 | 200 | 10 | 85.00 | 8.50 | ₹1,700 | 🗑 |
 
-**Row validation (inline)**
+- Unit price = read-only computed (MRP ÷ pack size).  
+- Pack size from medicine master; if missing, force enter pack size once.  
+- Validation: expiry > today, qty > 0, batch required, MRP entered.
 
-- Expiry must be future
-- Qty > 0
-- Batch required for scheduled drugs
-- Duplicate batch for same medicine → warning
-
-**Footer summary card**
+**Footer**
 
 ```
-┌──────────────────────────────────────┐
-│  Lines: 12    Total Units: 4,200    │
-│  Invoice Value: ₹84,500              │
-│  New SKUs: 2   Updated batches: 10   │
-│                                      │
-│  [Save Draft]  [Preview Impact]  [Confirm & Post Stock] │
-└──────────────────────────────────────┘
+2 lines · 700 units · Invoice value ₹2,700
+[Save Draft]                    [Confirm & Post Stock]
 ```
 
-### 5.3 Invoice Upload Tab
+### 4.4 Upload Invoice PDF
 
-Extend `upload-inovice.tsx`:
+1. Drag-drop PDF (reuse `upload-inovice.tsx` patterns)  
+2. Progress while processing  
+3. Review table (same columns as manual) with low-confidence rows highlighted  
+4. **Import to lines** → lands on the same editable table as Manual  
+5. Pharmacist/supplier user must fix batch/expiry/MRP before confirm  
 
-1. Drag-drop PDF
-2. Progress bar (OCR processing)
-3. Extracted table with confidence scores
-4. Pharmacist maps/corrects each row
-5. **Import to line items** → switches to Manual tab with pre-filled rows
+OCR never posts directly to inventory.
+
+### 4.5 Confirm modal (required)
+
+Not a bare Yes/No — include summary:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  📄 Invoice_inv-2023-001.pdf          OCR: 94% match   │
-│  ████████████████████░░░░  85%                          │
-│                                                         │
-│  Extracted: 15 items  |  2 need review  |  1 unmatched│
-│                                                         │
-│  [Review & Import]                                      │
-└─────────────────────────────────────────────────────────┘
+Confirm stock fill?
+
+Post 2 medicines (700 units) from invoice INV-2026-089
+to PharmaLink Distribution inventory?
+
+Invoice value (MRP): ₹2,700
+
+[Cancel]                    [Confirm & Post]
 ```
 
-### 5.4 Preview Impact Modal (Before Confirm)
-
-Show what will change in inventory:
-
-| Medicine | Current Stock | Adding | New Total | Nearest Expiry |
-|---|---|---|---|---|
-| Dolo 650 | 4,500 | +500 | 5,000 | Mar 2027 |
-| Amoxicillin 500mg | 0 (Out) | +200 | 200 | Jan 2026 |
-
-Use the same stock status chips from `prescription-preview.tsx`:
-
-- Green dot = In Stock
-- Amber = Low Stock (below reorder level)
-- Red = Out of Stock → will become In Stock after confirm
-
-### 5.5 Post-Confirm
-
-- Success toast
-- Optional: print GRN receipt
-- Redirect to supplier detail or inventory dashboard
-- Audit log entry created
+On success: toast + navigate back to suppliers (or stay with status Posted).
 
 ---
 
-## 6. Pharmacist Inventory Dashboard (Optional Phase 2)
+## 5. Wireframes (Desktop)
 
-A dedicated `/pharmacy/inventory` view for ongoing stock management:
+### Mode chooser
 
 ```
-┌──────────────┬──────────────┬──────────────┬──────────────┐
-│ Total SKUs   │ Low Stock    │ Expiring 30d │ Pending GRN  │
-│    1,247     │     23       │     8        │      2       │
-└──────────────┴──────────────┴──────────────┴──────────────┘
-
-[Search medicines...]  [Filter: Low Stock ▼]  [Filter: Expiring ▼]
-
-| Medicine | Batch | Expiry | On Hand | Reorder | Status | Action |
+┌────────────────────────────────────────────────────────────┐
+│ Suppliers > PharmaLink Distribution > Fill Stock          │
+│ PharmaLink Distribution  PL-9920-X  ● Active               │
+│ Invoice No. [INV-2026-089]   Date [15/07/2026]  Draft     │
+│                                                            │
+│ How do you want to add stock?                              │
+│  ┌─────────────────────┐   ┌─────────────────────┐       │
+│  │ Manual Entry        │   │ Upload Invoice PDF  │       │
+│  │ Search + line items │   │ PDF → review lines  │       │
+│  └─────────────────────┘   └─────────────────────┘       │
+└────────────────────────────────────────────────────────────┘
 ```
 
-Actions: Adjust stock, View movement history, Fill from supplier.
+### Manual entry + confirm
 
-### 6.1 Relationship to Clinic Overview (`/dashboard`)
+```
+┌────────────────────────────────────────────────────────────┐
+│ … invoice header …                                         │
+│ [Manual Entry]  Upload Invoice                             │
+│ 🔍 Search medicine…                         [+ Add line]   │
+│ Medicine   Batch   Expiry   Qty  MRP   Unit   Total   🗑  │
+│ Dolo 650   B-2401  Mar’27   500  30    2.00   1000        │
+│ …                                                          │
+│ 2 lines · 700 units · ₹2,700                               │
+│                    [Save Draft]  [Confirm & Post Stock]    │
+└────────────────────────────────────────────────────────────┘
 
-The full inventory table above is the **canonical pharmacy workspace**. The clinic Overview dashboard shows a **compact alert cousin** only — not a duplicate inventory grid.
-
-| Surface | Route | Scope |
-|---------|-------|-------|
-| Overview pharmacy alerts (`W-INV`) | `/dashboard` | Counts + top 5 low/expiring + pending GRN; CTAs into inventory / fill-stock |
-| Inventory dashboard | `/pharmacy/inventory` | Full SKU table, filters, adjust stock, movement history |
-| Fill Stock / GRN | `/suppliers/:supplierId/fill-stock` | Receive stock session (this document §§4–5) |
-
-**Product rules (shared with `dashboard-requirements.md`):**
-
-- Show Overview `W-INV` only when `inventory_enabled` (Phase 2).
-- Reuse the same stock chips as `src/prescriptions/prescription-preview.tsx`: In Stock / Low / Out.
-- KPI definitions must match: Low stock count, Expiring in 30 days, Pending GRN.
-- Deep links from Overview: “Open inventory” → `/pharmacy/inventory`; “Fill stock” → suppliers fill-stock flow.
-- Pharmacist role: Overview is an alert day board; deep work stays on inventory + GRN screens.
-
-See **[dashboard-requirements.md](dashboard-requirements.md)** §7.8 (Inventory alerts), §7.6 (Quick actions), §11 Phase 2, and DASH-03 Pharmacist layout.
+          ┌─ Confirm ─────────────────────────┐
+          │ Post 2 medicines (700 units)     │
+          │ invoice INV-2026-089 ?           │
+          │ [Cancel]     [Confirm & Post]    │
+          └──────────────────────────────────┘
+```
 
 ---
 
-## 7. Data Model (Suggested)
+## 6. Data Model (MVP)
 
 ```typescript
-// Stock Fill Session (GRN)
 interface StockFillSession {
   id: string;
   supplier_id: string;
   organisation_id: string;
-  invoice_number: string;
-  invoice_date: string;
-  purchase_order_id?: string;
-  status: 'draft' | 'verifying' | 'confirmed' | 'posted' | 'cancelled';
+  invoice_number: string;       // required
+  invoice_date: string;         // required
+  status: 'draft' | 'posted' | 'cancelled';
   entry_mode: 'manual' | 'invoice_ocr';
   invoice_file_url?: string;
-  received_by: string;        // pharmacist user_id
-  confirmed_at?: string;
   lines: StockFillLine[];
-  total_value: number;
-  notes?: string;
+  created_by: string;
+  posted_at?: string;
 }
 
 interface StockFillLine {
   id: string;
   medicine_id: string;
   medicine_name: string;
-  generic_name: string;
-  strength: string;
-  batch_number: string;
-  expiry_date: string;        // ISO date
-  quantity: number;
-  unit: 'tablet' | 'capsule' | 'ml' | 'vial' | 'strip' | 'bottle';
-  mrp: number;
-  purchase_price: number;
-  free_quantity?: number;       // common in pharma (10+2 scheme)
-  ocr_confidence?: number;      // 0-1 if from invoice
-  needs_review: boolean;
-}
-
-// Inventory batch (posted result)
-interface MedicineBatch {
-  id: string;
-  medicine_id: string;
+  pack_size: number;            // from master
   batch_number: string;
   expiry_date: string;
-  quantity_on_hand: number;
-  mrp: number;
-  purchase_price: number;
-  supplier_id: string;
-  grn_id: string;
-  received_at: string;
+  quantity: number;             // sellable units
+  mrp: number;                  // pack MRP
+  unit_selling_price: number;   // mrp / pack_size (stored)
+  purchase_price?: number;      // optional cost per unit or pack — decide one
+  line_mrp_total: number;       // unit_selling_price * quantity
 }
 ```
 
+After confirm, create `MedicineBatch` rows keyed by `(medicine_id, batch_number, supplier_id, grn_id)` so later dispensing can FEFO-select batches.
+
 ---
 
-## 8. API Endpoints (Suggested)
+## 7. API (Suggested)
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| POST | `/stock-fill/sessions` | Create draft session |
-| GET | `/stock-fill/sessions/:id` | Get session + lines |
-| PUT | `/stock-fill/sessions/:id` | Update header (invoice no, date) |
-| POST | `/stock-fill/sessions/:id/lines` | Add line item |
-| PUT | `/stock-fill/sessions/:id/lines/:lineId` | Update line |
-| DELETE | `/stock-fill/sessions/:id/lines/:lineId` | Remove line |
-| POST | `/stock-fill/sessions/:id/upload-invoice` | Upload PDF, trigger OCR |
-| GET | `/stock-fill/sessions/:id/preview` | Preview inventory impact |
-| POST | `/stock-fill/sessions/:id/confirm` | Post to inventory |
-| GET | `/inventory/medicines` | List with stock levels |
-| GET | `/inventory/medicines/:id/batches` | Batch-level stock |
-| GET | `/inventory/alerts` | Low stock + expiring |
+| POST | `/stock-fill/sessions` | Create draft (invoice no + date + supplier) |
+| PUT | `/stock-fill/sessions/:id` | Update header / lines |
+| POST | `/stock-fill/sessions/:id/upload-invoice` | PDF upload |
+| POST | `/stock-fill/sessions/:id/confirm` | Validate + post inventory |
+| GET | `/medicine/searchMedicine` | Existing search |
 
-Reuse existing: `GET /medicine/searchMedicine?name=...`
+Confirm rejects if invoice_number already posted for org (or soft-warn).
 
 ---
 
-## 9. Component Structure (Fits Your Project)
+## 8. Component Map
 
 ```
-src/
-  pharmacy/
-    stock-fill/
-      fill-stock-page.tsx          # Main page (route handler)
-      stock-fill-header.tsx        # Supplier info + invoice fields
-      stock-fill-tabs.tsx          # Manual | Upload Invoice
-      line-items-table.tsx         # Editable Ant Design Table
-      add-medicine-row.tsx         # Search + quick add
-      invoice-upload-panel.tsx     # Extends upload-inovice.tsx
-      ocr-review-table.tsx         # Post-OCR review
-      stock-impact-preview.tsx     # Modal before confirm
-      stock-fill-summary.tsx       # Footer totals card
-      api/
-        stock-fill.ts
-      types/
-        stock-fill.ts
-      hooks/
-        useStockFillSession.ts     # React Query
+src/suppliers/
+  fill-stock/
+    fill-stock-page.tsx          # Route shell + invoice header
+    mode-chooser.tsx             # Two cards
+    manual-entry-panel.tsx       # Search + table
+    invoice-upload-panel.tsx     # Extends upload-inovice.tsx
+    line-items-table.tsx
+    confirm-post-modal.tsx
+    types/stock-fill.ts
+    api/stock-fill.ts
 ```
 
-**Route to add in `App.tsx`:**
+Route (missing today):
 
 ```tsx
 <Route
@@ -321,137 +287,70 @@ src/
 />
 ```
 
----
-
-## 10. Modern UI Recommendations (Ant Design 5)
-
-### Visual Language
-
-- Keep `#25D366` primary; use semantic colors for stock:
-  - Success: `#52c41a` (in stock)
-  - Warning: `#faad14` (low / expiring soon)
-  - Error: `#ff4d4f` (out of stock / expired)
-- Card-based sections with `bordered={false}` and light shadow (like `add-manual-form.tsx`)
-- Sticky footer action bar on mobile
-
-### UX Details
-
-- **Keyboard-first**: Tab through batch → expiry → qty
-- **Bulk paste**: Excel copy → paste into table (Phase 2)
-- **Autosave draft** every 30s (React Query `useMutation` debounced)
-- **Popconfirm** on delete line and confirm post (per your audit report)
-- **Empty state**: "No items yet — search a medicine or upload an invoice"
-- **Loading skeletons** on OCR and preview
-
-### Responsive
-
-- Desktop: full table + side summary
-- Tablet: collapsible summary drawer
-- Mobile: card list per line item instead of wide table
+`pharmacy.tsx` already navigates to this path.
 
 ---
 
-## 11. Role-Based Access
-
-| Role | Can do |
-|---|---|
-| Pharmacist | Create GRN, verify OCR, confirm stock |
-| Admin | All + cancel posted GRN, adjust stock |
-| Doctor / Nurse | View inventory only (optional) |
-| Receptionist | No access |
-
-Wire this when you extend `AuthGuard` beyond token-only checks.
-
----
-
-## 12. Implementation Phases
-
-### Phase 1 — MVP (2–3 weeks)
-
-- [ ] Route + Fill Stock page shell
-- [ ] Manual line-item table with validation
-- [ ] Save draft + confirm APIs
-- [ ] Stock impact preview modal
-- [ ] Connect existing Fill Stock button in `pharmacy.tsx`
-
-### Phase 2 — Invoice OCR
-
-- [ ] PDF upload + OCR backend
-- [ ] Review/import extracted lines
-- [ ] Confidence highlighting for low-confidence rows
-
-### Phase 3 — Inventory Dashboard
-
-- [ ] Pharmacist inventory list with filters
-- [ ] Low stock / expiry alerts
-- [ ] Batch-level drill-down
-- [ ] Movement history
-
-### Phase 4 — POS Integration
-
-- [ ] Link stock levels to `prescription-preview.tsx` (replace mock data)
-- [ ] FEFO batch selection at dispense time
-- [ ] Barcode scanning
-
----
-
-## 13. Wireframe — Full Page (Desktop)
+## 9. UI Design Prompt (Copy-Paste)
 
 ```
-┌──────────┬────────────────────────────────────────────────────────────┐
-│          │  Home > Suppliers > PharmaLink > Fill Stock               │
-│ Sidebar  ├────────────────────────────────────────────────────────────┤
-│          │  ┌─ Supplier Card ─────────────────────────────────────┐  │
-│ Dashboard│  │ PharmaLink Distribution  PL-9920-X  ● Active          │  │
-│ Patients │  │ Invoice: [INV-2024-089]  Date: [07/07/2026]         │  │
-│ Rx       │  └────────────────────────────────────────────────────┘  │
-│ Suppliers│                                                            │
-│ Employees│  ┌ Manual Entry ─┬─ Upload Invoice ─────────────────┐   │
-│          │  │ 🔍 Search medicine or scan barcode    [+ Add Row]  │   │
-│          │  ├────────────────────────────────────────────────────┤   │
-│          │  │ Medicine    Batch    Expiry   Qty  MRP   Cost  ⚙  │   │
-│          │  │ Dolo 650    B-001    Mar'27   500  30    18   🗑 │   │
-│          │  │ Ator 20mg   B-044    Jun'26   100  120   85   🗑 │   │
-│          │  │ ...                                              │   │
-│          │  └────────────────────────────────────────────────────┘   │
-│          │                                                            │
-│          │  ┌─ Summary ──────────────────────────────────────────┐   │
-│          │  │ 2 lines · 600 units · ₹12,400                      │   │
-│          │  │         [Save Draft]  [Preview]  [Confirm Stock]   │   │
-│          │  └────────────────────────────────────────────────────┘   │
-└──────────┴────────────────────────────────────────────────────────────┘
+Design a desktop hospital pharmacy “Fill Stock” (goods receipt) screen for a clinical web app.
+
+CONTEXT
+- User clicks Fill Stock on a supplier row
+- Brand: primary green #25D366, light clinical Ant Design density, Roboto
+- Light mode only. No purple gradients, no cream terracotta editorial look, no emoji, no glow, no marketing card clutter
+
+FRAME 1 — Mode chooser
+- Breadcrumb: Suppliers / PharmaLink Distribution / Fill Stock
+- Compact supplier strip + required Invoice No. + Invoice Date + Draft status
+- Headline: How do you want to add stock?
+- Two equal interaction cards: Manual Entry | Upload Invoice PDF
+
+FRAME 2 — Manual entry
+- Same invoice header sticky
+- Segmented control: Manual Entry selected
+- Search + Add line
+- Table: Medicine, Batch No, Expiry, Qty, MRP ₹, Unit Price ₹ (computed), Line Total, delete
+- Helper text: Unit price = MRP ÷ pack size
+- Sticky footer: line/unit/value summary + Save Draft + Confirm & Post Stock
+
+FRAME 3 — Confirm modal
+- Title: Confirm stock fill?
+- Body: Post N medicines (X units) from invoice INV-… ?
+- Cancel + Confirm & Post (primary green)
+
+DELIVERABLE: high-fidelity mocks of the three frames. Clinical POS density, not consumer e-commerce.
 ```
 
 ---
 
-## 14. Key Design Decisions
+## 10. Evaluation Checklist
 
-| Decision | Recommendation | Rationale |
+| Decision | Options | Default |
 |---|---|---|
-| Entry mode | Tabs: Manual + Invoice | Matches `add-pharmacy.tsx`; covers all delivery types |
-| Stock unit | Per batch, not per medicine | Required for expiry/FEFO |
-| Confirm step | Mandatory preview modal | Prevents accidental bulk posts |
-| Draft autosave | Yes | Long sessions; pharmacist may be interrupted |
-| OCR | Verify-before-import | OCR errors are common on invoices |
-| Table vs form | Inline editable table | POS standard; faster than modal-per-row |
+| Mode UI | Cards first vs tabs only | **Cards first, then segmented/tabs** |
+| Invoice no. | Optional vs required | **Required before add/upload** |
+| Qty unit | Packs vs sellable units | **Sellable units** (tabs/caps); show pack size |
+| Pricing inputs | MRP only vs MRP + purchase cost | **MRP required; purchase cost optional in v1** |
+| Unit price | Editable vs computed | **Computed from MRP ÷ pack size** |
+| Confirm UX | Bare Yes/No vs summary modal | **Summary modal** |
+| After post | Stay vs redirect | **Redirect to suppliers + toast** |
+| OCR | Auto-post vs review | **Review then same table** |
 
 ---
 
-## 15. Connection to Prescription Flow
+## 11. Implementation Gate
 
-After stock fill is live, update `prescription-preview.tsx` to:
-
-1. Fetch real stock per medicine from inventory API
-2. Show batch-aware availability
-3. Block dispense if out of stock (or suggest substitute)
-4. Decrement stock on "Dispense" confirm
-
-That turns the mock pharmacist view into a real dispensing workflow.
+| Step | Status |
+|---|---|
+| Approach corrected (this doc) | Done |
+| UI mocks reviewed | Pending — see generated frames |
+| Checklist §10 decided | Pending |
+| Build route + FillStockPage | After approval |
 
 ---
 
 ## Summary
 
-The **Medicine Stock Fill** feature should be a **Goods Receipt (GRN)** workflow: pharmacist selects supplier → enters or OCR-imports invoice lines → adds batch/expiry/qty → previews impact → confirms to inventory. It fits your existing suppliers module, reuses medicine search and stock status UI, and aligns with how modern pharmacy POS systems (Odoo, Norak Pharma, Pharmacy Inventory Pro) handle procurement.
-
-**Immediate next step in your repo:** add the missing route `/suppliers/:supplierId/fill-stock` and build `fill-stock-page.tsx` using the patterns from `pharmacy.tsx`, `add-prescription.tsx`, and `upload-inovice.tsx`.
+Treat Fill Stock as an **invoice-keyed GRN**: require **invoice number**, choose **Manual** or **Upload PDF**, enter lines with **batch / expiry / qty / pack MRP**, derive **unit selling price = MRP ÷ pack size**, then **confirm with a summary modal** before posting. Do not derive selling price from `qty × MRP` — that product is the line total, not the unit price.

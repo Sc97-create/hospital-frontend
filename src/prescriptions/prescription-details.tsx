@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { FindAllPrescription, GetByStatus } from "./api/prescription";
 import type { PrescriptionListItem, PrescriptionStatusFilter } from "./types/prescriptionmodel";
+import { rememberPrescriptionPatientId } from "./prescription-patient";
 
 import Sidebar from "../sidebar";
 
@@ -38,11 +39,20 @@ const getStatusColor = (status: string) => {
             return "gray";
         case "dispensed":
             return "green";
+        case "payment_link_created":
+            return "blue";
         case "expired":
             return "red";
         default:
             return "default";
     }
+};
+
+const getStatusLabel = (status: string) => {
+    if (status?.toLowerCase() === "payment_link_created") {
+        return "Payment link created";
+    }
+    return status;
 };
 
 function PrescriptionList() {
@@ -151,7 +161,7 @@ function PrescriptionList() {
             color: "#6B7280",
             render: (status: string) => (
                 <Tag color={getStatusColor(status)} bordered className="app-tag">
-                    {status}
+                    {getStatusLabel(status)}
                 </Tag>
             ),
         },
@@ -165,7 +175,18 @@ function PrescriptionList() {
                     size="small"
                     className="view-prescription-btn"
                     icon={<EyeOutlined />}
-                    onClick={() => navigate(`/prescription/${record.id}`)}
+                    onClick={() => {
+                        rememberPrescriptionPatientId(record.id, record.patient_id);
+                        navigate(
+                            {
+                                pathname: `/prescription/${record.id}`,
+                                search: record.patient_id
+                                    ? `?patientId=${encodeURIComponent(record.patient_id)}`
+                                    : undefined,
+                            },
+                            { state: { patientId: record.patient_id } },
+                        );
+                    }}
                 >
                     View
                 </Button>
