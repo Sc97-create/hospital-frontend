@@ -28,6 +28,7 @@ export interface createPrescResponseData {
 }
 export interface medicineResponse {
     prescription_id: string;
+    prescription_item_id: string;
     medicine_id: string;
     medicine_name: string;
     medicine_form: string;
@@ -48,6 +49,10 @@ export interface SearchMedicineItem {
     generic_name: string;
     strength: string;
     form: string;
+    hsn_code?: string;
+    shelf_location?: string;
+    reorder_level?: number;
+    max_stock_target?: number;
 }
 
 export interface SearchMedicineResponse {
@@ -88,10 +93,30 @@ export type PrescriptionStatusFilter = "all" | "draft" | "sent";
 export interface UpdatePrescriptionStatus {
     prescription_id: string;
     appointment_id: string;
+    status: string;
 }
 
 export interface UpdateStatusResponse {
     data: string;
+    code: string;
+    message: string;
+}
+
+export interface UpdatePrescriptionItemPayload {
+    prescription_item_id: string;
+    medicine_id: string;
+    duration: number;
+    duration_type: string;
+    food_instruction: string;
+    morning: number;
+    afternoon: number;
+    night: number;
+}
+
+export interface UpdatePrescriptionItemResponse {
+    data: {
+        id: string;
+    };
     code: string;
     message: string;
 }

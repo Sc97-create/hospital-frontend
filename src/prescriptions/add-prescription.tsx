@@ -41,7 +41,7 @@ import "./add-prescription.css";
 import Sidebar from "../sidebar";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import type { CreatePrescription, Medicine, medicineResponse, SearchMedicineItem, UpdatePrescriptionStatus } from "./types/prescriptionmodel";
-import { CreatePrescriptionApi, FindOnePrescription, SearchMedicines, UpdatePrescription, UpdateStatus } from "./api/prescription";
+import { CreatePrescriptionApi, FindOnePrescription, SearchMedicines, UpdatePrescription, UpdatePrescriptionItem, UpdateStatus } from "./api/prescription";
 import type { DefaultOptionType } from "antd/es/select";
 
 const { Content } = Layout;
@@ -55,6 +55,7 @@ interface MedicineOption extends DefaultOptionType {
 interface PrescriptionFormValues {
     medicine: string;
     medicine_id: string;
+    prescription_item_id?: string;
     morning: string | number;
     afternoon: string | number;
     night: string | number;
@@ -63,6 +64,57 @@ interface PrescriptionFormValues {
     duration_type: string;
     food_instruction: string;
     medicine_type: string;
+}
+
+function getApiResponseData(error: unknown): unknown {
+    if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response
+    ) {
+        return (error.response as { data: unknown }).data;
+    }
+    return undefined;
+}
+
+function getApiErrorStatus(error: unknown): number | null {
+    if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "status" in error.response &&
+        typeof (error.response as { status: unknown }).status === "number"
+    ) {
+        return (error.response as { status: number }).status;
+    }
+    return null;
+}
+
+function getApiErrorMessage(error: unknown): string | null {
+    const data = getApiResponseData(error);
+    if (typeof data === "string" && data.trim()) {
+        return data;
+    }
+    if (data && typeof data === "object") {
+        const record = data as Record<string, unknown>;
+        if (typeof record.message === "string" && record.message.trim()) {
+            return record.message;
+        }
+        if (typeof record.error === "string" && record.error.trim()) {
+            return record.error;
+        }
+    }
+    if (error instanceof Error) return error.message;
+    return null;
+}
+
+function isMedicineAlreadyPresentMessage(message: string | null | undefined): boolean {
+    return Boolean(message?.toLowerCase().includes("already present in prescription"));
 }
 
 function AddPrescription() {
@@ -75,6 +127,7 @@ function AddPrescription() {
     const pageSize = 3;
 
     const [form] = Form.useForm();
+    const [messageApi, messageContextHolder] = message.useMessage();
 
     const [medicineOptions, setMedicineOptions] = useState<MedicineOption[]>([]);
 
@@ -82,13 +135,14 @@ function AddPrescription() {
     const [created_at, setCreatedAt] = useState<string>();
     const [isSent, setIsSent] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [editingItemId, setEditingItemId] = useState<string | null>(null);
     const screens = Grid.useBreakpoint();
     const isMobile = !screens.md;
     const handleUpdateStatus = async (payload: UpdatePrescriptionStatus) => {
         const response = await UpdateStatus(payload);
         if (response.code === "200") {
             setIsSent(true);
-            message.success("Status updated successfully!");
+            messageApi.success("Status updated successfully!");
             setTimeout(() => {
                 navigate('/prescription');
             }, 1000);
@@ -129,55 +183,130 @@ function AddPrescription() {
         setCreatedAt(findoneesponse.data.created_at.toString());
         setCurrentPage(page);
     }
+    const resetMedicineForm = () => {
+        form.resetFields();
+        setEditingItemId(null);
+        setDrawerOpen(false);
+    };
+
+    const handleEditMedicine = (item: medicineResponse) => {
+        const prescriptionItemId = item.prescription_item_id?.trim();
+        if (!prescriptionItemId) {
+            messageApi.error("Missing prescription_item_id for this medicine");
+            return;
+        }
+
+        setEditingItemId(prescriptionItemId);
+        form.setFieldsValue({
+            medicine: item.medicine_name,
+            medicine_id: item.medicine_id,
+            prescription_item_id: prescriptionItemId,
+            morning: item.frequency?.morning ?? 0,
+            afternoon: item.frequency?.afternoon ?? 0,
+            night: item.frequency?.night ?? 0,
+            dosage: item.medicine_form,
+            duration: item.duration_day,
+            duration_type: item.duration_type,
+            food_instruction: item.food_instruction,
+            medicine_type: item.medicine_form,
+        });
+        if (isMobile) {
+            setDrawerOpen(true);
+        }
+    };
+
     const handleFinalize = async (values: PrescriptionFormValues) => {
-        // 1. Format the new medicine from the current form values
-        const newMedicine = {
-            medicine_id: values.medicine_id,
-            medicine_name: values.medicine,
-            morning: Number(values.morning),
-            afternoon: Number(values.afternoon),
-            night: Number(values.night),
-            dosage: values.dosage,
-            duration: Number(values.duration),
-            duration_type: values.duration_type,
-            food_instruction: values.food_instruction,
-            medicine_type: values.medicine_type,
-        };
-
-        // 2. Prepare the full list (existing medicines + the one we just filled)
-        const updatedMedicines = [...medicines, newMedicine];
-
-        const finalPayload: CreatePrescription = {
-            appointment_id: params.appointmentID || "",
-            organisation_id: localStorage.getItem("organisation_id") || "",
-            prescribed_by: localStorage.getItem("user_id") || "",
-            medicine_array: updatedMedicines,
-            prescription_id: prescriptionID ? prescriptionID : "",
-        };
+        const prescriptionItemId =
+            editingItemId || values.prescription_item_id?.trim() || "";
 
         try {
+            if (prescriptionItemId) {
+                const response = await UpdatePrescriptionItem({
+                    prescription_item_id: prescriptionItemId,
+                    medicine_id: values.medicine_id,
+                    duration: Number(values.duration),
+                    duration_type: values.duration_type,
+                    food_instruction: values.food_instruction,
+                    morning: Number(values.morning),
+                    afternoon: Number(values.afternoon),
+                    night: Number(values.night),
+                });
+                if (response.code === "200") {
+                    messageApi.success("Medicine updated successfully!");
+                    if (prescriptionID) {
+                        await findonePresc(prescriptionID, currentPage);
+                    }
+                    resetMedicineForm();
+                } else if (isMedicineAlreadyPresentMessage(response.message)) {
+                    messageApi.warning(response.message);
+                } else {
+                    messageApi.error(response.message || "Failed to update medicine");
+                }
+                return;
+            }
+
+            // 1. Format the new medicine from the current form values
+            const newMedicine = {
+                medicine_id: values.medicine_id,
+                medicine_name: values.medicine,
+                morning: Number(values.morning),
+                afternoon: Number(values.afternoon),
+                night: Number(values.night),
+                dosage: values.dosage,
+                duration: Number(values.duration),
+                duration_type: values.duration_type,
+                food_instruction: values.food_instruction,
+                medicine_type: values.medicine_type,
+            };
+
+            // 2. Prepare the full list (existing medicines + the one we just filled)
+            const updatedMedicines = [...medicines, newMedicine];
+
+            const finalPayload: CreatePrescription = {
+                appointment_id: params.appointmentID || "",
+                organisation_id: localStorage.getItem("organisation_id") || "",
+                prescribed_by: localStorage.getItem("user_id") || "",
+                medicine_array: updatedMedicines,
+                prescription_id: prescriptionID ? prescriptionID : "",
+            };
+
             if (!prescriptionID) {
                 const response = await CreatePrescriptionApi(finalPayload);
                 if (response.code === "200") {
-                    message.success("Prescription updated successfully!");
+                    messageApi.success("Prescription updated successfully!");
                     findonePresc(response.data.id, currentPage)
                     setPrescriptionID(response.data.id)
-                    form.resetFields();
-                    setDrawerOpen(false);
+                    resetMedicineForm();
+                } else if (isMedicineAlreadyPresentMessage(response.message)) {
+                    messageApi.warning(response.message);
+                } else {
+                    messageApi.error(response.message || "Failed to update prescription");
                 }
             } else {
                 const response = await UpdatePrescription(finalPayload);
                 if (response.code === "200") {
-                    message.success("Prescription updated successfully!");
+                    messageApi.success("Prescription updated successfully!");
                     findonePresc(response.data.id, currentPage)
                     setPrescriptionID(response.data.id)
-                    form.resetFields();
-                    setDrawerOpen(false);
+                    resetMedicineForm();
+                } else if (isMedicineAlreadyPresentMessage(response.message)) {
+                    messageApi.warning(response.message);
+                } else {
+                    messageApi.error(response.message || "Failed to update prescription");
                 }
             }
         } catch (err) {
             console.error("API Error:", err);
-            message.error("Failed to update prescription");
+            const apiMessage = getApiErrorMessage(err);
+            const status = getApiErrorStatus(err);
+            if (status === 409 || isMedicineAlreadyPresentMessage(apiMessage)) {
+                messageApi.warning(apiMessage || "This medicine is already present in the prescription");
+                return;
+            }
+            messageApi.error(
+                apiMessage ||
+                    (editingItemId ? "Failed to update medicine" : "Failed to update prescription"),
+            );
         }
     }
 
@@ -302,15 +431,19 @@ function AddPrescription() {
             <Form.Item name="medicine_id" hidden>
                 <Input />
             </Form.Item>
+            <Form.Item name="prescription_item_id" hidden>
+                <Input />
+            </Form.Item>
 
             <Button type="primary" size="large" block className="add-btn" htmlType="submit">
-                Add Medicine
+                {editingItemId ? "Update Medicine" : "Add Medicine"}
             </Button>
         </Form>
     );
 
     return (
         <Layout>
+            {messageContextHolder}
             <Sidebar />
             <Layout>
                 <div className="breadcrumb-layout">
@@ -329,7 +462,7 @@ function AddPrescription() {
                     {!isMobile && (
                         <div className="prescription-sidebar prescription-sidebar-desktop">
                             <Title level={4} className="sidebar-title">
-                                Add Medicine
+                                {editingItemId ? "Edit Medicine" : "Add Medicine"}
                             </Title>
                             {medicineForm}
                         </div>
@@ -343,7 +476,11 @@ function AddPrescription() {
                                 icon={<PlusOutlined />}
                                 size="large"
                                 className="open-medicine-drawer-btn"
-                                onClick={() => setDrawerOpen(true)}
+                                onClick={() => {
+                                    setEditingItemId(null);
+                                    form.resetFields();
+                                    setDrawerOpen(true);
+                                }}
                             >
                                 Add Medicine
                             </Button>
@@ -380,7 +517,7 @@ function AddPrescription() {
                         {/* Medicine Cards */}
                         <Space direction="vertical" size={16} className="full-width">
                             {findonePrescriptionData?.map((item) => (
-                                <Card key={item.medicine_id} className="medicine-card">
+                                <Card key={item.prescription_item_id || item.medicine_id} className="medicine-card">
                                     <Row justify="space-between" align="middle">
                                         <Col flex="auto">
                                             <Space align="start">
@@ -430,6 +567,7 @@ function AddPrescription() {
                                                     type="text"
                                                     icon={<EditOutlined />}
                                                     className="action-btn edit-btn"
+                                                    onClick={() => handleEditMedicine(item)}
                                                 >
                                                     Edit
                                                 </Button>
@@ -438,7 +576,7 @@ function AddPrescription() {
                                                     description="This medicine will be removed from the prescription."
                                                     okText="Delete"
                                                     okType="danger"
-                                                    onConfirm={() => message.warning('Delete medicine API not yet connected')}
+                                                    onConfirm={() => messageApi.warning('Delete medicine API not yet connected')}
                                                 >
                                                     <Button
                                                         danger
@@ -489,7 +627,11 @@ function AddPrescription() {
                                     type="primary"
                                     icon={<CheckOutlined />}
                                     className="finalize-btn"
-                                    onClick={() => handleUpdateStatus({ prescription_id: prescriptionID, appointment_id: params.appointmentID ? params.appointmentID : "" })}
+                                    onClick={() => handleUpdateStatus({
+                                        prescription_id: prescriptionID,
+                                        appointment_id: params.appointmentID ? params.appointmentID : "",
+                                        status: "sent",
+                                    })}
                                     disabled={isSent || !prescriptionID}
                                 >
                                     {isSent ? "Prescription Sent" : "Finalize Prescription"}
@@ -500,10 +642,14 @@ function AddPrescription() {
 
                     {isMobile && (
                         <Drawer
-                            title="Add Medicine"
+                            title={editingItemId ? "Edit Medicine" : "Add Medicine"}
                             placement="bottom"
                             open={drawerOpen}
-                            onClose={() => setDrawerOpen(false)}
+                            onClose={() => {
+                                setDrawerOpen(false);
+                                setEditingItemId(null);
+                                form.resetFields();
+                            }}
                             height="min(90vh, 720px)"
                             className="prescription-medicine-drawer"
                             destroyOnClose={false}

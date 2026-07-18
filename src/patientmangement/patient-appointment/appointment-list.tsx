@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Table,
     Input,
@@ -14,8 +14,6 @@ import {
 } from "antd";
 import {
     SearchOutlined,
-    LeftOutlined,
-    RightOutlined,
     HomeOutlined,
     DownOutlined,
     LoadingOutlined,
@@ -90,13 +88,14 @@ const AppointmentsPage: React.FC = () => {
     const [searchInput, setSearchInput] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(10);
+    const [pageSize] = useState<number>(10);
     const [loading, setLoading] = useState(false);
     const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
     const navigate = useNavigate();
     const [appointmentsData, setAppointmentsData] = useState<AppointmentOrg[]>([]);
     const [appointmentcount, setAppntmentCount] = useState<number>(0);
     const organisationId = localStorage.getItem("organisation_id") || "";
+    const requestIdRef = useRef(0);
 
     const handleStatusChange = async (appointmentId: string, nextStatus: string) => {
         const previous = appointmentsData.find((a) => a.appointment_id === appointmentId);
@@ -266,7 +265,7 @@ const AppointmentsPage: React.FC = () => {
 
     useEffect(() => {
         getAppointmentByOrgID(
-            currentPage - 1,
+            currentPage,
             pageSize,
             selectedDoctor,
             selectedDate,
@@ -287,7 +286,7 @@ const AppointmentsPage: React.FC = () => {
     };
 
     const getAppointmentByOrgID = async (
-        page: number = 0,
+        page: number = 1,
         limit: number = 10,
         doctor_id?: number,
         date?: string,
@@ -295,6 +294,7 @@ const AppointmentsPage: React.FC = () => {
         visit_type?: string,
         search?: string,
     ) => {
+        const requestId = ++requestIdRef.current;
         try {
             setLoading(true);
             const trimmedSearch = search?.trim() || "";
@@ -309,13 +309,28 @@ const AppointmentsPage: React.FC = () => {
                 ...(trimmedSearch ? { search: trimmedSearch } : {}),
             };
             const response = await GetAppointmentsByOrganisationID(appointmentGetPayload);
-            setAppointmentsData(response.data || []);
-            setAppntmentCount(response.total || 0);
+            if (requestId !== requestIdRef.current) return;
+
+            const rows = Array.isArray(response?.data) ? response.data : [];
+            const total = Number(response?.total);
+            setAppointmentsData(rows);
+            setAppntmentCount(Number.isFinite(total) ? total : 0);
+
+            // If filters shrink the result set past the current page, snap back
+            const maxPage = Math.max(1, Math.ceil((Number.isFinite(total) ? total : 0) / limit) || 1);
+            if (page > maxPage) {
+                setCurrentPage(maxPage);
+            }
         } catch (error) {
+            if (requestId !== requestIdRef.current) return;
             console.error("Error fetching appointments:", error);
             messageApi.error("Failed to load appointments");
+            setAppointmentsData([]);
+            setAppntmentCount(0);
         } finally {
-            setLoading(false);
+            if (requestId === requestIdRef.current) {
+                setLoading(false);
+            }
         }
     };
 
@@ -459,12 +474,11 @@ const AppointmentsPage: React.FC = () => {
                             </Text>
 
                             <Pagination
-                                simple
                                 current={currentPage}
                                 total={appointmentcount}
                                 pageSize={pageSize}
-                                prevIcon={<LeftOutlined />}
-                                nextIcon={<RightOutlined />}
+                                showSizeChanger={false}
+                                hideOnSinglePage={false}
                                 onChange={(page) => setCurrentPage(page)}
                             />
                         </div>

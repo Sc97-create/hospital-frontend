@@ -3,6 +3,7 @@ import type { patientlist } from '../patientmangement/types/patients';
 
 export type PrescriptionLocationState = {
     patientId?: string;
+    status?: string;
 };
 
 const patientIdStorageKey = (prescriptionId: string) => `rx-patient:${prescriptionId}`;
@@ -84,6 +85,52 @@ export function toTitleCase(value: string | undefined | null): string {
         .trim()
         .toLowerCase()
         .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function normalizePrescriptionStatus(status: string | undefined | null): string {
+    return status?.trim().toLowerCase().replace(/[\s-]+/g, '_') ?? '';
+}
+
+export function isDraftPrescriptionStatus(status: string | undefined | null): boolean {
+    return normalizePrescriptionStatus(status) === 'draft';
+}
+
+/** Human-readable prescription / pharma status for tags. */
+export function formatPrescriptionStatusLabel(status: string | undefined | null): string {
+    switch (normalizePrescriptionStatus(status)) {
+        case 'payment_link_created':
+            return 'Payment link created';
+        case 'partially_dispensed':
+        case 'partial_dispensed':
+            return 'Partially dispensed';
+        case 'cancelled':
+        case 'canceled':
+            return 'Cancelled';
+        default:
+            return status?.trim() ? toTitleCase(status) : '—';
+    }
+}
+
+export function getPrescriptionStatusTagColor(status: string | undefined | null): string {
+    switch (normalizePrescriptionStatus(status)) {
+        case 'sent':
+        case 'dispensed':
+            return 'green';
+        case 'draft':
+        case 'pending':
+            return 'default';
+        case 'partially_dispensed':
+        case 'partial_dispensed':
+            return 'orange';
+        case 'payment_link_created':
+            return 'blue';
+        case 'expired':
+        case 'cancelled':
+        case 'canceled':
+            return 'red';
+        default:
+            return 'default';
+    }
 }
 
 export async function fetchPatientById(patientId: string): Promise<patientlist | null> {

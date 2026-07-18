@@ -8,6 +8,8 @@ import type {
     FindManyResponse,
     findOneResponse,
     SearchMedicineResponse,
+    UpdatePrescriptionItemPayload,
+    UpdatePrescriptionItemResponse,
     UpdatePrescriptionStatus,
     UpdateStatusResponse,
 } from "../types/prescriptionmodel";
@@ -22,6 +24,12 @@ export const CreatePrescriptionApi = async (createprescription: CreatePrescripti
 }
 export const UpdatePrescription = async (updateprescription: CreatePrescription): Promise<createPrescResponse> => {
     const response = await apiClient.patch(`/prescription/updatePrescriptions`, updateprescription)
+    return response.data
+}
+export const UpdatePrescriptionItem = async (
+    payload: UpdatePrescriptionItemPayload,
+): Promise<UpdatePrescriptionItemResponse> => {
+    const response = await apiClient.patch(`/prescription/updatePrescriptionItem`, payload)
     return response.data
 }
 export const FindOnePrescription = async (prescription_id: string, limit: number = 3, offset: number = 0): Promise<findOneResponse> => {

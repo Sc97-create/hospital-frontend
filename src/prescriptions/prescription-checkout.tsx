@@ -39,11 +39,12 @@ import type {
 import {
     fetchPatientById,
     formatPatientSubtext,
+    formatPrescriptionStatusLabel,
+    getPrescriptionStatusTagColor,
     prescriptionPath,
     recallPrescriptionPatientId,
     rememberPrescriptionPatientId,
     resolvePrescriptionPatientId,
-    toTitleCase,
     type PrescriptionLocationState,
 } from './prescription-patient';
 import type { patientlist } from '../patientmangement/types/patients';
@@ -985,8 +986,12 @@ function PrescriptionCheckout() {
                                                 {isPaymentLinkCreated(rxStatus) ? (
                                                     <Tag color="blue">Yet to pay</Tag>
                                                 ) : (
-                                                    <Tag color="green">
-                                                        {toTitleCase(rxStatus || '—')}
+                                                    <Tag
+                                                        color={getPrescriptionStatusTagColor(rxStatus)}
+                                                        bordered
+                                                        className="app-tag"
+                                                    >
+                                                        {formatPrescriptionStatusLabel(rxStatus)}
                                                     </Tag>
                                                 )}
                                             </div>
