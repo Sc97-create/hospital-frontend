@@ -26,11 +26,12 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'reac
 import { useEffect, useState } from 'react';
 
 import Sidebar from '../sidebar';
-import { FindOnePrescription, GetDispenseCheckoutLines } from './api/prescription';
+import { FindOnePrescription, GetDispenseCheckoutLines, UpdateStatus } from './api/prescription';
 import type { medicineResponse } from './types/prescriptionmodel';
 import {
     fetchPatientById,
     formatPatientSubtext,
+    isDraftPrescriptionStatus,
     prescriptionPath,
     recallPrescriptionPatientId,
     rememberPrescriptionPatientId,
@@ -158,11 +159,15 @@ function PharmacistPrescriptionDetail() {
     const [searchParams] = useSearchParams();
     const locationState = (location.state as PrescriptionLocationState | null) ?? null;
     const [messageApi, contextHolder] = message.useMessage();
+    const [modalApi, modalContextHolder] = Modal.useModal();
     const [loading, setLoading] = useState(true);
     const [rows, setRows] = useState<PrescriptionRow[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [patient, setPatient] = useState<patientlist | null>(null);
     const [resolvedPatientId, setResolvedPatientId] = useState<string | undefined>();
+    const [prescriptionStatus, setPrescriptionStatus] = useState<string>(
+        locationState?.status ?? '',
+    );
 
     useEffect(() => {
         if (!id) {
@@ -187,6 +192,11 @@ function PharmacistPrescriptionDetail() {
                     setRows(mapMedicines(medicines));
                     setTotalCount(rxResponse.data?.total_count ?? medicines.length);
                 }
+
+                const statusFromMedicineInfo =
+                    medicineInfo?.data?.find((item) => item.prescription_status)?.prescription_status ??
+                    '';
+                setPrescriptionStatus(statusFromMedicineInfo || locationState?.status || '');
 
                 const patientId = resolvePrescriptionPatientId({
                     locationPatientId: locationState?.patientId,
@@ -230,13 +240,35 @@ function PharmacistPrescriptionDetail() {
     };
 
     const handleDiscard = () => {
-        Modal.confirm({
+        if (!id) {
+            messageApi.error('Missing prescription id');
+            return;
+        }
+
+        modalApi.confirm({
             title: 'Discard Order?',
             content: 'This will cancel all items in the current order. This action cannot be undone.',
             okText: 'Yes, Discard',
             okType: 'danger',
             cancelText: 'Keep Order',
-            onOk: () => messageApi.warning('Order discarded'),
+            onOk: async () => {
+                try {
+                    const response = await UpdateStatus({
+                        prescription_id: id,
+                        appointment_id: '',
+                        status: 'cancelled',
+                    });
+                    if (response.code === '200') {
+                        messageApi.success(response.message || 'Prescription cancelled');
+                        navigate('/prescription');
+                        return;
+                    }
+                    messageApi.error(response.message || 'Failed to cancel prescription');
+                } catch (error) {
+                    console.error('Failed to cancel prescription:', error);
+                    messageApi.error('Failed to cancel prescription');
+                }
+            },
         });
     };
 
@@ -253,6 +285,7 @@ function PharmacistPrescriptionDetail() {
     return (
         <Layout>
             {contextHolder}
+            {modalContextHolder}
             <Sidebar />
 
             <Layout>
@@ -338,14 +371,16 @@ function PharmacistPrescriptionDetail() {
                                     <Button danger onClick={handleDiscard}>
                                         Discard Order
                                     </Button>
-                                    <Button
-                                        type='primary'
-                                        icon={<CheckCircleOutlined />}
-                                        className='confirm-btn'
-                                        onClick={handleProceedToCheckout}
-                                    >
-                                        Proceed to Checkout
-                                    </Button>
+                                    {!isDraftPrescriptionStatus(prescriptionStatus) && (
+                                        <Button
+                                            type='primary'
+                                            icon={<CheckCircleOutlined />}
+                                            className='confirm-btn'
+                                            onClick={handleProceedToCheckout}
+                                        >
+                                            Proceed to Checkout
+                                        </Button>
+                                    )}
                                 </Space>
                             </div>
                         </>

@@ -169,14 +169,14 @@
 .fill-stock-manual-toolbar {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
     margin-bottom: 16px;
 }
 
 .fill-stock-medicine-search {
-    flex: 1;
-    min-width: 260px;
+    width: 100%;
 }
 
 .fill-stock-medicine-search .ant-select-selector,
@@ -195,10 +195,136 @@
     color: #6b7280;
 }
 
+.fill-stock-drawer-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.fill-stock-medicine-form .ant-form-item {
+    margin-bottom: 16px !important;
+}
+
+.fill-stock-medicine-form .fill-stock-name-item {
+    margin-bottom: 8px !important;
+}
+
+.fill-stock-medicine-form .fill-stock-name-item .ant-form-item-control-input {
+    min-height: 40px;
+}
+
+/* Keep validation text below the input — AutoComplete can collapse explain spacing. */
+.fill-stock-medicine-form .fill-stock-name-item .ant-form-item-explain {
+    display: block !important;
+    height: auto !important;
+    min-height: 22px !important;
+    padding-top: 8px !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+    overflow: visible !important;
+}
+
+.fill-stock-medicine-form .fill-stock-name-item .ant-form-item-margin-offset {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+}
+
+.fill-stock-medicine-form .fill-stock-name-item.ant-form-item-has-error {
+    margin-bottom: 16px !important;
+}
+
+.fill-stock-medicine-form .fill-stock-name-item .ant-form-item-explain-error {
+    position: static !important;
+    top: auto !important;
+}
+
+.fill-stock-name-hint {
+    display: block;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #6b7280;
+}
+
+.fill-stock-name-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 20px;
+}
+
+.fill-stock-line-table {
+    width: 100%;
+}
+
+.fill-stock-line-table .ant-table {
+    table-layout: fixed;
+    width: 100% !important;
+}
+
+.fill-stock-line-table .ant-table-container,
+.fill-stock-line-table .ant-table-content,
+.fill-stock-line-table .ant-table-body {
+    overflow-x: hidden !important;
+}
+
 .fill-stock-line-table .ant-table-thead > tr > th {
     background: #f9fafb;
     font-weight: 600;
     color: #374151;
+    vertical-align: middle;
+    white-space: nowrap;
+    padding: 12px 8px !important;
+}
+
+.fill-stock-line-table .ant-table-tbody > tr > td {
+    vertical-align: top;
+    padding: 12px 8px !important;
+    overflow: hidden;
+}
+
+.fill-stock-medicine-cell {
+    min-width: 0;
+}
+
+.fill-stock-medicine-cell-name {
+    font-weight: 500;
+    color: #111827;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fill-stock-medicine-cell-meta {
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 1.3;
+    color: #6b7280;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fill-stock-col-num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.fill-stock-row-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.fill-stock-row-actions .ant-btn-link {
+    padding-inline: 0;
+    height: auto;
+    line-height: 1.35;
 }
 
 .fill-stock-unit-hint {

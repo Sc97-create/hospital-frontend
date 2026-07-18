@@ -21,7 +21,11 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { FindAllPrescription, GetByStatus } from "./api/prescription";
 import type { PrescriptionListItem, PrescriptionStatusFilter } from "./types/prescriptionmodel";
-import { rememberPrescriptionPatientId } from "./prescription-patient";
+import {
+    formatPrescriptionStatusLabel,
+    getPrescriptionStatusTagColor,
+    rememberPrescriptionPatientId,
+} from "./prescription-patient";
 
 import Sidebar from "../sidebar";
 
@@ -29,31 +33,6 @@ import "./prescription-details.css";
 
 const { Content } = Layout;
 const SEARCH_DEBOUNCE_MS = 400;
-
-const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-        case "sent":
-            return "green";
-        case "draft":
-        case "pending":
-            return "gray";
-        case "dispensed":
-            return "green";
-        case "payment_link_created":
-            return "blue";
-        case "expired":
-            return "red";
-        default:
-            return "default";
-    }
-};
-
-const getStatusLabel = (status: string) => {
-    if (status?.toLowerCase() === "payment_link_created") {
-        return "Payment link created";
-    }
-    return status;
-};
 
 function PrescriptionList() {
     const navigate = useNavigate();
@@ -160,8 +139,8 @@ function PrescriptionList() {
             key: "status",
             color: "#6B7280",
             render: (status: string) => (
-                <Tag color={getStatusColor(status)} bordered className="app-tag">
-                    {getStatusLabel(status)}
+                <Tag color={getPrescriptionStatusTagColor(status)} bordered className="app-tag">
+                    {formatPrescriptionStatusLabel(status)}
                 </Tag>
             ),
         },
@@ -184,7 +163,7 @@ function PrescriptionList() {
                                     ? `?patientId=${encodeURIComponent(record.patient_id)}`
                                     : undefined,
                             },
-                            { state: { patientId: record.patient_id } },
+                            { state: { patientId: record.patient_id, status: record.status } },
                         );
                     }}
                 >
