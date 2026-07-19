@@ -9,8 +9,26 @@ import Sidebar from "../../sidebar";
 import { Content } from "antd/es/layout/layout";
 import PatientOverview from "./patient-overview";
 import PatientAppointmentHistory from "./patient-appointment-history";
+import PatientPrescriptions from "./patient-prescriptions";
 
-
+function formatPatientStatusLabel(status: string | undefined | null): string {
+    switch (status?.trim().toLowerCase()) {
+        case "new_patient":
+            return "New Patient";
+        case "opd":
+            return "OPD";
+        case "follow_up":
+            return "Follow Up";
+        case "active":
+            return "Active";
+        default:
+            if (!status?.trim()) return "Active";
+            return status
+                .trim()
+                .replace(/[_-]+/g, " ")
+                .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+}
 
 function GeneralInfo() {
     const params = useParams<{ patientID: string }>();
@@ -34,9 +52,6 @@ function GeneralInfo() {
         { key: 'overview', label: 'Overview' },
         { key: 'appointments', label: 'Appointments' },
         { key: 'prescriptions', label: 'Prescriptions' },
-        { key: 'vitals', label: 'Vitals' },
-        { key: 'labReports', label: 'Lab Reports' },
-        { key: 'documents', label: 'Documents' },
         { key: 'billing', label: 'Billing' },
         { key: 'timeline', label: 'Timeline' },
     ];
@@ -73,7 +88,7 @@ function GeneralInfo() {
                                         <div className="patient-main-info">
                                             <div className="patient-name-row">
                                                 <h2>{patient?.patient_name ?? 'Rajesh'}</h2>
-                                                <Tag color="green">{ patient?.patient_status ?? 'Active'}</Tag>
+                                                <Tag color="green">{formatPatientStatusLabel(patient?.patient_status)}</Tag>
                                                 <Tag color="gold">{patient?.waiting_time ?? 0}</Tag>
                                             </div>
 
@@ -106,10 +121,6 @@ function GeneralInfo() {
                                     {/* Actions */}
                                     <div className="patient-action-buttons">
                                         <Button type="primary" onClick={()=>navigate(`/patients/addappointment/${patientID}`)}>Add Appointment</Button>
-                                        <Button type="primary" onClick={()=>navigate(`/prescription`)}>Prescription</Button>
-                                        <Button>Vitals</Button>
-                                        <Button>Lab Report</Button>
-                                        <Button>Billing</Button>
                                     </div>
                                 </div>
                             </Card>
@@ -131,17 +142,13 @@ function GeneralInfo() {
                                     <PatientOverview patient={patient} />
                                 )}
 
-                                { activeTab === 'appointments' && (
+                                {activeTab === 'appointments' && (
                                     <PatientAppointmentHistory patient={patient} />
                                 )}
 
-                                {/* {activeTab === 'prescriptions' && (
+                                {activeTab === 'prescriptions' && (
                                     <PatientPrescriptions patient={patient} />
-                                )}
-
-                                {activeTab === 'vitals' && (
-                                    <PatientVitals patient={patient} />
-                                )} */} 
+                                )} 
 
                             </div>
 

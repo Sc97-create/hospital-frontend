@@ -7,6 +7,7 @@ import type {
     DispenseCheckoutResponse,
     FindManyResponse,
     findOneResponse,
+    PrescriptionByPatientIdResponse,
     SearchMedicineResponse,
     UpdatePrescriptionItemPayload,
     UpdatePrescriptionItemResponse,
@@ -35,6 +36,16 @@ export const UpdatePrescriptionItem = async (
 export const FindOnePrescription = async (prescription_id: string, limit: number = 3, offset: number = 0): Promise<findOneResponse> => {
     const response = await apiClient.get(`/prescription/getprescriptionbyPid`, { params: { prescription_id, limit, offset } })    
     return response.data
+}
+export const GetPrescriptionByPatientID = async (
+    patient_id: string,
+    limit: number = 10,
+    page_no: number = 1,
+): Promise<PrescriptionByPatientIdResponse> => {
+    const response = await apiClient.get(`/prescription/getPrescriptionByPatientID`, {
+        params: { patient_id, limit, page_no },
+    });
+    return response.data;
 }
 export const FindAllPrescription = async (
     limit: number = 10,

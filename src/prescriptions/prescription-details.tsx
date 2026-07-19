@@ -13,7 +13,6 @@ import {
     EyeOutlined,
     HomeOutlined,
     MedicineBoxOutlined,
-    PlusCircleOutlined,
     SearchOutlined,
 } from "@ant-design/icons";
 
@@ -163,7 +162,11 @@ function PrescriptionList() {
                                     ? `?patientId=${encodeURIComponent(record.patient_id)}`
                                     : undefined,
                             },
-                            { state: { patientId: record.patient_id, status: record.status } },
+                            { state: {
+                                patientId: record.patient_id,
+                                status: record.status,
+                                createdAt: record.created_at,
+                            } },
                         );
                     }}
                 >
@@ -196,16 +199,6 @@ function PrescriptionList() {
                 />
 
                 <Content className="main-layout">
-                    <div className="button-layout">
-                        <Button
-                            className="appointment-button"
-                            icon={<PlusCircleOutlined />}
-                            onClick={() => navigate("/prescription/add-prescription/new")}
-                        >
-                            Add Prescription
-                        </Button>
-                    </div>
-
                     <div className="search-layout">
                         <Input
                             placeholder="Search prescriptions"
