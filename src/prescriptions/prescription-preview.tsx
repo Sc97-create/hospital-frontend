@@ -31,7 +31,11 @@ import type { medicineResponse } from './types/prescriptionmodel';
 import {
     fetchPatientById,
     formatPatientSubtext,
+    formatPrescriptionStatusLabel,
+    getPrescriptionStatusTagColor,
+    isCancelledPrescriptionStatus,
     isDraftPrescriptionStatus,
+    isFullyDispensedPrescriptionStatus,
     prescriptionPath,
     recallPrescriptionPatientId,
     rememberPrescriptionPatientId,
@@ -168,6 +172,7 @@ function PharmacistPrescriptionDetail() {
     const [prescriptionStatus, setPrescriptionStatus] = useState<string>(
         locationState?.status ?? '',
     );
+    const [prescriptionCreatedAt] = useState<string>(locationState?.createdAt ?? '');
 
     useEffect(() => {
         if (!id) {
@@ -227,7 +232,7 @@ function PharmacistPrescriptionDetail() {
         return () => {
             cancelled = true;
         };
-    }, [id, locationState?.patientId, messageApi, searchParams]);
+    }, [id, locationState?.patientId, locationState?.status, messageApi, searchParams]);
 
     const handlePrint = () => {
         messageApi.info('Sending to printer…');
@@ -277,6 +282,10 @@ function PharmacistPrescriptionDetail() {
             messageApi.error('Missing prescription id');
             return;
         }
+        if (isFullyDispensedPrescriptionStatus(prescriptionStatus)) {
+            messageApi.info('This prescription is already fully dispensed. Bill paid.');
+            return;
+        }
         navigate(prescriptionPath(id, { checkout: true, patientId: resolvedPatientId }), {
             state: { patientId: resolvedPatientId },
         });
@@ -322,10 +331,48 @@ function PharmacistPrescriptionDetail() {
                                     <Col>
                                         <div className='patient-meta'>
                                             <div className='patient-meta__item'>
+                                                <Text className='info-label'>CREATED AT</Text>
+                                                <Text>
+                                                    {prescriptionCreatedAt
+                                                        ? new Date(prescriptionCreatedAt).toLocaleString(
+                                                              'en-IN',
+                                                              {
+                                                                  day: '2-digit',
+                                                                  month: 'short',
+                                                                  year: 'numeric',
+                                                                  hour: '2-digit',
+                                                                  minute: '2-digit',
+                                                              },
+                                                          )
+                                                        : '—'}
+                                                </Text>
+                                            </div>
+
+                                            <div className='patient-meta__item'>
                                                 <Text className='info-label'>STATUS</Text>
                                                 <Tag color='green'>
                                                     {toTitleCase(patient?.patient_status)}
                                                 </Tag>
+                                            </div>
+
+                                            <div className='patient-meta__item'>
+                                                <Text className='info-label'>RX STATUS</Text>
+                                                <Space size={4} wrap>
+                                                    <Tag
+                                                        color={getPrescriptionStatusTagColor(
+                                                            prescriptionStatus,
+                                                        )}
+                                                        bordered
+                                                        className='app-tag'
+                                                    >
+                                                        {formatPrescriptionStatusLabel(
+                                                            prescriptionStatus,
+                                                        )}
+                                                    </Tag>
+                                                    {isFullyDispensedPrescriptionStatus(
+                                                        prescriptionStatus,
+                                                    ) && <Tag color='green'>Bill paid</Tag>}
+                                                </Space>
                                             </div>
 
                                             <div className='patient-meta__item'>
@@ -357,32 +404,42 @@ function PharmacistPrescriptionDetail() {
                                 />
                             </Card>
 
-                            <div className='sticky-footer'>
-                                <Space wrap>
-                                    <Button icon={<PrinterOutlined />} onClick={handlePrint}>
-                                        Print Bill
-                                    </Button>
-                                    <Button icon={<FileTextOutlined />} onClick={handleGenerateLabels}>
-                                        Generate Labels
-                                    </Button>
-                                </Space>
-
-                                <Space wrap>
-                                    <Button danger onClick={handleDiscard}>
-                                        Discard Order
-                                    </Button>
-                                    {!isDraftPrescriptionStatus(prescriptionStatus) && (
-                                        <Button
-                                            type='primary'
-                                            icon={<CheckCircleOutlined />}
-                                            className='confirm-btn'
-                                            onClick={handleProceedToCheckout}
-                                        >
-                                            Proceed to Checkout
+                            {!isCancelledPrescriptionStatus(prescriptionStatus) && (
+                                <div className='sticky-footer'>
+                                    <Space wrap>
+                                        <Button icon={<PrinterOutlined />} onClick={handlePrint}>
+                                            Print Bill
                                         </Button>
-                                    )}
-                                </Space>
-                            </div>
+                                        <Button icon={<FileTextOutlined />} onClick={handleGenerateLabels}>
+                                            Generate Labels
+                                        </Button>
+                                    </Space>
+
+                                    <Space wrap>
+                                        {!isFullyDispensedPrescriptionStatus(prescriptionStatus) && (
+                                            <Button danger onClick={handleDiscard}>
+                                                Discard Order
+                                            </Button>
+                                        )}
+                                        {isFullyDispensedPrescriptionStatus(prescriptionStatus) ? (
+                                            <Tag color='green' className='app-tag'>
+                                                Bill paid
+                                            </Tag>
+                                        ) : (
+                                            !isDraftPrescriptionStatus(prescriptionStatus) && (
+                                                <Button
+                                                    type='primary'
+                                                    icon={<CheckCircleOutlined />}
+                                                    className='confirm-btn'
+                                                    onClick={handleProceedToCheckout}
+                                                >
+                                                    Proceed to Checkout
+                                                </Button>
+                                            )
+                                        )}
+                                    </Space>
+                                </div>
+                            )}
                         </>
                     )}
                 </Content>

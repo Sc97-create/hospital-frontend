@@ -4,6 +4,7 @@ import type { patientlist } from '../patientmangement/types/patients';
 export type PrescriptionLocationState = {
     patientId?: string;
     status?: string;
+    createdAt?: string;
 };
 
 const patientIdStorageKey = (prescriptionId: string) => `rx-patient:${prescriptionId}`;
@@ -95,6 +96,20 @@ export function isDraftPrescriptionStatus(status: string | undefined | null): bo
     return normalizePrescriptionStatus(status) === 'draft';
 }
 
+export function isCancelledPrescriptionStatus(status: string | undefined | null): boolean {
+    const normalized = normalizePrescriptionStatus(status);
+    return normalized === 'cancelled' || normalized === 'canceled';
+}
+
+export function isFullyDispensedPrescriptionStatus(status: string | undefined | null): boolean {
+    const normalized = normalizePrescriptionStatus(status);
+    return (
+        normalized === 'full_dispensed' ||
+        normalized === 'fully_dispensed' ||
+        normalized === 'dispensed'
+    );
+}
+
 /** Human-readable prescription / pharma status for tags. */
 export function formatPrescriptionStatusLabel(status: string | undefined | null): string {
     switch (normalizePrescriptionStatus(status)) {
@@ -103,6 +118,9 @@ export function formatPrescriptionStatusLabel(status: string | undefined | null)
         case 'partially_dispensed':
         case 'partial_dispensed':
             return 'Partially dispensed';
+        case 'full_dispensed':
+        case 'fully_dispensed':
+            return 'Fully dispensed';
         case 'cancelled':
         case 'canceled':
             return 'Cancelled';
@@ -114,7 +132,10 @@ export function formatPrescriptionStatusLabel(status: string | undefined | null)
 export function getPrescriptionStatusTagColor(status: string | undefined | null): string {
     switch (normalizePrescriptionStatus(status)) {
         case 'sent':
+            return 'cyan';
         case 'dispensed':
+        case 'full_dispensed':
+        case 'fully_dispensed':
             return 'green';
         case 'draft':
         case 'pending':

@@ -37,6 +37,23 @@ const getStatusTag = (status: AppointmentStatus) => {
             return null;
     }
 };
+
+const formatVisitTypeLabel = (visitType: string | undefined | null): string => {
+    switch (visitType?.trim().toLowerCase()) {
+        case "new_patient":
+            return "New Patient";
+        case "opd":
+            return "OPD";
+        case "follow_up":
+            return "Follow Up";
+        default:
+            if (!visitType?.trim()) return "—";
+            return visitType
+                .trim()
+                .replace(/[_-]+/g, " ")
+                .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+};
 interface Props {
     patient: patientlist | null
 }
@@ -129,6 +146,7 @@ function PatientAppointmentHistory({ patient }: Props) {
         {
             title: "TYPE",
             dataIndex: "visit_type",
+            render: (visitType: string) => formatVisitTypeLabel(visitType),
         },
         {
             title: "STATUS",

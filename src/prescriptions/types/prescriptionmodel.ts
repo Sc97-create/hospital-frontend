@@ -89,6 +89,13 @@ export interface FindManyResponse {
     message: string;
 }
 
+export interface PrescriptionByPatientIdResponse {
+    data: PrescriptionListItem[];
+    total: number;
+    code: string;
+    message: string;
+}
+
 export type PrescriptionStatusFilter = "all" | "draft" | "sent";
 export interface UpdatePrescriptionStatus {
     prescription_id: string;
