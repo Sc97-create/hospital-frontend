@@ -127,11 +127,13 @@ Do **not** put payment method or editable prices on detail. That is checkout’s
 
 **Payment → status rules**
 
-| Method | After Confirm & Pay | How it finishes |
-|--------|---------------------|-----------------|
-| **Cash** | Popup: confirm cash collected | Pharmacist clicks **Confirm payment** |
-| **QR** | Popup: show QR + confirm | Pharmacist clicks **Confirm payment** |
-| **Link** | No confirm popup; wait for link | Completes automatically when paid |
+| Method | After Confirm & Pay | How it finishes | `payment_mode` |
+|--------|---------------------|-----------------|----------------|
+| **Cash** | Popup: amount + cash callout | Pharmacist **swipes to mark paid** | `cash` |
+| **QR** | Popup: QR placeholder + amount | Pharmacist **swipes to mark paid** | `qr` |
+| **Link** | No confirm popup; wait for link | Completes automatically when paid | `payment_link` |
+
+`POST /billing/create` includes top-level `payment_mode` so the backend can categorise and store the collection method.
 
 **Line rules (v1)**
 
@@ -292,7 +294,7 @@ Same medicine can already be 2 parent lines (different `prescription_item_id`). 
 ```ts
 interface PrescriptionCheckoutPayload {
   prescription_id: string;
-  payment_method: "cash" | "qr" | "link";
+  payment_mode: "cash" | "qr" | "payment_link";
   status_update?: "manual" | "automatic";
   amount_paid: number;
   notes?: string;
@@ -365,7 +367,7 @@ Use design-prompt output (and this doc) to decide what to take into implementati
 | Decision | Options to judge | Default if undecided |
 |---|---|---|
 | Checkout placement | Separate page vs panel on detail | **Separate page** `/prescription/:id/checkout` |
-| Payment methods | Cash / QR / Link | **Cash · QR · Link** (Cash/QR manual confirm; Link auto status) |
+| Payment methods | Cash / QR / Link | **Cash · QR · Link** (Cash/QR swipe to mark paid; Link auto status; `payment_mode` on bill) |
 | Tax display | Inclusive prices vs subtotal + tax | **Subtotal + tax + total** |
 | Partial qty | Qty edit / line toggle vs dedicated flow | **Qty edit + line toggle on checkout** |
 | Multi-batch UI | Auto FEFO + expand vs always nested vs allocate modal | **Auto FEFO + expandable override** |

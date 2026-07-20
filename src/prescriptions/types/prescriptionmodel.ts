@@ -185,14 +185,14 @@ export interface CheckoutBatchAllocationPayload {
     allocate_qty: number;
 }
 
-export type CheckoutPaymentMethod = "cash" | "qr" | "link";
+export type CheckoutPaymentMethod = "cash" | "qr" | "payment_link";
 
 export interface PrescriptionCheckoutPayload {
     prescription_id: string;
     payment_method: CheckoutPaymentMethod;
     amount_paid: number;
     notes?: string;
-    /** cash/qr = pharmacist confirms; link = gateway/webhook auto */
+    /** cash/qr = pharmacist confirms; payment_link = gateway/webhook auto */
     status_update?: "manual" | "automatic";
     items: Array<{
         prescription_item_id: string;
@@ -230,11 +230,35 @@ export interface BillingCreatePayload {
     cashier_id: string;
     supplier_id: string;
     organisation_id: string;
+    /** How the patient paid — used for categorisation / reporting. */
+    payment_mode: CheckoutPaymentMethod;
     financials: BillingCreateFinancials;
     dispense_items: BillingDispenseItem[];
 }
 
+export interface BillingPaymentInfo {
+    invoice_id: string;
+    /** UPI / payment link URL when mode is qr or payment_link. */
+    payment_url?: string | null;
+}
+
 export interface BillingCreateResponse {
+    payment?: BillingPaymentInfo;
+    data?: {
+        payment?: BillingPaymentInfo;
+    };
+    code?: string;
+    message?: string;
+}
+
+/** Cash / QR — pharmacist swipe confirms payment. */
+export interface ConfirmPaymentPayload {
+    invoice_id: string;
+    payment_mode: CheckoutPaymentMethod;
+    transaction_reference?: string;
+}
+
+export interface ConfirmPaymentResponse {
     data?: unknown;
     code?: string;
     message?: string;

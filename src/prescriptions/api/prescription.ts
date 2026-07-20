@@ -2,6 +2,9 @@ import apiClient from "../../lib/api-client";
 import type {
     BillingCreatePayload,
     BillingCreateResponse,
+    BillingPaymentInfo,
+    ConfirmPaymentPayload,
+    ConfirmPaymentResponse,
     createPrescResponse,
     CreatePrescription,
     DispenseCheckoutResponse,
@@ -96,10 +99,31 @@ export const GetDispenseCheckoutLines = async (
     return response.data
 }
 
-/** Confirm & Pay — create bill and decrement inventory per batch take. */
+/** Confirm & Pay — create bill; cash/qr then confirm via /payment/confirm on swipe. */
 export const CreateBilling = async (
     payload: BillingCreatePayload,
 ): Promise<BillingCreateResponse> => {
     const response = await apiClient.post(`/billing/create`, payload)
     return response.data
+}
+
+/** Cash / QR — pharmacist swipe confirms payment. */
+export const ConfirmPayment = async (
+    payload: ConfirmPaymentPayload,
+): Promise<ConfirmPaymentResponse> => {
+    const response = await apiClient.post(`/payment/confirm`, payload)
+    return response.data
+}
+
+export function parseBillingCreateResponse(
+    response: BillingCreateResponse,
+): BillingPaymentInfo {
+    const payment = response.payment ?? response.data?.payment;
+    if (payment?.invoice_id) {
+        return {
+            invoice_id: payment.invoice_id,
+            payment_url: payment.payment_url ?? undefined,
+        };
+    }
+    throw new Error('Billing response missing payment.invoice_id');
 }
