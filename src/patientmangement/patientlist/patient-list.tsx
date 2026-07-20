@@ -23,6 +23,7 @@ interface DataType {
     weight: number;
     gender: string;
     issued_at: Date;
+    patient_created_at: string;
     status: string;
 }
 
@@ -89,9 +90,9 @@ function PatientList() {
             dataIndex: 'issued_at',
             className: 'other-layout',
             showSorterTooltip: { target: 'full-header' },
-            render: (date: Date) => datecheck(date).format('DD MMMM YYYY'),
+            render: (_date: Date, record) => datecheck(record.patient_created_at).format('DD MMMM YYYY'),
             defaultSortOrder: 'descend',
-            sorter: (a, b) => new Date(a.issued_at).getTime() - new Date(b.issued_at).getTime()
+            sorter: (a, b) => new Date(a.patient_created_at).getTime() - new Date(b.patient_created_at).getTime()
         },
         {
             title: 'Status',
@@ -152,6 +153,7 @@ function PatientList() {
         weight: patient.patient_weight,
         gender: patient.patient_gender,
         issued_at: patient.admission_date,
+        patient_created_at: patient.patient_created_at,
         status: patient.patient_status || 'active'
     }));
     const onChange = (page: number, pageSize?: number) => {

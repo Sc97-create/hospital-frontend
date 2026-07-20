@@ -30,9 +30,10 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'reac
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Sidebar from '../sidebar';
-import { CreateBilling, GetDispenseCheckoutLines } from './api/prescription';
+import { ConfirmPayment, CreateBilling, GetDispenseCheckoutLines, parseBillingCreateResponse } from './api/prescription';
 import type {
     BillingCreatePayload,
+    CheckoutPaymentMethod,
     DispenseLineResponse,
     MedicineBatch,
 } from './types/prescriptionmodel';
@@ -49,6 +50,7 @@ import {
 } from './prescription-patient';
 import type { patientlist } from '../patientmangement/types/patients';
 import PrescriptionPreviewSkeleton from './prescription-preview-skeleton';
+import SwipeToConfirm from './components/swipe-to-confirm';
 
 import './prescription-preview.css';
 import './prescription-checkout.css';
@@ -62,7 +64,7 @@ const PAYMENT_LINK_CREATED = 'payment_link_created';
 /** Checkout session lock — Confirm & Pay disabled when this hits 0. */
 const CHECKOUT_TIMEOUT_SECONDS = 2 * 60;
 
-type PaymentMethod = 'cash' | 'qr' | 'link';
+type PaymentMethod = CheckoutPaymentMethod;
 
 const MANUAL_PAYMENT_METHODS: PaymentMethod[] = ['cash', 'qr'];
 
@@ -72,6 +74,27 @@ function isManualPayment(method: PaymentMethod): boolean {
 
 function isPaymentLinkCreated(status?: string): boolean {
     return status?.toLowerCase() === PAYMENT_LINK_CREATED;
+}
+
+function extractApiErrorMessage(error: unknown, fallback: string): string {
+    if (
+        error &&
+        typeof error === 'object' &&
+        'response' in error &&
+        error.response &&
+        typeof error.response === 'object' &&
+        'data' in error.response &&
+        error.response.data &&
+        typeof error.response.data === 'object' &&
+        'message' in error.response.data &&
+        typeof error.response.data.message === 'string'
+    ) {
+        return error.response.data.message;
+    }
+    if (error instanceof Error && error.message) {
+        return error.message;
+    }
+    return fallback;
 }
 
 function formatCountdown(totalSeconds: number): string {
@@ -347,7 +370,9 @@ function PrescriptionCheckout() {
     const [paidAmount, setPaidAmount] = useState(0);
     const [paidItemCount, setPaidItemCount] = useState(0);
     const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
-    const [pendingPayload, setPendingPayload] = useState<BillingCreatePayload | null>(null);
+    const [pendingInvoiceId, setPendingInvoiceId] = useState<string | null>(null);
+    const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
+    const [transactionReference, setTransactionReference] = useState('');
     const [secondsLeft, setSecondsLeft] = useState(CHECKOUT_TIMEOUT_SECONDS);
     const [timerExpired, setTimerExpired] = useState(false);
     const expiryToastShown = useRef(false);
@@ -626,6 +651,7 @@ function PrescriptionCheckout() {
             cashier_id,
             supplier_id,
             organisation_id,
+            payment_mode: paymentMethod,
             financials: {
                 discount_amount: 0,
                 sub_total_amount: totals.subtotal,
@@ -636,50 +662,112 @@ function PrescriptionCheckout() {
         };
     };
 
-    const completePayment = async (
-        payload: BillingCreatePayload,
-        opts: { autoStatus: boolean },
-    ) => {
+    const resetManualPaymentSession = () => {
+        setManualConfirmOpen(false);
+        setPendingInvoiceId(null);
+        setPendingPaymentUrl(null);
+        setTransactionReference('');
+    };
+
+    const openPaymentSuccess = (opts: { autoStatus: boolean }) => {
+        setPaidAmount(totals.total);
+        setPaidItemCount(totals.itemCount);
+        setStatusUpdatedManually(!opts.autoStatus);
+        setSuccessOpen(true);
+    };
+
+    const startManualPayment = async (payload: BillingCreatePayload) => {
         setPaying(true);
         messageApi.loading({
-            content: opts.autoStatus
-                ? 'Waiting for payment link…'
-                : 'Confirming payment…',
+            content: 'Creating invoice…',
             key: 'checkout',
             duration: 0,
         });
 
         try {
-            await CreateBilling(payload);
-            setManualConfirmOpen(false);
-            setPendingPayload(null);
-            setPaidAmount(totals.total);
-            setPaidItemCount(totals.itemCount);
-            setStatusUpdatedManually(!opts.autoStatus);
-            messageApi.success({
-                content: opts.autoStatus
-                    ? 'Payment completed via link'
-                    : 'Payment confirmed',
-                key: 'checkout',
-            });
-            setSuccessOpen(true);
+            const billingResponse = await CreateBilling(payload);
+            const { invoice_id, payment_url } = parseBillingCreateResponse(billingResponse);
+            setPendingInvoiceId(invoice_id);
+            setPendingPaymentUrl(payment_url ?? null);
+            setManualConfirmOpen(true);
+            messageApi.destroy('checkout');
         } catch (error) {
             console.error('Billing create failed:', error);
-            const apiMessage =
-                error &&
-                typeof error === 'object' &&
-                'response' in error &&
-                error.response &&
-                typeof error.response === 'object' &&
-                'data' in error.response &&
-                error.response.data &&
-                typeof error.response.data === 'object' &&
-                'message' in error.response.data &&
-                typeof error.response.data.message === 'string'
-                    ? error.response.data.message
-                    : null;
             messageApi.error({
-                content: apiMessage || 'Failed to create billing. Please try again.',
+                content: extractApiErrorMessage(error, 'Failed to create invoice. Please try again.'),
+                key: 'checkout',
+            });
+        } finally {
+            setPaying(false);
+        }
+    };
+
+    const completePaymentLink = async (payload: BillingCreatePayload) => {
+        setPaying(true);
+        messageApi.loading({
+            content: 'Waiting for payment link…',
+            key: 'checkout',
+            duration: 0,
+        });
+
+        try {
+            const billingResponse = await CreateBilling(payload);
+            const { payment_url } = parseBillingCreateResponse(billingResponse);
+            if (payment_url) {
+                window.open(payment_url, '_blank', 'noopener,noreferrer');
+            }
+            openPaymentSuccess({ autoStatus: true });
+            messageApi.success({
+                content: payment_url
+                    ? 'Payment link opened — awaiting patient payment'
+                    : 'Payment link created',
+                key: 'checkout',
+            });
+        } catch (error) {
+            console.error('Billing create failed:', error);
+            messageApi.error({
+                content: extractApiErrorMessage(error, 'Failed to create billing. Please try again.'),
+                key: 'checkout',
+            });
+        } finally {
+            setPaying(false);
+        }
+    };
+
+    const confirmManualPayment = async () => {
+        if (!pendingInvoiceId) return;
+        if (timerExpired) {
+            messageApi.warning('Checkout time expired — reload to try again');
+            return;
+        }
+
+        setPaying(true);
+        messageApi.loading({
+            content: 'Confirming payment…',
+            key: 'checkout',
+            duration: 0,
+        });
+
+        try {
+            const trimmedRef = transactionReference.trim();
+            await ConfirmPayment({
+                invoice_id: pendingInvoiceId,
+                payment_mode: paymentMethod,
+                ...(trimmedRef ? { transaction_reference: trimmedRef } : {}),
+            });
+            resetManualPaymentSession();
+            openPaymentSuccess({ autoStatus: false });
+            messageApi.success({
+                content: 'Payment confirmed',
+                key: 'checkout',
+            });
+        } catch (error) {
+            console.error('Confirm payment failed:', error);
+            messageApi.error({
+                content: extractApiErrorMessage(
+                    error,
+                    'Failed to confirm payment. Please try again.',
+                ),
                 key: 'checkout',
             });
         } finally {
@@ -711,22 +799,15 @@ function PrescriptionCheckout() {
         }
 
         if (isManualPayment(paymentMethod)) {
-            setPendingPayload(payload);
-            setManualConfirmOpen(true);
+            void startManualPayment(payload);
             return;
         }
 
-        // Link: status updates automatically when payment completes
-        void completePayment(payload, { autoStatus: true });
+        void completePaymentLink(payload);
     };
 
     const handleManualPaymentConfirmed = () => {
-        if (!pendingPayload) return;
-        if (timerExpired) {
-            messageApi.warning('Checkout time expired — reload to try again');
-            return;
-        }
-        void completePayment(pendingPayload, { autoStatus: false });
+        void confirmManualPayment();
     };
 
     const columns = [
@@ -1071,12 +1152,12 @@ function PrescriptionCheckout() {
                                             options={[
                                                 { label: 'Cash', value: 'cash' },
                                                 { label: 'QR', value: 'qr' },
-                                                { label: 'Link', value: 'link' },
+                                                { label: 'Link', value: 'payment_link' },
                                             ]}
                                         />
                                         <Text type="secondary" className="checkout-payment-hint">
                                             {isManualPayment(paymentMethod)
-                                                ? 'Cash / QR: confirm collection in a popup before finishing.'
+                                                ? 'Cash / QR: swipe to mark paid in a popup before finishing.'
                                                 : 'Link: finishes automatically when the patient pays.'}
                                         </Text>
                                         <Text className="info-label checkout-notes-label">
@@ -1178,55 +1259,81 @@ function PrescriptionCheckout() {
                 }
                 onCancel={() => {
                     if (paying) return;
-                    setManualConfirmOpen(false);
-                    setPendingPayload(null);
+                    resetManualPaymentSession();
                 }}
                 maskClosable={!paying}
                 footer={[
                     <Button
                         key="cancel"
                         disabled={paying}
-                        onClick={() => {
-                            setManualConfirmOpen(false);
-                            setPendingPayload(null);
-                        }}
+                        onClick={resetManualPaymentSession}
                     >
                         Cancel
                     </Button>,
-                    <Button
-                        key="confirm"
-                        type="primary"
-                        loading={paying}
-                        disabled={timerExpired}
-                        icon={<CheckCircleOutlined />}
-                        onClick={handleManualPaymentConfirmed}
-                    >
-                        Confirm payment
-                    </Button>,
                 ]}
             >
-                <Space direction="vertical" size={12} className="checkout-manual-modal">
-                    <Text>
-                        Collect{' '}
-                        <Text strong>{formatInr(totals.total)}</Text> via{' '}
-                        <Text strong>{paymentMethod === 'cash' ? 'cash' : 'QR code'}</Text> at the
-                        counter, then confirm below.
-                    </Text>
+                <Space direction="vertical" size={16} className="checkout-manual-modal">
+                    <div className="checkout-manual-amount">
+                        <Text type="secondary" className="checkout-manual-amount-label">
+                            Amount due
+                        </Text>
+                        <Text strong className="checkout-manual-amount-value">
+                            {formatInr(totals.total)}
+                        </Text>
+                    </div>
+
                     {paymentMethod === 'qr' ? (
-                        <div className="checkout-qr-placeholder" aria-hidden>
-                            <Text type="secondary">QR code placeholder</Text>
-                            <Text type="secondary" className="checkout-qr-amount">
-                                {formatInr(totals.total)}
+                        <>
+                            <div className="checkout-qr-placeholder" aria-hidden>
+                                <div className="checkout-qr-mock-square" />
+                                {pendingPaymentUrl ? (
+                                    <Text
+                                        copyable={{ text: pendingPaymentUrl }}
+                                        className="checkout-qr-link"
+                                    >
+                                        {pendingPaymentUrl}
+                                    </Text>
+                                ) : (
+                                    <Text type="secondary">QR code placeholder</Text>
+                                )}
+                                <Text type="secondary" className="checkout-qr-amount">
+                                    {formatInr(totals.total)}
+                                </Text>
+                            </div>
+                            <Text type="secondary" className="checkout-manual-hint">
+                                Show the patient this payment link / QR, wait for UPI success, then
+                                swipe to mark paid.
                             </Text>
-                        </div>
+                        </>
                     ) : (
                         <div className="checkout-cash-callout">
-                            <Text>Count the cash from the patient, then confirm to continue.</Text>
+                            <Text>
+                                Count the cash from the patient, then swipe below to mark paid.
+                            </Text>
                         </div>
                     )}
-                    <Text type="secondary">
-                        Payment link does not need this step — it completes on its own when paid.
-                    </Text>
+
+                    <div className="checkout-txn-ref">
+                        <Text className="info-label">TRANSACTION REFERENCE (OPTIONAL)</Text>
+                        <Input
+                            placeholder={
+                                paymentMethod === 'qr'
+                                    ? 'UPI / bank reference (optional)'
+                                    : 'Receipt / reference (optional)'
+                            }
+                            value={transactionReference}
+                            onChange={(e) => setTransactionReference(e.target.value)}
+                            disabled={paying}
+                            maxLength={100}
+                        />
+                    </div>
+
+                    <SwipeToConfirm
+                        active={manualConfirmOpen}
+                        disabled={timerExpired}
+                        loading={paying}
+                        onConfirm={handleManualPaymentConfirmed}
+                    />
                 </Space>
             </Modal>
 
@@ -1259,8 +1366,13 @@ function PrescriptionCheckout() {
                         Amount paid: <Text strong>{formatInr(paidAmount)}</Text>
                     </Text>
                     <Text>
-                        Payment: <Text strong>{paymentMethod.toUpperCase()}</Text> · {paidItemCount}{' '}
-                        item{paidItemCount === 1 ? '' : 's'}
+                        Payment:{' '}
+                        <Text strong>
+                            {paymentMethod === 'payment_link'
+                                ? 'PAYMENT LINK'
+                                : paymentMethod.toUpperCase()}
+                        </Text>{' '}
+                        · {paidItemCount} item{paidItemCount === 1 ? '' : 's'}
                     </Text>
                     <Text type="secondary">
                         {statusUpdatedManually
