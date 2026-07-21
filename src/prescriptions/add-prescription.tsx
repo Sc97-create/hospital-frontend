@@ -15,7 +15,6 @@ import {
     Typography,
     Space,
     Divider,
-    Tag,
     Pagination,
     Breadcrumb,
     AutoComplete,
@@ -39,6 +38,8 @@ import {
 
 import "./add-prescription.css";
 import Sidebar from "../sidebar";
+import { StatusTag } from "../components/status-tag";
+import { STATUS_INFO } from "../constants/status-colors";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import type { CreatePrescription, Medicine, medicineResponse, SearchMedicineItem, UpdatePrescriptionStatus } from "./types/prescriptionmodel";
 import { CreatePrescriptionApi, FindOnePrescription, SearchMedicines, UpdatePrescription, UpdatePrescriptionItem, UpdateStatus } from "./api/prescription";
@@ -493,7 +494,7 @@ function AddPrescription() {
                                         Prescription Preview
                                     </Title>
 
-                                    <Tag color="blue">{totalMedicines} Medicines</Tag>
+                                    <StatusTag type={STATUS_INFO}>{totalMedicines} Medicines</StatusTag>
                                 </Space>
                             </Col>
 
@@ -511,7 +512,9 @@ function AddPrescription() {
 
                         {/* Stats */}
                         <Space size={16} className="stats-wrapper">
-                            <Tag className="stats-tag">Total Medicines: {totalMedicines}</Tag>
+                            <StatusTag type={STATUS_INFO} className="stats-tag">
+                                Total Medicines: {totalMedicines}
+                            </StatusTag>
                         </Space>
 
                         {/* Medicine Cards */}
@@ -531,7 +534,7 @@ function AddPrescription() {
                                                     </Title>
 
                                                     <Space size={12} className="medicine-meta">
-                                                        <Tag color="blue" className="dosage-tag">{item.medicine_form}</Tag>
+                                                        <StatusTag type={STATUS_INFO} className="dosage-tag">{item.medicine_form}</StatusTag>
 
                                                         <div className="frequency-badges">
                                                             <span className={`freq-badge ${item.frequency?.morning > 0 ? 'active' : ''}`}>

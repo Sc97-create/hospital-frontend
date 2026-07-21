@@ -10,7 +10,6 @@ import {
     Row,
     Space,
     Table,
-    Tag,
     Typography,
 } from 'antd';
 
@@ -43,6 +42,12 @@ import {
     toTitleCase,
     type PrescriptionLocationState,
 } from './prescription-patient';
+import { StatusTag } from '../components/status-tag';
+import {
+    getPatientStatusType,
+    STATUS_INFO,
+    STATUS_SUCCESS,
+} from '../constants/status-colors';
 import type { patientlist } from '../patientmangement/types/patients';
 import PrescriptionPreviewSkeleton from './prescription-preview-skeleton';
 
@@ -119,19 +124,19 @@ const columns = [
         render: (_: unknown, record: PrescriptionRow) => (
             <Space size={4} wrap>
                 {record.morning > 0 && (
-                    <Tag className='schedule-tag schedule-tag--active'>
+                    <StatusTag type={STATUS_INFO} className='schedule-tag'>
                         MOR{record.morning > 1 ? ` ×${record.morning}` : ''}
-                    </Tag>
+                    </StatusTag>
                 )}
                 {record.afternoon > 0 && (
-                    <Tag className='schedule-tag schedule-tag--active'>
+                    <StatusTag type={STATUS_INFO} className='schedule-tag'>
                         AFT{record.afternoon > 1 ? ` ×${record.afternoon}` : ''}
-                    </Tag>
+                    </StatusTag>
                 )}
                 {record.night > 0 && (
-                    <Tag className='schedule-tag schedule-tag--active'>
+                    <StatusTag type={STATUS_INFO} className='schedule-tag'>
                         NIT{record.night > 1 ? ` ×${record.night}` : ''}
-                    </Tag>
+                    </StatusTag>
                 )}
                 {record.morning === 0 && record.afternoon === 0 && record.night === 0 && (
                     <Text type='secondary'>—</Text>
@@ -350,28 +355,27 @@ function PharmacistPrescriptionDetail() {
 
                                             <div className='patient-meta__item'>
                                                 <Text className='info-label'>STATUS</Text>
-                                                <Tag color='green'>
+                                                <StatusTag type={getPatientStatusType(patient?.patient_status)}>
                                                     {toTitleCase(patient?.patient_status)}
-                                                </Tag>
+                                                </StatusTag>
                                             </div>
 
                                             <div className='patient-meta__item'>
                                                 <Text className='info-label'>RX STATUS</Text>
                                                 <Space size={4} wrap>
-                                                    <Tag
-                                                        color={getPrescriptionStatusTagColor(
+                                                    <StatusTag
+                                                        type={getPrescriptionStatusTagColor(
                                                             prescriptionStatus,
                                                         )}
                                                         bordered
-                                                        className='app-tag'
                                                     >
                                                         {formatPrescriptionStatusLabel(
                                                             prescriptionStatus,
                                                         )}
-                                                    </Tag>
+                                                    </StatusTag>
                                                     {isFullyDispensedPrescriptionStatus(
                                                         prescriptionStatus,
-                                                    ) && <Tag color='green'>Bill paid</Tag>}
+                                                    ) && <StatusTag type={STATUS_SUCCESS}>Bill paid</StatusTag>}
                                                 </Space>
                                             </div>
 
@@ -390,7 +394,7 @@ function PharmacistPrescriptionDetail() {
                                         <Title level={5} className='table-title'>
                                             Prescribed Medication
                                         </Title>
-                                        <Tag>{totalCount} Items</Tag>
+                            <StatusTag type={STATUS_INFO}>{totalCount} Items</StatusTag>
                                     </Space>
                                 </div>
 
@@ -422,9 +426,9 @@ function PharmacistPrescriptionDetail() {
                                             </Button>
                                         )}
                                         {isFullyDispensedPrescriptionStatus(prescriptionStatus) ? (
-                                            <Tag color='green' className='app-tag'>
+                                            <StatusTag type={STATUS_SUCCESS}>
                                                 Bill paid
-                                            </Tag>
+                                            </StatusTag>
                                         ) : (
                                             !isDraftPrescriptionStatus(prescriptionStatus) && (
                                                 <Button

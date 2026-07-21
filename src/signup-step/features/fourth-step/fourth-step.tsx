@@ -11,7 +11,6 @@ import {
     Avatar,
     Space,
     Divider,
-    Tag,
 } from "antd";
 import {
     EditOutlined,
@@ -20,6 +19,8 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import type { OrganisationData, UserData } from "../../types/common-api";
+import { StatusTag } from "../../../components/status-tag";
+import { STATUS_SUCCESS } from "../../../constants/status-colors";
 
 const { Content } = Layout;
 const { Title, Text, Link } = Typography;
@@ -163,11 +164,9 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                             <Text strong>{Userdata?.username}</Text>
                         </div>
                         <div>
-                            <Tag
-                                color="#25D366"
-                                className="root-admin-tag">
+                            <StatusTag type={STATUS_SUCCESS} className="root-admin-tag">
                                 ROOT ADMIN
-                            </Tag>
+                            </StatusTag>
                         </div>
                     </Col>
                     <Col flex="auto" />

@@ -154,19 +154,19 @@
 }
 
 .dash-kpi__value--success {
-  color: var(--color-primary);
+  color: var(--status-success-default);
 }
 
 .dash-kpi__value--ongoing {
-  color: #2563eb;
+  color: var(--status-info-default);
 }
 
 .dash-kpi__value--danger {
-  color: #dc2626;
+  color: var(--status-danger-default);
 }
 
 .dash-kpi__value--warning {
-  color: #d97706;
+  color: var(--status-warning-default);
 }
 
 .dash-kpi__value--muted {
@@ -390,40 +390,7 @@
   padding: 2px 10px;
 }
 
-.dash-tag--visit {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.dash-tag--ongoing {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.dash-tag--waiting {
-  background: #ffedd5;
-  color: #c2410c;
-}
-
-.dash-tag--scheduled {
-  background: #f3f4f6;
-  color: #4b5563;
-}
-
-.dash-tag--missed {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.dash-tag--draft {
-  background: #f3f4f6;
-  color: #4b5563;
-}
-
-.dash-tag--pending {
-  background: #fee2e2;
-  color: #b91c1c;
-}
+/* Status fill/text comes from .status-tag--* in index.css */
 
 .dash-up-next {
   list-style: none;

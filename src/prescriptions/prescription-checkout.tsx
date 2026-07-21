@@ -14,7 +14,6 @@ import {
     Segmented,
     Space,
     Table,
-    Tag,
     Typography,
 } from 'antd';
 import {
@@ -48,6 +47,12 @@ import {
     resolvePrescriptionPatientId,
     type PrescriptionLocationState,
 } from './prescription-patient';
+import { StatusTag } from '../components/status-tag';
+import {
+    STATUS_INFO,
+    STATUS_SUCCESS,
+    STATUS_WARNING,
+} from '../constants/status-colors';
 import type { patientlist } from '../patientmangement/types/patients';
 import PrescriptionPreviewSkeleton from './prescription-preview-skeleton';
 import SwipeToConfirm from './components/swipe-to-confirm';
@@ -1037,7 +1042,7 @@ function PrescriptionCheckout() {
                                     </span>
                                 </div>
                                 {isPaymentLinkCreated(rxStatus) ? (
-                                    <Tag color="blue">Yet to pay</Tag>
+                                    <StatusTag type={STATUS_WARNING}>Yet to pay</StatusTag>
                                 ) : null}
                             </div>
 
@@ -1060,20 +1065,16 @@ function PrescriptionCheckout() {
                                         <div className="patient-meta">
                                             <div className="patient-meta__item">
                                                 <Text className="info-label">RX CODE</Text>
-                                                <Tag color="yellow">{rxCode || '—'}</Tag>
+                                                <StatusTag type={STATUS_INFO}>{rxCode || '—'}</StatusTag>
                                             </div>
                                             <div className="patient-meta__item">
                                                 <Text className="info-label">RX STATUS</Text>
                                                 {isPaymentLinkCreated(rxStatus) ? (
-                                                    <Tag color="blue">Yet to pay</Tag>
+                                                    <StatusTag type={STATUS_WARNING}>Yet to pay</StatusTag>
                                                 ) : (
-                                                    <Tag
-                                                        color={getPrescriptionStatusTagColor(rxStatus)}
-                                                        bordered
-                                                        className="app-tag"
-                                                    >
+                                                    <StatusTag type={getPrescriptionStatusTagColor(rxStatus)} bordered>
                                                         {formatPrescriptionStatusLabel(rxStatus)}
-                                                    </Tag>
+                                                    </StatusTag>
                                                 )}
                                             </div>
                                             <div className="patient-meta__item">
@@ -1091,14 +1092,14 @@ function PrescriptionCheckout() {
                                         <Title level={5} className="table-title">
                                             Order items
                                         </Title>
-                                        <Tag>{totals.itemCount} billed</Tag>
+                                        <StatusTag type={STATUS_INFO}>{totals.itemCount} billed</StatusTag>
                                         {usingMock ? (
-                                            <Tag color="orange">Sample API data</Tag>
+                                            <StatusTag type={STATUS_WARNING}>Sample API data</StatusTag>
                                         ) : (
-                                            <Tag color="green">Live dispense lines</Tag>
+                                            <StatusTag type={STATUS_SUCCESS}>Live dispense lines</StatusTag>
                                         )}
                                         {isPaymentLinkCreated(rxStatus) ? (
-                                            <Tag color="blue">Yet to pay</Tag>
+                                            <StatusTag type={STATUS_WARNING}>Yet to pay</StatusTag>
                                         ) : null}
                                     </Space>
                                 </div>

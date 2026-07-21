@@ -141,15 +141,15 @@
 }
 
 .stock-status.success .stock-dot {
-    background: #52c41a;
+    background: var(--status-success-default);
 }
 
 .stock-status.warning .stock-dot {
-    background: #faad14;
+    background: var(--status-warning-default);
 }
 
 .stock-status.danger .stock-dot {
-    background: #ff4d4f;
+    background: var(--status-danger-default);
 }
 
 .dispense-btn {
@@ -211,9 +211,9 @@
 }
 
 .schedule-tag--active {
-    background: #e6f9ef;
-    border-color: #b7e9d1;
-    color: #0f766e;
+    background: var(--status-info-lighter);
+    border-color: var(--status-info-default);
+    color: var(--status-info-darker);
 }
 
 /* Skeleton — mirrors patient header + medicine table */

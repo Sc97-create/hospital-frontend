@@ -41,6 +41,12 @@ import {
   type UpNextAppointment,
   type VisitType,
 } from "./dashboard-mock-data";
+import {
+  getQueueStatusType,
+  statusTagClassName,
+  STATUS_INFO,
+  STATUS_WARNING,
+} from "./constants/status-colors";
 import "./dashboard.css";
 
 const { Content, Header } = Layout;
@@ -77,18 +83,7 @@ const statusLabel = (status: QueueStatus): string => {
 };
 
 const statusTagClass = (status: QueueStatus): string => {
-  switch (status) {
-    case "ongoing":
-      return "dash-tag dash-tag--ongoing";
-    case "waiting":
-      return "dash-tag dash-tag--waiting";
-    case "scheduled":
-      return "dash-tag dash-tag--scheduled";
-    case "missed":
-      return "dash-tag dash-tag--missed";
-    default:
-      return "dash-tag";
-  }
+  return statusTagClassName(getQueueStatusType(status), "dash-tag");
 };
 
 const kpiAccentClass = (key: string, isZero: boolean): string => {
@@ -252,7 +247,7 @@ function Dashboard() {
       title: "Type",
       key: "visit_type",
       render: (_, row) => (
-        <Tag className="dash-tag dash-tag--visit">{visitTypeLabel(row.visit_type)}</Tag>
+        <Tag className={statusTagClassName(STATUS_INFO, "dash-tag")}>{visitTypeLabel(row.visit_type)}</Tag>
       ),
     },
     {
@@ -561,11 +556,7 @@ function Dashboard() {
                                     </Text>
                                   </div>
                                   <Tag
-                                    className={
-                                      rx.status === "draft"
-                                        ? "dash-tag dash-tag--draft"
-                                        : "dash-tag dash-tag--pending"
-                                    }
+                                    className={statusTagClassName(STATUS_WARNING, "dash-tag")}
                                   >
                                     {rx.status === "draft" ? "DRAFT" : "PENDING"}
                                   </Tag>

@@ -35,6 +35,10 @@ function App() {
         token: {
           colorPrimary: '#25D366',
           colorPrimaryHover: '#20b858',
+          colorInfo: '#2563EB',
+          colorSuccess: '#16A34A',
+          colorWarning: '#D97706',
+          colorError: '#DC2626',
           borderRadius: 8,
           fontFamily: "'Roboto', sans-serif",
         },

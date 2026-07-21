@@ -6,7 +6,6 @@ import {
     Pagination,
     Space,
     Table,
-    Tag,
 } from "antd";
 
 import {
@@ -25,6 +24,8 @@ import {
     getPrescriptionStatusTagColor,
     rememberPrescriptionPatientId,
 } from "./prescription-patient";
+import { StatusTag } from "../components/status-tag";
+import { STATUS_INFO } from "../constants/status-colors";
 
 import Sidebar from "../sidebar";
 
@@ -112,8 +113,14 @@ function PrescriptionList() {
             dataIndex: "code",
             key: "code",
             render: (text: string) => (
-                <Tag color="yellow">{text}</Tag>
+                <StatusTag type={STATUS_INFO}>{text}</StatusTag>
             ),
+        },
+        {
+            title: "Patient",
+            dataIndex: "patient_name",
+            key: "patient_name",
+            render: (name: string | undefined) => name?.trim() || "—",
         },
         {
             title: "Doctor",
@@ -138,9 +145,9 @@ function PrescriptionList() {
             key: "status",
             color: "#6B7280",
             render: (status: string) => (
-                <Tag color={getPrescriptionStatusTagColor(status)} bordered className="app-tag">
+                <StatusTag type={getPrescriptionStatusTagColor(status)} bordered>
                     {formatPrescriptionStatusLabel(status)}
-                </Tag>
+                </StatusTag>
             ),
         },
         {

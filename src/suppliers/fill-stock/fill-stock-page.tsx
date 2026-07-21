@@ -14,7 +14,6 @@ import {
     Row,
     Select,
     Table,
-    Tag,
     Typography,
     message,
 } from "antd";
@@ -37,6 +36,13 @@ import { SearchMedicines } from "../../prescriptions/api/prescription";
 import type { SearchMedicineItem } from "../../prescriptions/types/prescriptionmodel";
 import { AddMedicine } from "../api/stock-fill";
 import type { AddMedicineInfo, AddMedicinePayload } from "../types/stock-fill";
+import { StatusTag } from "../../components/status-tag";
+import {
+    getSupplierStatusType,
+    STATUS_INFO,
+    STATUS_SUCCESS,
+    STATUS_WARNING,
+} from "../../constants/status-colors";
 
 import "./fill-stock.css";
 
@@ -572,12 +578,7 @@ function FillStockPage() {
         });
     };
 
-    const statusColor =
-        supplierStatus.toLowerCase() === "active"
-            ? "green"
-            : supplierStatus.toLowerCase() === "inactive"
-              ? "red"
-              : "default";
+    const supplierStatusType = getSupplierStatusType(supplierStatus);
 
     return (
         <Layout>
@@ -617,10 +618,10 @@ function FillStockPage() {
                                     {supplierName}
                                 </Title>
                                 <span className="fill-stock-supplier-code">{supplierCode}</span>
-                                <Tag color={statusColor} bordered>
+                                <StatusTag type={supplierStatusType} bordered>
                                     {supplierStatus}
-                                </Tag>
-                                <Tag>Draft</Tag>
+                                </StatusTag>
+                                <StatusTag type={STATUS_WARNING}>Draft</StatusTag>
                             </div>
 
                             <Form layout="vertical" className="fill-stock-invoice-row">
@@ -844,9 +845,9 @@ function FillStockPage() {
                     </Form.Item>
                     <div className="fill-stock-name-meta">
                         {selectedMedicineId ? (
-                            <Tag color="green">Existing medicine</Tag>
+                            <StatusTag type={STATUS_SUCCESS}>Existing medicine</StatusTag>
                         ) : isNewMedicine ? (
-                            <Tag color="blue">New medicine</Tag>
+                            <StatusTag type={STATUS_INFO}>New medicine</StatusTag>
                         ) : null}
                         <Text type="secondary" className="fill-stock-name-hint">
                             Select a match to autofill, or press Enter to add as a new medicine.

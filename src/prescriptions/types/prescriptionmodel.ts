@@ -72,6 +72,7 @@ export interface PrescriptionListItem {
     created_at?: string;
     status: string;
     patient_id?: string;
+    patient_name?: string;
     medicines?: medicineResponse[];
 }
 

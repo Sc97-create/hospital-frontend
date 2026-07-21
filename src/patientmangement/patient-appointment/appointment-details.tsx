@@ -3,7 +3,6 @@ import {
     Card,
     Row,
     Col,
-    Tag,
     Button,
     Avatar,
     Typography,
@@ -26,6 +25,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { GetAppointmentPreview, updateStatus } from "../api/appointments";
 import type { previewAppointmentData, statusUpdate } from "../types/appointments";
 import dayjs from "dayjs";
+import { StatusTag } from "../../components/status-tag";
+import {
+    getAppointmentStatusType,
+    STATUS_INFO,
+} from "../../constants/status-colors";
 
 const { Text } = Typography;
 
@@ -111,7 +115,9 @@ const AppointmentDetails: React.FC = () => {
                                     Appointment #{previewData?.appointment_code}
                                 </h1>
 
-                                <Tag color="blue">{selectStatus(previewData?.status ?? "")}</Tag>
+                                <StatusTag type={getAppointmentStatusType(previewData?.status)}>
+                                    {selectStatus(previewData?.status ?? "")}
+                                </StatusTag>
                             </div>
 
                             <div className="appointment-meta">
@@ -303,9 +309,9 @@ const AppointmentDetails: React.FC = () => {
                                         DIAGNOSIS
                                     </div>
 
-                                    <Tag color="red">
+                                    <StatusTag type={STATUS_INFO}>
                                         Type 2 Diabetes
-                                    </Tag>
+                                    </StatusTag>
                                 </div>
 
                                 <div className="summary-item">

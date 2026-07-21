@@ -1,4 +1,4 @@
-import { Card, Tag, Button, Layout, Breadcrumb } from "antd"
+import { Avatar, Card, Button, Layout, Breadcrumb } from "antd"
 import './patient-profile.css'
 import { useEffect, useState } from "react";
 import { findOne } from "../api/patients";
@@ -7,9 +7,23 @@ import type { patientlist } from "../types/patients";
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import Sidebar from "../../sidebar";
 import { Content } from "antd/es/layout/layout";
-import PatientOverview from "./patient-overview";
 import PatientAppointmentHistory from "./patient-appointment-history";
 import PatientPrescriptions from "./patient-prescriptions";
+import { StatusTag } from "../../components/status-tag";
+import { getPatientStatusType, STATUS_WARNING } from "../../constants/status-colors";
+
+function displayValue(value: string | number | null | undefined): string {
+    if (value === null || value === undefined) return "—";
+    const text = String(value).trim();
+    return text || "—";
+}
+
+function getPatientInitials(name: string | undefined | null): string {
+    if (!name?.trim()) return "?";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
+}
 
 function formatPatientStatusLabel(status: string | undefined | null): string {
     switch (status?.trim().toLowerCase()) {
@@ -34,7 +48,7 @@ function GeneralInfo() {
     const params = useParams<{ patientID: string }>();
     const patientID = params.patientID;
     const [patient, setPatient] = useState<patientlist | null>(null);
-    const [activeTab, setActiveTab] = useState('overview');
+    const [activeTab, setActiveTab] = useState('appointments');
     const navigate =useNavigate();
 
 
@@ -49,11 +63,8 @@ function GeneralInfo() {
     }, [patientID]);
 
     const tabs = [
-        { key: 'overview', label: 'Overview' },
         { key: 'appointments', label: 'Appointments' },
         { key: 'prescriptions', label: 'Prescriptions' },
-        { key: 'billing', label: 'Billing' },
-        { key: 'timeline', label: 'Timeline' },
     ];
     return (
         <>
@@ -79,41 +90,32 @@ function GeneralInfo() {
                             <Card className="patient-header-card">
                                 <div className="patient-header-container">
                                     <div className="patient-left-section">
-                                        <img
-                                            src="https://i.pravatar.cc/100"
-                                            alt="patient"
-                                            className="patient-avatar"
-                                        />
+                                        <Avatar size={72} className="patient-avatar">
+                                            {getPatientInitials(patient?.patient_name)}
+                                        </Avatar>
 
                                         <div className="patient-main-info">
                                             <div className="patient-name-row">
-                                                <h2>{patient?.patient_name ?? 'Rajesh'}</h2>
-                                                <Tag color="green">{formatPatientStatusLabel(patient?.patient_status)}</Tag>
-                                                <Tag color="gold">{patient?.waiting_time ?? 0}</Tag>
+                                                <h2>{displayValue(patient?.patient_name)}</h2>
+                                                <StatusTag type={getPatientStatusType(patient?.patient_status)}>
+                                                    {formatPatientStatusLabel(patient?.patient_status)}
+                                                </StatusTag>
+                                                {patient?.waiting_time ? (
+                                                    <StatusTag type={STATUS_WARNING}>
+                                                        Wait: {patient.waiting_time}
+                                                    </StatusTag>
+                                                ) : null}
                                             </div>
 
                                             <div className="patient-meta-grid">
-                                                <span><b>UHID:</b> {patient?.patient_code}</span>
-                                                <span><b>Gender:</b> {patient?.patient_gender ?? 'Male'}</span>
-                                                <span><b>Age:</b> {patient?.patient_age ?? '34'}</span>
+                                                <span><b>UHID:</b> {displayValue(patient?.patient_code)}</span>
+                                                <span><b>Gender:</b> {displayValue(patient?.patient_gender)}</span>
+                                                <span><b>Age:</b> {patient?.patient_age != null ? `${patient.patient_age} yrs` : "—"}</span>
                                             </div>
 
                                             <div className="patient-meta-grid">
-                                                <span><b>Blood Group:</b> {patient?.patient_bg}</span>
-                                                <span><b>Weight:</b> {patient?.patient_weight ?? '72'} kg</span>
-                                            </div>
-
-                                            <div className="patient-meta-grid">
-                                                <span><b>Phone:</b> {patient?.patient_phone ?? '+91 98765 43210'}</span>
-                                            </div>
-
-                                            <div className="patient-meta-grid">
-                                                <span><b>Last Visit:</b> {patient?.patient_lvd ? new Date(patient.patient_lvd).toLocaleDateString() : 'N/A'}</span>
-                                            </div>
-
-                                            <div className="patient-tag-wrapper">
-                                                <Tag color="red">⚠ Allergy (Penicillin)</Tag>
-                                                <Tag color="orange">Chronic (Hypertension)</Tag>
+                                                <span><b>Phone:</b> {displayValue(patient?.patient_phone)}</span>
+                                                <span><b>Last Visit:</b> {patient?.patient_lvd ? new Date(patient.patient_lvd).toLocaleDateString() : "—"}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -138,22 +140,14 @@ function GeneralInfo() {
                                 ))}
                             </div>
                             <div className="tab-content-layout">
-                                {activeTab === 'overview' && (
-                                    <PatientOverview patient={patient} />
-                                )}
-
                                 {activeTab === 'appointments' && (
                                     <PatientAppointmentHistory patient={patient} />
                                 )}
 
                                 {activeTab === 'prescriptions' && (
                                     <PatientPrescriptions patient={patient} />
-                                )} 
-
+                                )}
                             </div>
-
-                            {/* Main Cards */}
-                            
                         </div>
                     </Content>
                 </Layout>
