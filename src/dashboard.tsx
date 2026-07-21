@@ -47,6 +47,7 @@ import {
   STATUS_INFO,
   STATUS_WARNING,
 } from "./constants/status-colors";
+import { logoutAndRedirect } from "./authentication/logout";
 import "./dashboard.css";
 
 const { Content, Header } = Layout;
@@ -308,7 +309,13 @@ function Dashboard() {
 
   const userMenuItems = [
     { key: "settings", label: "Settings" },
-    { key: "logout", label: "Logout" },
+    {
+      key: "logout",
+      label: "Logout",
+      onClick: () => {
+        void logoutAndRedirect(navigate);
+      },
+    },
   ];
 
   return (

@@ -81,6 +81,14 @@ function isPaymentLinkCreated(status?: string): boolean {
     return status?.toLowerCase() === PAYMENT_LINK_CREATED;
 }
 
+/** Stable UUID for a single payment attempt (retries / double-clicks reuse it). */
+function createIdempotencyKey(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    return `chk_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+}
+
 function extractApiErrorMessage(error: unknown, fallback: string): string {
     if (
         error &&
@@ -381,6 +389,12 @@ function PrescriptionCheckout() {
     const [secondsLeft, setSecondsLeft] = useState(CHECKOUT_TIMEOUT_SECONDS);
     const [timerExpired, setTimerExpired] = useState(false);
     const expiryToastShown = useRef(false);
+    /** Sync lock — `paying` state alone can miss a second click before re-render. */
+    const paymentInFlightRef = useRef(false);
+    /** Reused for retries of the same Confirm & Pay attempt until success. */
+    const billingIdempotencyKeyRef = useRef<string | null>(null);
+    /** Reused for retries of the same swipe-to-confirm until success. */
+    const confirmIdempotencyKeyRef = useRef<string | null>(null);
 
     const applyLines = (items: DispenseLineResponse[], mock: boolean) => {
         const mapped = mapDispenseToCheckoutLines(items);
@@ -650,6 +664,10 @@ function PrescriptionCheckout() {
             return null;
         }
 
+        if (!billingIdempotencyKeyRef.current) {
+            billingIdempotencyKeyRef.current = createIdempotencyKey();
+        }
+
         return {
             prescription_id,
             patient_id,
@@ -657,6 +675,7 @@ function PrescriptionCheckout() {
             supplier_id,
             organisation_id,
             payment_mode: paymentMethod,
+            idempotency_key: billingIdempotencyKeyRef.current,
             financials: {
                 discount_amount: 0,
                 sub_total_amount: totals.subtotal,
@@ -672,9 +691,23 @@ function PrescriptionCheckout() {
         setPendingInvoiceId(null);
         setPendingPaymentUrl(null);
         setTransactionReference('');
+        confirmIdempotencyKeyRef.current = null;
+    };
+
+    const getConfirmIdempotencyKey = (): string => {
+        if (!confirmIdempotencyKeyRef.current) {
+            confirmIdempotencyKeyRef.current = createIdempotencyKey();
+        }
+        return confirmIdempotencyKeyRef.current;
+    };
+
+    const clearPaymentAttemptKeys = () => {
+        billingIdempotencyKeyRef.current = null;
+        confirmIdempotencyKeyRef.current = null;
     };
 
     const openPaymentSuccess = (opts: { autoStatus: boolean }) => {
+        clearPaymentAttemptKeys();
         setPaidAmount(totals.total);
         setPaidItemCount(totals.itemCount);
         setStatusUpdatedManually(!opts.autoStatus);
@@ -682,6 +715,8 @@ function PrescriptionCheckout() {
     };
 
     const startManualPayment = async (payload: BillingCreatePayload) => {
+        if (paymentInFlightRef.current) return;
+        paymentInFlightRef.current = true;
         setPaying(true);
         messageApi.loading({
             content: 'Creating invoice…',
@@ -703,11 +738,14 @@ function PrescriptionCheckout() {
                 key: 'checkout',
             });
         } finally {
+            paymentInFlightRef.current = false;
             setPaying(false);
         }
     };
 
     const completePaymentLink = async (payload: BillingCreatePayload) => {
+        if (paymentInFlightRef.current) return;
+        paymentInFlightRef.current = true;
         setPaying(true);
         messageApi.loading({
             content: 'Waiting for payment link…',
@@ -735,17 +773,20 @@ function PrescriptionCheckout() {
                 key: 'checkout',
             });
         } finally {
+            paymentInFlightRef.current = false;
             setPaying(false);
         }
     };
 
     const confirmManualPayment = async () => {
         if (!pendingInvoiceId) return;
+        if (paymentInFlightRef.current) return;
         if (timerExpired) {
             messageApi.warning('Checkout time expired — reload to try again');
             return;
         }
 
+        paymentInFlightRef.current = true;
         setPaying(true);
         messageApi.loading({
             content: 'Confirming payment…',
@@ -758,6 +799,7 @@ function PrescriptionCheckout() {
             await ConfirmPayment({
                 invoice_id: pendingInvoiceId,
                 payment_mode: paymentMethod,
+                idempotency_key: getConfirmIdempotencyKey(),
                 ...(trimmedRef ? { transaction_reference: trimmedRef } : {}),
             });
             resetManualPaymentSession();
@@ -776,11 +818,15 @@ function PrescriptionCheckout() {
                 key: 'checkout',
             });
         } finally {
+            paymentInFlightRef.current = false;
             setPaying(false);
         }
     };
 
     const handleConfirmPay = () => {
+        if (paying || paymentInFlightRef.current) {
+            return;
+        }
         if (isPaymentLinkCreated(rxStatus)) {
             messageApi.warning('Payment link already created — awaiting payment (Yet to pay)');
             return;
@@ -1147,9 +1193,11 @@ function PrescriptionCheckout() {
                                         <Segmented
                                             className="checkout-payment-segmented"
                                             value={paymentMethod}
-                                            onChange={(value) =>
-                                                setPaymentMethod(value as PaymentMethod)
-                                            }
+                                            onChange={(value) => {
+                                                billingIdempotencyKeyRef.current = null;
+                                                confirmIdempotencyKeyRef.current = null;
+                                                setPaymentMethod(value as PaymentMethod);
+                                            }}
                                             options={[
                                                 { label: 'Cash', value: 'cash' },
                                                 { label: 'QR', value: 'qr' },
