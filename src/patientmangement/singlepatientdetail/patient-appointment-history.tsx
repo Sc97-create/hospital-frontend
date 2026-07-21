@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { Avatar, Segmented, Space, Table, Tag, Typography } from "antd";
+import { Avatar, Segmented, Space, Table, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import "./patient-appointment-history.css";
 import { GetAppointmentByPatientID } from "../api/appointments";
 import type { patientlist } from "../types/patients";
 import type { appointmentByPatientID, previewAppointmentData } from "../types/appointments";
+import { StatusTag } from "../../components/status-tag";
+import { getAppointmentStatusType } from "../../constants/status-colors";
 
 const { Text } = Typography;
 
@@ -19,23 +21,12 @@ type AppointmentStatus =
 type Appointment = previewAppointmentData;
 
 const getStatusTag = (status: AppointmentStatus) => {
-    switch (status) {
-        case "upcoming":
-            return <Tag color="green">Upcoming</Tag>;
+    const label =
+        status === "reschedule_required"
+            ? "Reschedule Required"
+            : status.charAt(0).toUpperCase() + status.slice(1);
 
-        case "completed":
-            return <Tag color="success">Completed</Tag>;
-
-        case "cancelled":
-            return <Tag color="error">Cancelled</Tag>;
-        case "missed":
-            return <Tag color="volcano">Missed</Tag>;
-        case "reschedule_required":
-            return <Tag color="gold">Reschedule Required</Tag>;
-
-        default:
-            return null;
-    }
+    return <StatusTag type={getAppointmentStatusType(status)}>{label}</StatusTag>;
 };
 
 const formatVisitTypeLabel = (visitType: string | undefined | null): string => {

@@ -13,6 +13,31 @@
   --color-primary-text:  #25D366;   /* text / icon in default btn hover        */
   --color-muted-text:    #667085;   /* secondary / helper / caption text       */
 
+  /* ── Status colours (only four semantic types — see STATUS-COLORS.md) ───── */
+  --status-info-lightest:    #eff6ff;
+  --status-info-lighter:     #dbeafe;
+  --status-info-default:     #2563eb;
+  --status-info-darker:      #1d4ed8;
+  --status-info-darkest:     #1e3a8a;
+
+  --status-success-lightest: #f0fdf4;
+  --status-success-lighter:  #dcfce7;
+  --status-success-default:  #16a34a;
+  --status-success-darker:   #15803d;
+  --status-success-darkest:  #14532d;
+
+  --status-warning-lightest: #fffbeb;
+  --status-warning-lighter:  #fef3c7;
+  --status-warning-default:  #d97706;
+  --status-warning-darker:   #b45309;
+  --status-warning-darkest:  #78350f;
+
+  --status-danger-lightest:  #fef2f2;
+  --status-danger-lighter:   #fee2e2;
+  --status-danger-default:   #dc2626;
+  --status-danger-darker:    #b91c1c;
+  --status-danger-darkest:   #7f1d1d;
+
   /* ── Spacing scale (8-point grid) ──────────────────────────────────────── */
   --space-1:  4px;    /* micro: icon gaps, badge padding             */
   --space-2:  8px;    /* compact: inline gaps, tight rows            */
@@ -203,6 +228,31 @@ body,
     align-items: center !important;
     justify-content: center !important;
     height: 28px !important;
+}
+
+/* Global status tags — only info | success | warning | danger (STATUS-COLORS.md) */
+.status-tag--info {
+  background: var(--status-info-lighter) !important;
+  color: var(--status-info-darker) !important;
+  border-color: var(--status-info-default) !important;
+}
+
+.status-tag--success {
+  background: var(--status-success-lighter) !important;
+  color: var(--status-success-darker) !important;
+  border-color: var(--status-success-default) !important;
+}
+
+.status-tag--warning {
+  background: var(--status-warning-lighter) !important;
+  color: var(--status-warning-darker) !important;
+  border-color: var(--status-warning-default) !important;
+}
+
+.status-tag--danger {
+  background: var(--status-danger-lighter) !important;
+  color: var(--status-danger-darker) !important;
+  border-color: var(--status-danger-default) !important;
 }
 
 /* Global CTA button overrides — single source of truth via CSS variables */

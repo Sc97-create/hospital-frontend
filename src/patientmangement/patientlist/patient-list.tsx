@@ -1,4 +1,4 @@
-import { Layout, Breadcrumb, Button, Input, Table, Tag, Pagination } from 'antd'
+import { Layout, Breadcrumb, Button, Input, Table, Pagination } from 'antd'
 import { useState, useEffect } from 'react'
 import type { TableColumnsType, TablePaginationConfig } from 'antd'
 import './patient-list.css'
@@ -13,6 +13,8 @@ import {
 } from '@ant-design/icons'
 import { findMany } from '../api/patients'
 import type { Patientlistresponse } from '../types/patients'
+import { StatusTag } from '../../components/status-tag'
+import { getPatientStatusType, STATUS_INFO } from '../../constants/status-colors'
 
 const { Content } = Layout
 
@@ -39,7 +41,7 @@ function PatientList() {
             className: 'column-layout',
             showSorterTooltip: { target: 'full-header' },
             render: (text: string) => (
-                <Tag color="yellow">{text}</Tag>
+                <StatusTag type={STATUS_INFO}>{text}</StatusTag>
             )
         },
         {
@@ -102,13 +104,11 @@ function PatientList() {
                 const toTitleCase = (str: string) =>
                     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-                const colorMap: Record<string, string> = {
-                    pending: 'orange',
-                    active: 'green',
-                    completed: 'blue',
-                    cancelled: 'red',
-                };
-                return <Tag color={colorMap[status.toLowerCase()]} bordered={true} className='app-tag'>{toTitleCase(status)}</Tag>
+                return (
+                    <StatusTag type={getPatientStatusType(status)} bordered>
+                        {toTitleCase(status)}
+                    </StatusTag>
+                );
             }
         }
     ];

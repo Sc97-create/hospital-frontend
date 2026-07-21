@@ -1,5 +1,7 @@
 import { findOne as findPatientById } from '../patientmangement/api/patients';
 import type { patientlist } from '../patientmangement/types/patients';
+import type { StatusType } from '../constants/status-colors';
+import { getPrescriptionStatusType } from '../constants/status-colors';
 
 export type PrescriptionLocationState = {
     patientId?: string;
@@ -129,29 +131,8 @@ export function formatPrescriptionStatusLabel(status: string | undefined | null)
     }
 }
 
-export function getPrescriptionStatusTagColor(status: string | undefined | null): string {
-    switch (normalizePrescriptionStatus(status)) {
-        case 'sent':
-            return 'cyan';
-        case 'dispensed':
-        case 'full_dispensed':
-        case 'fully_dispensed':
-            return 'green';
-        case 'draft':
-        case 'pending':
-            return 'default';
-        case 'partially_dispensed':
-        case 'partial_dispensed':
-            return 'orange';
-        case 'payment_link_created':
-            return 'blue';
-        case 'expired':
-        case 'cancelled':
-        case 'canceled':
-            return 'red';
-        default:
-            return 'default';
-    }
+export function getPrescriptionStatusTagColor(status: string | undefined | null): StatusType {
+    return getPrescriptionStatusType(status);
 }
 
 export async function fetchPatientById(patientId: string): Promise<patientlist | null> {

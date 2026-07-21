@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Tag } from "antd";
+import { Button, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,8 @@ import {
 } from "../../prescriptions/prescription-patient";
 import type { patientlist } from "../types/patients";
 import "./patient-appointment-history.css";
+import { StatusTag } from "../../components/status-tag";
+import { STATUS_INFO } from "../../constants/status-colors";
 
 interface Props {
     patient: patientlist | null;
@@ -58,7 +60,13 @@ function PatientPrescriptions({ patient }: Props) {
             title: "Code",
             dataIndex: "code",
             key: "code",
-            render: (text: string) => <Tag color="yellow">{text}</Tag>,
+            render: (text: string) => <StatusTag type={STATUS_INFO}>{text}</StatusTag>,
+        },
+        {
+            title: "Patient",
+            dataIndex: "patient_name",
+            key: "patient_name",
+            render: (name: string | undefined) => name?.trim() || patient?.patient_name || "—",
         },
         {
             title: "Doctor",
@@ -83,9 +91,9 @@ function PatientPrescriptions({ patient }: Props) {
             dataIndex: "status",
             key: "status",
             render: (status: string) => (
-                <Tag color={getPrescriptionStatusTagColor(status)} bordered>
+                <StatusTag type={getPrescriptionStatusTagColor(status)} bordered>
                     {formatPrescriptionStatusLabel(status)}
-                </Tag>
+                </StatusTag>
             ),
         },
         {

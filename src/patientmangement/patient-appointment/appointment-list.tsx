@@ -26,6 +26,13 @@ import { Content } from "antd/es/layout/layout";
 import { Link, useNavigate } from "react-router-dom";
 import { GetDoctors } from "../../shared/api/shared-api";
 import { GetAppointmentsByOrganisationID, updateStatus } from "../api/appointments";
+import { StatusTag } from "../../components/status-tag";
+import {
+    getAppointmentStatusType,
+    statusTagClassName,
+    STATUS_INFO,
+    STATUS_SUCCESS,
+} from "../../constants/status-colors";
 import type { AppointmentOrg } from "../types/appointments";
 
 const { Title, Text } = Typography;
@@ -37,28 +44,28 @@ interface Doctor {
 }
 
 const APPOINTMENT_STATUS_OPTIONS = [
-    { value: "scheduled", label: "Scheduled", color: "green" },
-    { value: "upcoming", label: "Upcoming", color: "cyan" },
-    { value: "ongoing", label: "Ongoing", color: "gold" },
-    { value: "completed", label: "Completed", color: "success" },
-    { value: "cancelled", label: "Cancelled", color: "red" },
-    { value: "reschedule_required", label: "Reschedule Required", color: "orange" },
-    { value: "missed", label: "Missed", color: "volcano" },
+    { value: "scheduled", label: "Scheduled" },
+    { value: "upcoming", label: "Upcoming" },
+    { value: "ongoing", label: "Ongoing" },
+    { value: "completed", label: "Completed" },
+    { value: "cancelled", label: "Cancelled" },
+    { value: "reschedule_required", label: "Reschedule Required" },
+    { value: "missed", label: "Missed" },
 ] as const;
 
 const getVisitTag = (type: string) => {
     switch (type) {
         case "new_patient":
-            return <Tag color="blue">New Patient</Tag>;
+            return <StatusTag type={STATUS_INFO}>New Patient</StatusTag>;
 
         case "follow_up":
-            return <Tag color="purple">Follow Up</Tag>;
+            return <StatusTag type={STATUS_INFO}>Follow Up</StatusTag>;
 
         case "opd":
-            return <Tag color="orange">OPD</Tag>;
+            return <StatusTag type={STATUS_INFO}>OPD</StatusTag>;
 
         default:
-            return <Tag color="blue">New Patient</Tag>;
+            return <StatusTag type={STATUS_INFO}>New Patient</StatusTag>;
     }
 };
 
@@ -67,14 +74,17 @@ const getStatusMeta = (status: string) => {
         APPOINTMENT_STATUS_OPTIONS.find((opt) => opt.value === status) ?? {
             value: status,
             label: status,
-            color: "default",
         }
     );
 };
 
 const getStatusTag = (status: string) => {
     const match = getStatusMeta(status);
-    return <Tag color={match.color}>{match.label}</Tag>;
+    return (
+        <StatusTag type={getAppointmentStatusType(match.value)}>
+            {match.label}
+        </StatusTag>
+    );
 };
 //add appointment code
 //send appointmentid
@@ -140,7 +150,7 @@ const AppointmentsPage: React.FC = () => {
             color: "#6B7280",
             width: 180,
             render: (_: string, record: AppointmentOrg) => (
-                <Tag color="yellow">{record.appointment_code}</Tag>
+                <StatusTag type={STATUS_INFO}>{record.appointment_code}</StatusTag>
             ),
         },
         {
@@ -154,9 +164,9 @@ const AppointmentsPage: React.FC = () => {
                     <div className="time-text">{record.start_time} - {record.end_time}</div>
 
                     {record.next && (
-                        <Tag className="next-tag" color="blue">
+                        <StatusTag type={STATUS_SUCCESS} className="next-tag">
                             NEXT
-                        </Tag>
+                        </StatusTag>
                     )}
                 </div>
             ),
@@ -226,8 +236,11 @@ const AppointmentsPage: React.FC = () => {
                         }}
                     >
                         <Tag
-                            color={meta.color}
-                            className={`appointment-status-tag ${isUpdating ? "is-loading" : ""}`}
+                            bordered
+                            className={statusTagClassName(
+                                getAppointmentStatusType(record.status),
+                                `appointment-status-tag ${isUpdating ? "is-loading" : ""}`,
+                            )}
                             role="button"
                             tabIndex={0}
                             aria-label={`Change status for ${record.appointment_code}`}

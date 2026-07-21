@@ -11,7 +11,6 @@ import {
     Radio,
     Row,
     Select,
-    Tag,
     TimePicker,
     Typography,
 } from 'antd';
@@ -26,6 +25,8 @@ import {
 import './add-employee.css';
 import Sidebar from '../../sidebar';
 import { Link } from 'react-router-dom';
+import { StatusTag } from '../../components/status-tag';
+import { STATUS_WARNING } from '../../constants/status-colors';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -98,7 +99,7 @@ function AddEmployee() {
                                     Register hospital staff with role, department, and shift details for scheduling and access control.
                                 </Text>
                             </div>
-                            <Tag color="default">Draft</Tag>
+                            <StatusTag type={STATUS_WARNING}>Draft</StatusTag>
                         </div>
                     </div>
 

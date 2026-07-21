@@ -14,10 +14,15 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { GetSuppliersByOrgID } from "./api/supplier"
 import type { SupplierListItem } from "./types/supplier"
+import { StatusTag } from "../components/status-tag"
+import {
+    getSupplierStatusType,
+    statusTagClassName,
+} from "../constants/status-colors"
 
 const SUPPLIER_STATUS_OPTIONS = [
-    { value: "Active", label: "Active", color: "green" },
-    { value: "Inactive", label: "Inactive", color: "red" },
+    { value: "Active", label: "Active" },
+    { value: "Inactive", label: "Inactive" },
 ] as const;
 
 function normalizeStatus(status: string): string {
@@ -33,7 +38,6 @@ function getStatusMeta(status: string) {
         SUPPLIER_STATUS_OPTIONS.find((opt) => opt.value === normalized) ?? {
             value: normalized,
             label: normalized,
-            color: "default" as const,
         }
     );
 }
@@ -135,18 +139,20 @@ function Pharmacy() {
                             items: SUPPLIER_STATUS_OPTIONS.map((opt) => ({
                                 key: opt.value,
                                 label: (
-                                    <Tag color={opt.color} bordered className="app-tag">
+                                    <StatusTag type={getSupplierStatusType(opt.value)} bordered>
                                         {opt.label}
-                                    </Tag>
+                                    </StatusTag>
                                 ),
                             })),
                             onClick: ({ key }) => handleStatusChange(record.id, key),
                         }}
                     >
                         <Tag
-                            color={meta.color}
                             bordered
-                            className="supplier-status-tag app-tag"
+                            className={statusTagClassName(
+                                getSupplierStatusType(status),
+                                "supplier-status-tag",
+                            )}
                             role="button"
                             tabIndex={0}
                             aria-label={`Change status for ${record.name}`}
