@@ -103,7 +103,11 @@ export const GetDispenseCheckoutLines = async (
 export const CreateBilling = async (
     payload: BillingCreatePayload,
 ): Promise<BillingCreateResponse> => {
-    const response = await apiClient.post(`/billing/create`, payload)
+    const response = await apiClient.post(`/billing/create`, payload, {
+        headers: {
+            'Idempotency-Key': payload.idempotency_key,
+        },
+    })
     return response.data
 }
 
@@ -111,7 +115,11 @@ export const CreateBilling = async (
 export const ConfirmPayment = async (
     payload: ConfirmPaymentPayload,
 ): Promise<ConfirmPaymentResponse> => {
-    const response = await apiClient.post(`/payment/confirm`, payload)
+    const response = await apiClient.post(`/payment/confirm`, payload, {
+        headers: {
+            'Idempotency-Key': payload.idempotency_key,
+        },
+    })
     return response.data
 }
 

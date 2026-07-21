@@ -1,29 +1,30 @@
 
-import {  Layout, Dropdown, Space } from 'antd'
+import { Layout, Dropdown, Space } from 'antd'
 import './header.css'
 const { Header } = Layout
-import{
+import {
     DownOutlined,
 } from '@ant-design/icons'
-const items = [
-    {
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                Logout
-            </a>
-        ),
-        key: '0'
-    },
-    {
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                Settings
-            </a>
-        ),
-        key: '1'
-    }
-]
+import { useNavigate } from 'react-router-dom'
+import { logoutAndRedirect } from './authentication/logout'
+
 function HeaderLayout() {
+    const navigate = useNavigate()
+
+    const items = [
+        {
+            key: 'logout',
+            label: 'Logout',
+            onClick: () => {
+                void logoutAndRedirect(navigate)
+            },
+        },
+        {
+            key: 'settings',
+            label: 'Settings',
+        },
+    ]
+
     return (
         <>
             <div className="container-fluid">

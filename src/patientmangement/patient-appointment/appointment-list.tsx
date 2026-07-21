@@ -31,7 +31,6 @@ import {
     getAppointmentStatusType,
     statusTagClassName,
     STATUS_INFO,
-    STATUS_SUCCESS,
 } from "../../constants/status-colors";
 import type { AppointmentOrg } from "../types/appointments";
 
@@ -160,15 +159,7 @@ const AppointmentsPage: React.FC = () => {
             color: "#6B7280",
             width: 220,
             render: (_: string, record: AppointmentOrg) => (
-                <div>
-                    <div className="time-text">{record.start_time} - {record.end_time}</div>
-
-                    {record.next && (
-                        <StatusTag type={STATUS_SUCCESS} className="next-tag">
-                            NEXT
-                        </StatusTag>
-                    )}
-                </div>
+                <div className="time-text">{record.start_time} - {record.end_time}</div>
             ),
         },
         {
@@ -179,12 +170,21 @@ const AppointmentsPage: React.FC = () => {
             width: 280,
             render: (_: string, record: AppointmentOrg) => (
                 <div>
-                    <div className="patient-name">
-                        <a onClick={() =>
+                    <div
+                        className="patient-name"
+                        role="link"
+                        tabIndex={0}
+                        onClick={() =>
                             navigate(`/appointment/preview/${record.appointment_id}`)
-                        }>
-                            {record.patient_name}
-                        </a>
+                        }
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                navigate(`/appointment/preview/${record.appointment_id}`);
+                            }
+                        }}
+                    >
+                        {record.patient_name}
                     </div>
                     <Text type="secondary" className="sub-text">
                         {record.mobile_no}

@@ -124,6 +124,7 @@
   font-size: 14px !important;
   font-weight: 500;
   color: #6B7280;
+  cursor: pointer;
 }
 
 .sub-text {
@@ -159,22 +160,6 @@
 .next-row {
   background: #f7fbff !important;
 }
-
-.next-tag,
-.next-tag {
-  margin-top: 8px;
-  padding: 0px 10px;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  border-radius: 999px;
-  background: #22c55e !important;
-  border-color: #22c55e !important;
-  color: #fff !important;
-}
-
-
-
 
 /* Visit Type */
 .visit-type-tag {

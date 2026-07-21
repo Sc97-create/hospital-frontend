@@ -233,6 +233,11 @@ export interface BillingCreatePayload {
     organisation_id: string;
     /** How the patient paid — used for categorisation / reporting. */
     payment_mode: CheckoutPaymentMethod;
+    /**
+     * Unique per payment attempt. Same key on retries / double-clicks must
+     * create at most one bill on the backend.
+     */
+    idempotency_key: string;
     financials: BillingCreateFinancials;
     dispense_items: BillingDispenseItem[];
 }
@@ -256,6 +261,8 @@ export interface BillingCreateResponse {
 export interface ConfirmPaymentPayload {
     invoice_id: string;
     payment_mode: CheckoutPaymentMethod;
+    /** Unique per confirm attempt — prevents double-confirm on rapid swipes. */
+    idempotency_key: string;
     transaction_reference?: string;
 }
 
