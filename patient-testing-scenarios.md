@@ -262,3 +262,24 @@ Manual QA checklist for patient flows. Use with a logged-in user and a valid `or
 | | | ☐ | ☐ | ☐ | ☐ | ☐ | |
 
 *When automation is added later (Playwright/Vitest), convert §A–E into specs; this file remains the source of truth for coverage.*
+
+## Added bugs
+| ID | Module | Feature | Bug Title | Steps to Reproduce | Expected Result | Suggested Solution |
+|----|--------|---------|-----------|--------------------|-----------------|--------------------|
+| 1 | Authentication | Login | Wrong Password Error Not Displayed | Enter a valid email and incorrect password, then click Login. | System should display a "Wrong Password" error message. | Add backend validation and show appropriate error message on failed login. |
+| 2 | Authentication | Forgot Password | Forgot Password Not Working | Click the "Forgot Password" link from the login page. | User should be redirected to the password reset process. | Verify routing, API, and email reset functionality. |
+| 3 | Organization Setup | Time Zone | Time Zone List Incomplete | Start organization signup and open the Time Zone dropdown. | All available time zones should be displayed. | Populate the dropdown with complete time zone data. |
+| 4 | Organization Setup | Permissions | All Permissions Assigned by Default | Sign up a new organization and review assigned permissions. | Users should receive permissions based on their selected role only. | Implement Role-Based Access Control (RBAC). |
+| 5 | Support | Contact Support | Contact Platform Support Not Working | Click **Need Help? Contact Platform Support**. | Support page or contact form should open. | Fix navigation or support API endpoint. |
+| 6 | Security | Root Access Warning | Acknowledge Button Not Working | Open Root Access Warning popup and click **Acknowledge**. | Warning popup should close after acknowledgement. | Fix button click event and popup state handling. |
+| 7 | Organization Setup | Final Review | Edit Button Not Working | Navigate to Final Review page and click **Edit**. | User should be able to edit previously entered information. | Verify Edit button navigation and form binding. |
+| 8 | Organization Setup | Registration Details | Tax ID/Registration Number Should Be Optional | Leave Tax ID/Registration Number blank during registration. | User should be able to continue registration successfully. | Make the field optional in UI and backend validation. |
+| 9 | Authentication | Login Security | Failed Login Attempt Handling Missing | Enter an incorrect password multiple times. | System should display an error and optionally show remaining login attempts. | Implement failed login tracking and user notifications. |
+| 10 | Branch Management | Default Branch | Incorrect Default Branch Displayed | Login and observe the default branch shown in the top-right corner. | User's assigned default branch should be displayed. | Load the correct branch from the user's profile. |
+| 11 | Patient Management | Patient Details | Duplicate Patient Number Validation Missing | Create a patient using an existing patient number. | System should prevent duplicate entries and show an error. | Add unique validation in frontend and backend. |
+| 12 | Appointment | Time Slot | Multiple Time Slots Cannot Be Added | Try adding multiple appointment time slots. | System should allow adding multiple valid time slots. | Fix time slot creation logic. |
+| 13 | Appointment | Book Appointment | Book Appointment Not Working | Fill appointment details and click **Book Appointment**. | Appointment should be created successfully. | Verify API request and backend appointment creation logic. |
+| 14 | Employee Management | Employee Creation | Default Employee Details Already Present | Open Employee Creation page. | Form should be blank for new employee creation. | Remove unwanted default values from the form. |
+| 15 | Employee Management | Date of Birth | Future Date Allowed in DOB | Select today's date or a future date as Date of Birth. | Future dates should not be allowed. | Restrict Date of Birth to past dates only. |
+| 16 | Appointment | Time Slot | Start Time and End Time Can Be Same | Create a time slot with identical start and end times. | System should prevent identical start and end times. | Add validation to ensure End Time is greater than Start Time. |
+| 17 | Employee Management | Employee Creation | Employee Not Added After Success Message | Add a new employee and observe the success message. Check the employee list. | Employee should appear in the employee list immediately. | Verify database insertion and refresh the employee list after creation. |
