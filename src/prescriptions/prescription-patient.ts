@@ -103,26 +103,65 @@ export function isCancelledPrescriptionStatus(status: string | undefined | null)
     return normalized === 'cancelled' || normalized === 'canceled';
 }
 
+/** Paid / finished Rx (link paid or fully dispensed). */
 export function isFullyDispensedPrescriptionStatus(status: string | undefined | null): boolean {
     const normalized = normalizePrescriptionStatus(status);
     return (
+        normalized === 'completed' ||
         normalized === 'full_dispensed' ||
         normalized === 'fully_dispensed' ||
         normalized === 'dispensed'
     );
 }
 
+/** Payment link generated — awaiting patient pay. */
+export function isPaymentPendingPrescriptionStatus(
+    status: string | undefined | null,
+): boolean {
+    const normalized = normalizePrescriptionStatus(status);
+    return normalized === 'payment_pending' || normalized === 'payment_link_created';
+}
+
+/**
+ * Tentative / partial — stock-out or patient took only part of the Rx.
+ * Remaining-balance checkout not available yet.
+ */
+export function isPartiallyDispensedPrescriptionStatus(
+    status: string | undefined | null,
+): boolean {
+    const normalized = normalizePrescriptionStatus(status);
+    return (
+        normalized === 'tentative' ||
+        normalized === 'partially_dispensed' ||
+        normalized === 'partial_dispensed'
+    );
+}
+
+/** Shown when Rx is tentative / partial — remaining-balance checkout not available. */
+export const PARTIAL_DISPENSE_BLOCK_MESSAGE =
+    'This prescription is tentative (partial dispense). Create a new prescription to continue — remaining-balance checkout is not available yet.';
+
 /** Human-readable prescription / pharma status for tags. */
 export function formatPrescriptionStatusLabel(status: string | undefined | null): string {
     switch (normalizePrescriptionStatus(status)) {
+        case 'draft':
+            return 'Draft';
+        case 'sent':
+            return 'Sent';
+        case 'payment_pending':
         case 'payment_link_created':
-            return 'Payment link created';
+            return 'Payment pending';
+        case 'completed':
+            return 'Completed';
+        case 'tentative':
+            return 'Tentative';
         case 'partially_dispensed':
         case 'partial_dispensed':
-            return 'Partially dispensed';
+            return 'Tentative';
         case 'full_dispensed':
         case 'fully_dispensed':
-            return 'Fully dispensed';
+        case 'dispensed':
+            return 'Completed';
         case 'cancelled':
         case 'canceled':
             return 'Cancelled';

@@ -29,11 +29,19 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'reac
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Sidebar from '../sidebar';
-import { ConfirmPayment, CreateBilling, GetDispenseCheckoutLines, parseBillingCreateResponse } from './api/prescription';
+import {
+    ConfirmPayment,
+    CreateBilling,
+    GetDispenseCheckoutLines,
+    GetInvoiceByPrescriptionID,
+    parseBillingCreateResponse,
+    parseInvoiceByPrescriptionResponse,
+} from './api/prescription';
 import type {
     BillingCreatePayload,
     CheckoutPaymentMethod,
     DispenseLineResponse,
+    InvoiceByPrescription,
     MedicineBatch,
 } from './types/prescriptionmodel';
 import {
@@ -41,6 +49,9 @@ import {
     formatPatientSubtext,
     formatPrescriptionStatusLabel,
     getPrescriptionStatusTagColor,
+    isPartiallyDispensedPrescriptionStatus,
+    isPaymentPendingPrescriptionStatus,
+    PARTIAL_DISPENSE_BLOCK_MESSAGE,
     prescriptionPath,
     recallPrescriptionPatientId,
     rememberPrescriptionPatientId,
@@ -65,7 +76,6 @@ const { Title, Text } = Typography;
 
 const TAX_RATE = 0.05;
 const FALLBACK_SUPPLIER_ID = 'sample-supplier-id';
-const PAYMENT_LINK_CREATED = 'payment_link_created';
 /** Checkout session lock — Confirm & Pay disabled when this hits 0. */
 const CHECKOUT_TIMEOUT_SECONDS = 2 * 60;
 
@@ -75,10 +85,6 @@ const MANUAL_PAYMENT_METHODS: PaymentMethod[] = ['cash', 'qr'];
 
 function isManualPayment(method: PaymentMethod): boolean {
     return MANUAL_PAYMENT_METHODS.includes(method);
-}
-
-function isPaymentLinkCreated(status?: string): boolean {
-    return status?.toLowerCase() === PAYMENT_LINK_CREATED;
 }
 
 /** Stable UUID for a single payment attempt (retries / double-clicks reuse it). */
@@ -366,6 +372,7 @@ function PrescriptionCheckout() {
     const [searchParams] = useSearchParams();
     const locationState = (location.state as PrescriptionLocationState | null) ?? null;
     const [messageApi, contextHolder] = message.useMessage();
+    const [modalApi, modalContextHolder] = Modal.useModal();
     const [loading, setLoading] = useState(true);
     const [usingMock, setUsingMock] = useState(false);
     const [lines, setLines] = useState<CheckoutLineItem[]>([]);
@@ -388,6 +395,8 @@ function PrescriptionCheckout() {
     const [transactionReference, setTransactionReference] = useState('');
     const [secondsLeft, setSecondsLeft] = useState(CHECKOUT_TIMEOUT_SECONDS);
     const [timerExpired, setTimerExpired] = useState(false);
+    /** Backend tentative — block checkout / complete payment. */
+    const [partialRxBlocked, setPartialRxBlocked] = useState(false);
     const expiryToastShown = useRef(false);
     /** Sync lock — `paying` state alone can miss a second click before re-render. */
     const paymentInFlightRef = useRef(false);
@@ -395,6 +404,15 @@ function PrescriptionCheckout() {
     const billingIdempotencyKeyRef = useRef<string | null>(null);
     /** Reused for retries of the same swipe-to-confirm until success. */
     const confirmIdempotencyKeyRef = useRef<string | null>(null);
+
+    const showGetNewPrescriptionPopup = () => {
+        modalApi.warning({
+            title: 'Get new prescription',
+            content: PARTIAL_DISPENSE_BLOCK_MESSAGE,
+            okText: 'OK',
+            centered: true,
+        });
+    };
 
     const applyLines = (items: DispenseLineResponse[], mock: boolean) => {
         const mapped = mapDispenseToCheckoutLines(items);
@@ -412,6 +430,24 @@ function PrescriptionCheckout() {
         expiryToastShown.current = false;
     };
 
+    /** Fetch existing invoice for this Rx (if any). Caller applies UI only when still mounted. */
+    const fetchExistingInvoice = async (prescriptionId: string) => {
+        try {
+            const response = await GetInvoiceByPrescriptionID(prescriptionId);
+            return parseInvoiceByPrescriptionResponse(response);
+        } catch (error) {
+            // 404 / no invoice — normal first checkout; stay on create flow
+            console.debug('No existing invoice for prescription:', prescriptionId, error);
+            return null;
+        }
+    };
+
+    const openConfirmForInvoice = (invoice: InvoiceByPrescription) => {
+        setPendingInvoiceId(invoice.id);
+        setPendingPaymentUrl(null);
+        setManualConfirmOpen(true);
+    };
+
     useEffect(() => {
         let cancelled = false;
 
@@ -419,6 +455,10 @@ function PrescriptionCheckout() {
             setLoading(true);
             setPatient(null);
             setResolvedSupplierId(undefined);
+            setPendingInvoiceId(null);
+            setPendingPaymentUrl(null);
+            setManualConfirmOpen(false);
+            setPartialRxBlocked(false);
             if (!id) {
                 applyLines(FALLBACK_DISPENSE_LINES, true);
                 setLoading(false);
@@ -436,6 +476,11 @@ function PrescriptionCheckout() {
                     messageApi.warning('No dispense lines returned — showing sample data');
                 }
 
+                const resolvedStatus = items[0]?.prescription_status ?? '';
+                if (resolvedStatus) {
+                    setRxStatus(resolvedStatus);
+                }
+
                 const patientId = resolvePrescriptionPatientId({
                     locationPatientId: locationState?.patientId,
                     queryPatientId: searchParams.get('patientId'),
@@ -450,6 +495,17 @@ function PrescriptionCheckout() {
                 if (patientId) {
                     const patientData = await fetchPatientById(patientId);
                     if (!cancelled) setPatient(patientData);
+                }
+
+                if (isPartiallyDispensedPrescriptionStatus(resolvedStatus)) {
+                    setPartialRxBlocked(true);
+                    showGetNewPrescriptionPopup();
+                    return;
+                }
+
+                const existingInvoice = await fetchExistingInvoice(id);
+                if (!cancelled && existingInvoice?.id) {
+                    openConfirmForInvoice(existingInvoice);
                 }
             } catch (error) {
                 if (cancelled) return;
@@ -505,12 +561,11 @@ function PrescriptionCheckout() {
         if (!timerExpired || expiryToastShown.current) return;
         expiryToastShown.current = true;
         setManualConfirmOpen(false);
-        setPendingPayload(null);
+        setPendingInvoiceId(null);
+        setPendingPaymentUrl(null);
+        confirmIdempotencyKeyRef.current = null;
         messageApi.warning('Checkout time expired — reload to try again');
     }, [timerExpired, messageApi]);
-
-    const confirmDisabled =
-        isPaymentLinkCreated(rxStatus) || timerExpired;
 
     const totals = useMemo(() => {
         const billed = lines.filter((line) => line.selected && line.dispense_qty > 0);
@@ -522,6 +577,42 @@ function PrescriptionCheckout() {
             total: subtotal + tax,
             itemCount: billed.length,
         };
+    }, [lines]);
+
+    /**
+     * Backend `tentative` (getMedicineInfo) blocks pay.
+     * Qty edits that create a light partial are also blocked until product supports remaining balance.
+     */
+    const isPartialDispense = useMemo(() => {
+        if (partialRxBlocked) return true;
+        if (lines.length === 0) return false;
+        return lines.some((line) => {
+            if (line.prescribed_qty <= 0) return false;
+            if (!line.selected) return true;
+            return line.dispense_qty < line.prescribed_qty;
+        });
+    }, [lines, partialRxBlocked]);
+
+    const confirmDisabled =
+        isPaymentPendingPrescriptionStatus(rxStatus) ||
+        timerExpired ||
+        partialRxBlocked ||
+        isPartialDispense;
+
+    const overstockAllocations = useMemo(() => {
+        return lines
+            .filter((line) => line.selected && line.dispense_qty > 0)
+            .flatMap((line) =>
+                line.batches
+                    .filter((batch) => batch.allocate_qty > batch.current_stock_units)
+                    .map((batch) => ({
+                        medicine_name: line.medicine_name,
+                        frequency_label: line.frequency_label,
+                        batch_no: batch.batch_no,
+                        allocate_qty: batch.allocate_qty,
+                        current_stock_units: batch.current_stock_units,
+                    })),
+            );
     }, [lines]);
 
     const allocationErrors = useMemo(() => {
@@ -538,13 +629,13 @@ function PrescriptionCheckout() {
                 for (const batch of line.batches) {
                     if (batch.allocate_qty > batch.current_stock_units) {
                         issues.push(
-                            `${line.medicine_name}: ${batch.batch_no} take ${batch.allocate_qty} > stock ${batch.current_stock_units}`,
+                            `${line.medicine_name} (${line.frequency_label}) batch ${batch.batch_no}: take qty ${batch.allocate_qty} > stock ${batch.current_stock_units}. Reduce take qty to ${batch.current_stock_units} or less.`,
                         );
                     }
                 }
                 if (stockAvailable(line.batches) < line.dispense_qty) {
                     issues.push(
-                        `${line.medicine_name} (${line.frequency_label}): insufficient stock`,
+                        `${line.medicine_name} (${line.frequency_label}): insufficient stock — reduce dispense qty to ${stockAvailable(line.batches)} or less.`,
                     );
                 }
                 return issues;
@@ -568,14 +659,25 @@ function PrescriptionCheckout() {
     };
 
     const updateBatchAllocate = (lineKey: string, batchId: string, allocate_qty: number) => {
+        const line = lines.find((l) => l.key === lineKey);
+        const batch = line?.batches.find((b) => b.batch_id === batchId);
+        if (!batch) return;
+
+        const nextQty = Math.max(0, allocate_qty);
+        const capped = Math.min(nextQty, batch.current_stock_units);
+        if (nextQty > batch.current_stock_units) {
+            messageApi.warning(
+                `Batch ${batch.batch_no}: take qty cannot exceed stock (${batch.current_stock_units}). Reduce to ${batch.current_stock_units} or less.`,
+            );
+        }
+
         setLines((prev) =>
-            prev.map((line) => {
-                if (line.key !== lineKey) return line;
-                const batches = line.batches.map((b) =>
-                    b.batch_id === batchId ? { ...b, allocate_qty } : b,
+            prev.map((row) => {
+                if (row.key !== lineKey) return row;
+                const batches = row.batches.map((b) =>
+                    b.batch_id === batchId ? { ...b, allocate_qty: capped } : b,
                 );
-                const dispense_qty = allocationSum(batches);
-                return { ...line, batches, dispense_qty };
+                return { ...row, batches, dispense_qty: allocationSum(batches) };
             }),
         );
     };
@@ -715,6 +817,14 @@ function PrescriptionCheckout() {
     };
 
     const startManualPayment = async (payload: BillingCreatePayload) => {
+        if (partialRxBlocked || isPartialDispense) {
+            showGetNewPrescriptionPopup();
+            return;
+        }
+        if (pendingInvoiceId) {
+            setManualConfirmOpen(true);
+            return;
+        }
         if (paymentInFlightRef.current) return;
         paymentInFlightRef.current = true;
         setPaying(true);
@@ -781,6 +891,11 @@ function PrescriptionCheckout() {
     const confirmManualPayment = async () => {
         if (!pendingInvoiceId) return;
         if (paymentInFlightRef.current) return;
+        if (partialRxBlocked || isPartialDispense) {
+            setManualConfirmOpen(false);
+            showGetNewPrescriptionPopup();
+            return;
+        }
         if (timerExpired) {
             messageApi.warning('Checkout time expired — reload to try again');
             return;
@@ -827,8 +942,8 @@ function PrescriptionCheckout() {
         if (paying || paymentInFlightRef.current) {
             return;
         }
-        if (isPaymentLinkCreated(rxStatus)) {
-            messageApi.warning('Payment link already created — awaiting payment (Yet to pay)');
+        if (isPaymentPendingPrescriptionStatus(rxStatus)) {
+            messageApi.warning('Payment pending — awaiting patient payment on the link');
             return;
         }
         if (timerExpired || secondsLeft <= 0) {
@@ -839,8 +954,19 @@ function PrescriptionCheckout() {
             messageApi.error('Select at least one item with quantity greater than zero');
             return;
         }
+        if (partialRxBlocked || isPartialDispense) {
+            showGetNewPrescriptionPopup();
+            return;
+        }
+        if (overstockAllocations.length > 0) {
+            const first = overstockAllocations[0];
+            messageApi.warning(
+                `${first.medicine_name} batch ${first.batch_no}: take qty ${first.allocate_qty} exceeds stock ${first.current_stock_units}. Reduce take qty to ${first.current_stock_units} or less before Confirm & Pay.`,
+            );
+            return;
+        }
         if (allocationErrors.length > 0) {
-            messageApi.error(allocationErrors[0]);
+            messageApi.warning(allocationErrors[0]);
             return;
         }
 
@@ -1037,6 +1163,7 @@ function PrescriptionCheckout() {
     return (
         <Layout>
             {contextHolder}
+            {modalContextHolder}
             <Sidebar />
 
             <Layout>
@@ -1087,7 +1214,7 @@ function PrescriptionCheckout() {
                                             : formatCountdown(secondsLeft)}
                                     </span>
                                 </div>
-                                {isPaymentLinkCreated(rxStatus) ? (
+                                {isPaymentPendingPrescriptionStatus(rxStatus) ? (
                                     <StatusTag type={STATUS_WARNING}>Yet to pay</StatusTag>
                                 ) : null}
                             </div>
@@ -1115,7 +1242,7 @@ function PrescriptionCheckout() {
                                             </div>
                                             <div className="patient-meta__item">
                                                 <Text className="info-label">RX STATUS</Text>
-                                                {isPaymentLinkCreated(rxStatus) ? (
+                                                {isPaymentPendingPrescriptionStatus(rxStatus) ? (
                                                     <StatusTag type={STATUS_WARNING}>Yet to pay</StatusTag>
                                                 ) : (
                                                     <StatusTag type={getPrescriptionStatusTagColor(rxStatus)} bordered>
@@ -1144,11 +1271,26 @@ function PrescriptionCheckout() {
                                         ) : (
                                             <StatusTag type={STATUS_SUCCESS}>Live dispense lines</StatusTag>
                                         )}
-                                        {isPaymentLinkCreated(rxStatus) ? (
+                                        {isPaymentPendingPrescriptionStatus(rxStatus) ? (
                                             <StatusTag type={STATUS_WARNING}>Yet to pay</StatusTag>
                                         ) : null}
                                     </Space>
                                 </div>
+
+                                {partialRxBlocked ? (
+                                    <div className="checkout-alloc-alert checkout-alloc-alert--partial">
+                                        <WarningOutlined />
+                                        <div>
+                                            <Text strong type="warning">
+                                                Get new prescription
+                                            </Text>
+                                            <br />
+                                            <Text type="secondary">
+                                                {PARTIAL_DISPENSE_BLOCK_MESSAGE}
+                                            </Text>
+                                        </div>
+                                    </div>
+                                ) : null}
 
                                 {timerExpired ? (
                                     <div className="checkout-alloc-alert">
@@ -1157,6 +1299,21 @@ function PrescriptionCheckout() {
                                             Checkout session expired. Reload the page to start a new
                                             2-minute timer.
                                         </Text>
+                                    </div>
+                                ) : null}
+
+                                {!partialRxBlocked && isPartialDispense ? (
+                                    <div className="checkout-alloc-alert checkout-alloc-alert--partial">
+                                        <WarningOutlined />
+                                        <div>
+                                            <Text strong type="warning">
+                                                Partial dispense not available
+                                            </Text>
+                                            <br />
+                                            <Text type="secondary">
+                                                {PARTIAL_DISPENSE_BLOCK_MESSAGE}
+                                            </Text>
+                                        </div>
                                     </div>
                                 ) : null}
 
@@ -1201,7 +1358,7 @@ function PrescriptionCheckout() {
                                             options={[
                                                 { label: 'Cash', value: 'cash' },
                                                 { label: 'QR', value: 'qr' },
-                                                { label: 'Link', value: 'payment_link' },
+                                                { label: 'Link', value: 'link' },
                                             ]}
                                         />
                                         <Text type="secondary" className="checkout-payment-hint">
@@ -1286,7 +1443,7 @@ function PrescriptionCheckout() {
                                         disabled={confirmDisabled}
                                         onClick={handleConfirmPay}
                                     >
-                                        {isPaymentLinkCreated(rxStatus)
+                                        {isPaymentPendingPrescriptionStatus(rxStatus)
                                             ? 'Yet to pay'
                                             : timerExpired
                                               ? 'Time expired'
@@ -1300,7 +1457,7 @@ function PrescriptionCheckout() {
             </Layout>
 
             <Modal
-                open={manualConfirmOpen}
+                open={manualConfirmOpen && !partialRxBlocked && !isPartialDispense}
                 title={
                     paymentMethod === 'cash'
                         ? 'Confirm cash payment'
@@ -1378,8 +1535,8 @@ function PrescriptionCheckout() {
                     </div>
 
                     <SwipeToConfirm
-                        active={manualConfirmOpen}
-                        disabled={timerExpired}
+                        active={manualConfirmOpen && !partialRxBlocked && !isPartialDispense}
+                        disabled={timerExpired || partialRxBlocked || isPartialDispense}
                         loading={paying}
                         onConfirm={handleManualPaymentConfirmed}
                     />
@@ -1417,8 +1574,8 @@ function PrescriptionCheckout() {
                     <Text>
                         Payment:{' '}
                         <Text strong>
-                            {paymentMethod === 'payment_link'
-                                ? 'PAYMENT LINK'
+                            {paymentMethod === 'link'
+                                ? 'LINK'
                                 : paymentMethod.toUpperCase()}
                         </Text>{' '}
                         · {paidItemCount} item{paidItemCount === 1 ? '' : 's'}

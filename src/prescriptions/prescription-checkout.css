@@ -38,13 +38,18 @@
 
 .checkout-alloc-alert {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     margin-bottom: 12px;
     padding: 8px 12px;
     border-radius: 8px;
     background: #fff2f0;
     border: 1px solid #ffccc7;
+}
+
+.checkout-alloc-alert--partial {
+    background: #fffbeb;
+    border-color: #fbbf24;
 }
 
 .checkout-timer-tag {

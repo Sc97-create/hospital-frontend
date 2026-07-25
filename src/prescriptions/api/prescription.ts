@@ -10,6 +10,8 @@ import type {
     DispenseCheckoutResponse,
     FindManyResponse,
     findOneResponse,
+    GetInvoiceByPrescriptionResponse,
+    InvoiceByPrescription,
     PrescriptionByPatientIdResponse,
     SearchMedicineResponse,
     UpdatePrescriptionItemPayload,
@@ -18,8 +20,13 @@ import type {
     UpdateStatusResponse,
 } from "../types/prescriptionmodel";
 
-export const SearchMedicines = async (name: string): Promise<SearchMedicineResponse> => {
-    const response = await apiClient.get(`/medicine/searchMedicine?name=${name}`)
+export const SearchMedicines = async (
+    name: string,
+    organisation_id: string,
+): Promise<SearchMedicineResponse> => {
+    const response = await apiClient.get(`/medicine/searchMedicine`, {
+        params: { name, organisation_id },
+    })
     return response.data
 }
 export const CreatePrescriptionApi = async (createprescription: CreatePrescription): Promise<createPrescResponse> => {
@@ -134,4 +141,41 @@ export function parseBillingCreateResponse(
         };
     }
     throw new Error('Billing response missing payment.invoice_id');
+}
+
+/** Resume unpaid checkout — existing invoice for this prescription, if any. */
+export const GetInvoiceByPrescriptionID = async (
+    prescription_id: string,
+): Promise<GetInvoiceByPrescriptionResponse> => {
+    const response = await apiClient.get(
+        `/billing/getInvoiceByPrescriptionID/${prescription_id}`,
+    );
+    return response.data;
+};
+
+export function parseInvoiceByPrescriptionResponse(
+    response: GetInvoiceByPrescriptionResponse,
+): InvoiceByPrescription | null {
+    const body = response.data ?? response;
+    const id = body.id;
+
+    if (!id || typeof id !== 'string') {
+        return null;
+    }
+
+    return {
+        id,
+        invoice_code: body.invoice_code ?? '',
+        prescription_id: body.prescription_id ?? '',
+        patient_id: body.patient_id ?? '',
+        status: body.status ?? '',
+        cashier_id: body.cashier_id ?? '',
+        organisation_id: body.organisation_id ?? '',
+        sub_total_amount: body.sub_total_amount ?? 0,
+        tax_amount: body.tax_amount ?? 0,
+        total_amount: body.total_amount ?? 0,
+        discount_amount: body.discount_amount ?? 0,
+        created_at: body.created_at ?? '',
+        updated_at: body.updated_at ?? '',
+    };
 }

@@ -81,6 +81,9 @@ export interface findOneResponseData {
     created_at: string;
     total_count: number;
     patient_id?: string;
+    /** From getprescriptionbyPid — e.g. draft, sent, payment-pending, completed, tentative */
+    prescription_status?: string;
+    status?: string;
 }
 
 export interface FindManyResponse {
@@ -155,6 +158,10 @@ export interface DispenseLineResponse {
     prescription_status: string;
     prescription_created_at: string;
     prescribed_quantity: number;
+    /** Units still to dispense (getMedicineInfo). */
+    remaining_quantity?: number;
+    /** @deprecated prefer remaining_quantity */
+    remaining_qty?: number;
     prescription_id: string;
     prescription_item_id: string;
     patient_id?: string;
@@ -169,6 +176,9 @@ export interface DispenseLineResponse {
     };
     reorder_level: number;
     max_stock_target: number;
+    /** e.g. fully_dispensed, pending */
+    prescription_item_status?: string;
+    food_instruction?: string;
     medicine_batches: MedicineBatch[];
     supplier_id?: string;
 }
@@ -186,14 +196,14 @@ export interface CheckoutBatchAllocationPayload {
     allocate_qty: number;
 }
 
-export type CheckoutPaymentMethod = "cash" | "qr" | "payment_link";
+export type CheckoutPaymentMethod = "cash" | "qr" | "link";
 
 export interface PrescriptionCheckoutPayload {
     prescription_id: string;
     payment_method: CheckoutPaymentMethod;
     amount_paid: number;
     notes?: string;
-    /** cash/qr = pharmacist confirms; payment_link = gateway/webhook auto */
+    /** cash/qr = pharmacist confirms; link = gateway/webhook auto */
     status_update?: "manual" | "automatic";
     items: Array<{
         prescription_item_id: string;
@@ -244,7 +254,7 @@ export interface BillingCreatePayload {
 
 export interface BillingPaymentInfo {
     invoice_id: string;
-    /** UPI / payment link URL when mode is qr or payment_link. */
+    /** UPI / payment link URL when mode is qr or link. */
     payment_url?: string | null;
 }
 
@@ -255,6 +265,45 @@ export interface BillingCreateResponse {
     };
     code?: string;
     message?: string;
+}
+
+/** Existing invoice for a prescription (resume unpaid checkout). */
+export interface InvoiceByPrescription {
+    id: string;
+    invoice_code: string;
+    prescription_id: string;
+    patient_id: string;
+    status: string;
+    cashier_id: string;
+    organisation_id: string;
+    sub_total_amount: number;
+    tax_amount: number;
+    total_amount: number;
+    discount_amount: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface GetInvoiceByPrescriptionResponse {
+    code?: string | number;
+    message?: string;
+    error?: string;
+    /** Wrapped success body */
+    data?: InvoiceByPrescription;
+    /** Unwrapped success body fields (same as InvoiceByPrescription) */
+    id?: string;
+    invoice_code?: string;
+    prescription_id?: string;
+    patient_id?: string;
+    status?: string;
+    cashier_id?: string;
+    organisation_id?: string;
+    sub_total_amount?: number;
+    tax_amount?: number;
+    total_amount?: number;
+    discount_amount?: number;
+    created_at?: string;
+    updated_at?: string;
 }
 
 /** Cash / QR — pharmacist swipe confirms payment. */
