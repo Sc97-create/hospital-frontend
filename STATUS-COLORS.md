@@ -6,9 +6,9 @@ The hospital frontend uses **exactly four semantic status colors** everywhere. N
 
 | Type | Role | Default | Use when |
 |------|------|---------|----------|
-| **Info** | In progress / informational | `#2563EB` | Scheduled, sent, payment link created, codes, visit types, new items |
-| **Success** | Complete / healthy | `#16A34A` | Active, completed, dispensed, paid, bill paid |
-| **Warning** | Needs attention | `#D97706` | Pending, waiting, partial dispense, on leave, draft, yet to pay |
+| **Info** | In progress / informational | `#2563EB` | Scheduled, sent, codes, visit types, new items |
+| **Success** | Complete / healthy | `#16A34A` | Active, completed, paid, bill paid |
+| **Warning** | Needs attention | `#D97706` | Pending, waiting, payment pending, tentative, draft, yet to pay |
 | **Danger** | Blocked / negative | `#DC2626` | Cancelled, inactive, expired, missed |
 
 ## CSS variables
@@ -85,9 +85,9 @@ Classes: `status-tag--info` | `status-tag--success` | `status-tag--warning` | `s
 
 | Status | Color |
 |--------|-------|
-| Sent, Payment link created | Info |
-| Dispensed / Fully dispensed | Success |
-| Draft, Pending, Partially dispensed | Warning |
+| Sent | Info |
+| Completed | Success |
+| Draft, Payment pending, Tentative | Warning |
 | Expired, Cancelled | Danger |
 
 ### Employee

@@ -155,7 +155,8 @@ function AddPrescription() {
             return;
         }
         try {
-            const response = await SearchMedicines(value);
+            const organisation_id = localStorage.getItem("organisation_id") || "";
+            const response = await SearchMedicines(value, organisation_id);
             const formatted = response.data.map((item: SearchMedicineItem) => ({
                 value: item.name,
                 label: (

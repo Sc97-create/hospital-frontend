@@ -25,8 +25,8 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'reac
 import { useEffect, useState } from 'react';
 
 import Sidebar from '../sidebar';
-import { FindOnePrescription, GetDispenseCheckoutLines, UpdateStatus } from './api/prescription';
-import type { medicineResponse } from './types/prescriptionmodel';
+import { GetDispenseCheckoutLines, UpdateStatus } from './api/prescription';
+import type { DispenseLineResponse } from './types/prescriptionmodel';
 import {
     fetchPatientById,
     formatPatientSubtext,
@@ -35,6 +35,9 @@ import {
     isCancelledPrescriptionStatus,
     isDraftPrescriptionStatus,
     isFullyDispensedPrescriptionStatus,
+    isPartiallyDispensedPrescriptionStatus,
+    isPaymentPendingPrescriptionStatus,
+    PARTIAL_DISPENSE_BLOCK_MESSAGE,
     prescriptionPath,
     recallPrescriptionPatientId,
     rememberPrescriptionPatientId,
@@ -47,6 +50,7 @@ import {
     getPatientStatusType,
     STATUS_INFO,
     STATUS_SUCCESS,
+    STATUS_WARNING,
 } from '../constants/status-colors';
 import type { patientlist } from '../patientmangement/types/patients';
 import PrescriptionPreviewSkeleton from './prescription-preview-skeleton';
@@ -58,37 +62,64 @@ const { Title, Text } = Typography;
 
 interface PrescriptionRow {
     key: string;
+    prescription_item_id: string;
     medicine: string;
+    composition: string;
     form: string;
     dosage: string;
     morning: number;
     afternoon: number;
     night: number;
-    duration: string;
     qty: number;
+    remaining_quantity: number | null;
+    item_status: string;
 }
 
-function mapMedicines(medicines: medicineResponse[]): PrescriptionRow[] {
-    return medicines.map((item) => {
-        const food =
-            item.food_instruction === 'before'
-                ? 'Before food'
-                : item.food_instruction === 'after'
-                  ? 'After food'
-                  : item.food_instruction === 'any'
-                    ? 'Any time'
-                    : item.food_instruction || '';
+function formatFoodInstruction(value: string | undefined): string {
+    switch (value?.toLowerCase()) {
+        case 'before':
+            return 'Before food';
+        case 'after':
+            return 'After food';
+        case 'any':
+            return 'Any time';
+        default:
+            return value?.trim() || '';
+    }
+}
+
+function lineRemainingQuantity(line: DispenseLineResponse): number | null {
+    if (typeof line.remaining_quantity === 'number') return line.remaining_quantity;
+    if (typeof line.remaining_qty === 'number') return line.remaining_qty;
+    return null;
+}
+
+function isItemFullyDispensed(row: PrescriptionRow): boolean {
+    const status = row.item_status.trim().toLowerCase().replace(/[\s-]+/g, '_');
+    if (status === 'fully_dispensed' || status === 'full_dispensed' || status === 'dispensed') {
+        return true;
+    }
+    return row.remaining_quantity === 0;
+}
+
+function mapMedicineInfoLines(lines: DispenseLineResponse[]): PrescriptionRow[] {
+    return lines.map((item) => {
+        const strength = item.medicine_strength?.trim() || '';
+        const food = formatFoodInstruction(item.food_instruction);
 
         return {
-            key: item.medicine_id,
+            key: item.prescription_item_id || item.medicine_id,
+            prescription_item_id: item.prescription_item_id,
             medicine: item.medicine_name,
+            composition: [strength, food].filter(Boolean).join(' · '),
             form: food,
             dosage: item.medicine_form || '—',
             morning: item.frequency?.morning ?? 0,
             afternoon: item.frequency?.afternoon ?? 0,
             night: item.frequency?.night ?? 0,
-            duration: `${item.duration_day} ${item.duration_type || 'Days'}`,
-            qty: item.quantity ?? 0,
+            qty: item.prescribed_quantity ?? 0,
+            remaining_quantity: lineRemainingQuantity(item),
+            item_status: item.prescription_item_status ?? '',
         };
     });
 }
@@ -98,13 +129,13 @@ const columns = [
         title: 'MEDICINE & COMPOSITION',
         dataIndex: 'medicine',
         key: 'medicine',
-        width: 220,
+        width: 240,
         align: 'left' as const,
         render: (_: unknown, record: PrescriptionRow) => (
             <div className='medicine-info'>
                 <Text className='medicine-name'>{record.medicine}</Text>
-                {record.form ? (
-                    <Text className='medicine-generic'>{record.form}</Text>
+                {record.composition ? (
+                    <Text className='medicine-generic'>{record.composition}</Text>
                 ) : null}
             </div>
         ),
@@ -145,19 +176,48 @@ const columns = [
         ),
     },
     {
-        title: 'DURATION',
-        dataIndex: 'duration',
-        key: 'duration',
-        width: 100,
-        align: 'left' as const,
-    },
-    {
         title: 'QTY',
         dataIndex: 'qty',
         key: 'qty',
         width: 70,
         align: 'center' as const,
         render: (qty: number) => <div className='qty-box'>{qty}</div>,
+    },
+    {
+        title: 'REMAINING',
+        key: 'remaining_quantity',
+        width: 120,
+        align: 'center' as const,
+        render: (_: unknown, record: PrescriptionRow) => {
+            if (record.remaining_quantity == null) {
+                return <Text type="secondary">—</Text>;
+            }
+            return (
+                <StatusTag
+                    type={record.remaining_quantity > 0 ? STATUS_WARNING : STATUS_SUCCESS}
+                >
+                    Remaining {record.remaining_quantity}
+                </StatusTag>
+            );
+        },
+    },
+    {
+        title: 'ITEM STATUS',
+        key: 'item_status',
+        width: 140,
+        align: 'center' as const,
+        render: (_: unknown, record: PrescriptionRow) => {
+            if (!record.item_status) {
+                return <Text type="secondary">—</Text>;
+            }
+            return (
+                <StatusTag
+                    type={isItemFullyDispensed(record) ? STATUS_SUCCESS : STATUS_WARNING}
+                >
+                    {toTitleCase(record.item_status.replace(/_/g, ' '))}
+                </StatusTag>
+            );
+        },
     },
 ];
 
@@ -177,7 +237,19 @@ function PharmacistPrescriptionDetail() {
     const [prescriptionStatus, setPrescriptionStatus] = useState<string>(
         locationState?.status ?? '',
     );
-    const [prescriptionCreatedAt] = useState<string>(locationState?.createdAt ?? '');
+    const [prescriptionCreatedAt, setPrescriptionCreatedAt] = useState<string>(
+        locationState?.createdAt ?? '',
+    );
+    const [prescriptionCode, setPrescriptionCode] = useState('');
+
+    const showGetNewPrescriptionPopup = () => {
+        modalApi.warning({
+            title: 'Get new prescription',
+            content: PARTIAL_DISPENSE_BLOCK_MESSAGE,
+            okText: 'OK',
+            centered: true,
+        });
+    };
 
     useEffect(() => {
         if (!id) {
@@ -191,31 +263,36 @@ function PharmacistPrescriptionDetail() {
             setLoading(true);
             setPatient(null);
             try {
-                const [rxResponse, medicineInfo] = await Promise.all([
-                    FindOnePrescription(id, 50, 0),
-                    GetDispenseCheckoutLines(id).catch(() => null),
-                ]);
+                const medicineInfo = await GetDispenseCheckoutLines(id);
                 if (cancelled) return;
 
-                if (rxResponse.code === '200' || rxResponse.data) {
-                    const medicines = rxResponse.data?.medicines ?? [];
-                    setRows(mapMedicines(medicines));
-                    setTotalCount(rxResponse.data?.total_count ?? medicines.length);
+                const lines = Array.isArray(medicineInfo.data) ? medicineInfo.data : [];
+                setRows(mapMedicineInfoLines(lines));
+                setTotalCount(medicineInfo.total ?? lines.length);
+
+                const first = lines[0];
+                const resolvedStatus =
+                    first?.prescription_status || locationState?.status || '';
+                setPrescriptionStatus(resolvedStatus);
+                setPrescriptionCode(first?.prescription_code ?? '');
+                if (first?.prescription_created_at) {
+                    setPrescriptionCreatedAt(first.prescription_created_at);
                 }
 
-                const statusFromMedicineInfo =
-                    medicineInfo?.data?.find((item) => item.prescription_status)?.prescription_status ??
-                    '';
-                setPrescriptionStatus(statusFromMedicineInfo || locationState?.status || '');
+                if (
+                    !cancelled &&
+                    isPartiallyDispensedPrescriptionStatus(resolvedStatus)
+                ) {
+                    showGetNewPrescriptionPopup();
+                }
 
                 const patientId = resolvePrescriptionPatientId({
                     locationPatientId: locationState?.patientId,
                     queryPatientId: searchParams.get('patientId'),
                     cachedPatientId: recallPrescriptionPatientId(id),
                     apiPatientId:
-                        rxResponse.data?.patient_id ||
-                        medicineInfo?.patient_id ||
-                        medicineInfo?.data?.find((item) => item.patient_id)?.patient_id,
+                        medicineInfo.patient_id ||
+                        lines.find((item) => item.patient_id)?.patient_id,
                 });
                 setResolvedPatientId(patientId);
                 rememberPrescriptionPatientId(id, patientId);
@@ -282,13 +359,27 @@ function PharmacistPrescriptionDetail() {
         });
     };
 
+    const itemsFullyDispensed =
+        rows.length > 0 && rows.every((row) => isItemFullyDispensed(row));
+    const showBillPaid =
+        isFullyDispensedPrescriptionStatus(prescriptionStatus) || itemsFullyDispensed;
+    const showPaymentPending = isPaymentPendingPrescriptionStatus(prescriptionStatus);
+
     const handleProceedToCheckout = () => {
         if (!id) {
             messageApi.error('Missing prescription id');
             return;
         }
-        if (isFullyDispensedPrescriptionStatus(prescriptionStatus)) {
-            messageApi.info('This prescription is already fully dispensed. Bill paid.');
+        if (showBillPaid) {
+            messageApi.info('This prescription is already completed. Bill paid.');
+            return;
+        }
+        if (showPaymentPending) {
+            messageApi.warning('Payment link already created — awaiting payment (Payment pending)');
+            return;
+        }
+        if (isPartiallyDispensedPrescriptionStatus(prescriptionStatus)) {
+            showGetNewPrescriptionPopup();
             return;
         }
         navigate(prescriptionPath(id, { checkout: true, patientId: resolvedPatientId }), {
@@ -316,7 +407,6 @@ function PharmacistPrescriptionDetail() {
                         <PrescriptionPreviewSkeleton />
                     ) : (
                         <>
-                            {/* Patient context — from getpatientByID using patient_id on prescription */}
                             <Card className='patient-card'>
                                 <Row justify='space-between' align='middle' gutter={[16, 16]}>
                                     <Col>
@@ -363,6 +453,11 @@ function PharmacistPrescriptionDetail() {
                                             <div className='patient-meta__item'>
                                                 <Text className='info-label'>RX STATUS</Text>
                                                 <Space size={4} wrap>
+                                                    {prescriptionCode ? (
+                                                        <StatusTag type={STATUS_INFO} bordered>
+                                                            {prescriptionCode}
+                                                        </StatusTag>
+                                                    ) : null}
                                                     <StatusTag
                                                         type={getPrescriptionStatusTagColor(
                                                             prescriptionStatus,
@@ -373,9 +468,16 @@ function PharmacistPrescriptionDetail() {
                                                             prescriptionStatus,
                                                         )}
                                                     </StatusTag>
-                                                    {isFullyDispensedPrescriptionStatus(
-                                                        prescriptionStatus,
-                                                    ) && <StatusTag type={STATUS_SUCCESS}>Bill paid</StatusTag>}
+                                                    {showBillPaid && (
+                                                        <StatusTag type={STATUS_SUCCESS}>
+                                                            Bill paid
+                                                        </StatusTag>
+                                                    )}
+                                                    {showPaymentPending && (
+                                                        <StatusTag type={STATUS_WARNING}>
+                                                            Yet to pay
+                                                        </StatusTag>
+                                                    )}
                                                 </Space>
                                             </div>
 
@@ -390,11 +492,20 @@ function PharmacistPrescriptionDetail() {
 
                             <Card className='medicine-table-card'>
                                 <div className='table-header'>
-                                    <Space>
+                                    <Space wrap>
                                         <Title level={5} className='table-title'>
                                             Prescribed Medication
                                         </Title>
-                            <StatusTag type={STATUS_INFO}>{totalCount} Items</StatusTag>
+                                        <StatusTag type={STATUS_INFO}>{totalCount} Items</StatusTag>
+                                        {rows.some(
+                                            (row) =>
+                                                row.remaining_quantity != null &&
+                                                row.remaining_quantity > 0,
+                                        ) ? (
+                                            <StatusTag type={STATUS_WARNING}>
+                                                Remaining qty
+                                            </StatusTag>
+                                        ) : null}
                                     </Space>
                                 </div>
 
@@ -420,14 +531,18 @@ function PharmacistPrescriptionDetail() {
                                     </Space>
 
                                     <Space wrap>
-                                        {!isFullyDispensedPrescriptionStatus(prescriptionStatus) && (
+                                        {!showBillPaid && (
                                             <Button danger onClick={handleDiscard}>
                                                 Discard Order
                                             </Button>
                                         )}
-                                        {isFullyDispensedPrescriptionStatus(prescriptionStatus) ? (
+                                        {showBillPaid ? (
                                             <StatusTag type={STATUS_SUCCESS}>
                                                 Bill paid
+                                            </StatusTag>
+                                        ) : showPaymentPending ? (
+                                            <StatusTag type={STATUS_WARNING}>
+                                                Payment pending
                                             </StatusTag>
                                         ) : (
                                             !isDraftPrescriptionStatus(prescriptionStatus) && (

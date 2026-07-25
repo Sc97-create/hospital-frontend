@@ -56,13 +56,16 @@ export function getAppointmentStatusType(status: string | undefined | null): Sta
 export function getPrescriptionStatusType(status: string | undefined | null): StatusType {
     switch (normalizeKey(status)) {
         case 'sent':
-        case 'payment_link_created':
             return 'info';
+        case 'completed':
         case 'dispensed':
         case 'full_dispensed':
         case 'fully_dispensed':
             return 'success';
         case 'draft':
+        case 'payment_pending':
+        case 'payment_link_created':
+        case 'tentative':
         case 'pending':
         case 'partially_dispensed':
         case 'partial_dispensed':

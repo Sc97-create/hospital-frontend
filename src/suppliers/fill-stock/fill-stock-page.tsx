@@ -179,7 +179,8 @@ function FillStockPage() {
             return;
         }
         try {
-            const response = await SearchMedicines(query);
+            const organisation_id = localStorage.getItem("organisation_id") || "";
+            const response = await SearchMedicines(query, organisation_id);
             const rows = Array.isArray(response?.data) ? response.data : [];
             const options: MedicineOption[] = rows.map((item: SearchMedicineItem) => ({
                 value: item.name,
