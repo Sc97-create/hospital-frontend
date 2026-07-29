@@ -391,6 +391,8 @@ function PrescriptionCheckout() {
     const [paidItemCount, setPaidItemCount] = useState(0);
     const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
     const [pendingInvoiceId, setPendingInvoiceId] = useState<string | null>(null);
+    /** Locked amount for the open invoice — do not use live line totals on resume/refresh. */
+    const [pendingInvoiceAmount, setPendingInvoiceAmount] = useState<number | null>(null);
     const [pendingPaymentUrl, setPendingPaymentUrl] = useState<string | null>(null);
     const [transactionReference, setTransactionReference] = useState('');
     const [secondsLeft, setSecondsLeft] = useState(CHECKOUT_TIMEOUT_SECONDS);
@@ -444,6 +446,7 @@ function PrescriptionCheckout() {
 
     const openConfirmForInvoice = (invoice: InvoiceByPrescription) => {
         setPendingInvoiceId(invoice.id);
+        setPendingInvoiceAmount(invoice.total_amount);
         setPendingPaymentUrl(null);
         setManualConfirmOpen(true);
     };
@@ -456,6 +459,7 @@ function PrescriptionCheckout() {
             setPatient(null);
             setResolvedSupplierId(undefined);
             setPendingInvoiceId(null);
+            setPendingInvoiceAmount(null);
             setPendingPaymentUrl(null);
             setManualConfirmOpen(false);
             setPartialRxBlocked(false);
@@ -562,6 +566,7 @@ function PrescriptionCheckout() {
         expiryToastShown.current = true;
         setManualConfirmOpen(false);
         setPendingInvoiceId(null);
+        setPendingInvoiceAmount(null);
         setPendingPaymentUrl(null);
         confirmIdempotencyKeyRef.current = null;
         messageApi.warning('Checkout time expired — reload to try again');
@@ -579,25 +584,15 @@ function PrescriptionCheckout() {
         };
     }, [lines]);
 
-    /**
-     * Backend `tentative` (getMedicineInfo) blocks pay.
-     * Qty edits that create a light partial are also blocked until product supports remaining balance.
-     */
-    const isPartialDispense = useMemo(() => {
-        if (partialRxBlocked) return true;
-        if (lines.length === 0) return false;
-        return lines.some((line) => {
-            if (line.prescribed_qty <= 0) return false;
-            if (!line.selected) return true;
-            return line.dispense_qty < line.prescribed_qty;
-        });
-    }, [lines, partialRxBlocked]);
+    /** Prefer locked invoice total (resume / after create) over live line recalculation. */
+    const amountDue = pendingInvoiceAmount ?? totals.total;
 
     const confirmDisabled =
-        isPaymentPendingPrescriptionStatus(rxStatus) ||
         timerExpired ||
-        partialRxBlocked ||
-        isPartialDispense;
+        partialRxBlocked;
+
+    const isPaymentPending = isPaymentPendingPrescriptionStatus(rxStatus);
+    const canResumeUnpaidInvoice = Boolean(pendingInvoiceId) || isPaymentPending;
 
     const overstockAllocations = useMemo(() => {
         return lines
@@ -626,6 +621,11 @@ function PrescriptionCheckout() {
                         `${line.medicine_name} (${line.frequency_label}): allocated ${allocated} ≠ dispense ${line.dispense_qty}`,
                     );
                 }
+                if (line.dispense_qty > line.prescribed_qty || allocated > line.prescribed_qty) {
+                    issues.push(
+                        `${line.medicine_name} (${line.frequency_label}): qty ${Math.max(line.dispense_qty, allocated)} exceeds prescribed ${line.prescribed_qty}. Reduce to ${line.prescribed_qty} or less.`,
+                    );
+                }
                 for (const batch of line.batches) {
                     if (batch.allocate_qty > batch.current_stock_units) {
                         issues.push(
@@ -643,13 +643,24 @@ function PrescriptionCheckout() {
     }, [lines]);
 
     const setDispenseQty = (key: string, dispense_qty: number) => {
+        const line = lines.find((l) => l.key === key);
+        if (!line) return;
+
+        const nextQty = Math.max(0, dispense_qty);
+        const capped = Math.min(nextQty, line.prescribed_qty);
+        if (nextQty > line.prescribed_qty) {
+            messageApi.warning(
+                `${line.medicine_name}: cannot dispense more than prescribed (${line.prescribed_qty}).`,
+            );
+        }
+
         setLines((prev) =>
-            prev.map((line) => {
-                if (line.key !== key) return line;
-                const batches = allocateFefo(line.source_batches, dispense_qty, line.supplier_id);
+            prev.map((row) => {
+                if (row.key !== key) return row;
+                const batches = allocateFefo(row.source_batches, capped, row.supplier_id);
                 const unit_price =
-                    batches.find((b) => b.allocate_qty > 0)?.unit_selling_price ?? line.unit_price;
-                return { ...line, dispense_qty, batches, unit_price };
+                    batches.find((b) => b.allocate_qty > 0)?.unit_selling_price ?? row.unit_price;
+                return { ...row, dispense_qty: capped, batches, unit_price };
             }),
         );
     };
@@ -661,13 +672,23 @@ function PrescriptionCheckout() {
     const updateBatchAllocate = (lineKey: string, batchId: string, allocate_qty: number) => {
         const line = lines.find((l) => l.key === lineKey);
         const batch = line?.batches.find((b) => b.batch_id === batchId);
-        if (!batch) return;
+        if (!batch || !line) return;
 
         const nextQty = Math.max(0, allocate_qty);
-        const capped = Math.min(nextQty, batch.current_stock_units);
+        const otherAllocated = line.batches
+            .filter((b) => b.batch_id !== batchId)
+            .reduce((sum, b) => sum + b.allocate_qty, 0);
+        const roomUnderPrescribed = Math.max(0, line.prescribed_qty - otherAllocated);
+        const maxAllowed = Math.min(batch.current_stock_units, roomUnderPrescribed);
+        const capped = Math.min(nextQty, maxAllowed);
+
         if (nextQty > batch.current_stock_units) {
             messageApi.warning(
                 `Batch ${batch.batch_no}: take qty cannot exceed stock (${batch.current_stock_units}). Reduce to ${batch.current_stock_units} or less.`,
+            );
+        } else if (nextQty > roomUnderPrescribed) {
+            messageApi.warning(
+                `${line.medicine_name}: cannot take more than prescribed (${line.prescribed_qty}). Max for this batch is ${roomUnderPrescribed}.`,
             );
         }
 
@@ -791,9 +812,30 @@ function PrescriptionCheckout() {
     const resetManualPaymentSession = () => {
         setManualConfirmOpen(false);
         setPendingInvoiceId(null);
+        setPendingInvoiceAmount(null);
         setPendingPaymentUrl(null);
         setTransactionReference('');
         confirmIdempotencyKeyRef.current = null;
+    };
+
+    /** Close swipe modal but keep unpaid invoice so pharmacist can reopen. */
+    const dismissManualConfirmModal = () => {
+        setManualConfirmOpen(false);
+        setTransactionReference('');
+    };
+
+    const reopenUnpaidInvoiceConfirm = async (): Promise<boolean> => {
+        if (pendingInvoiceId) {
+            setManualConfirmOpen(true);
+            return true;
+        }
+        if (!id) return false;
+        const existing = await fetchExistingInvoice(id);
+        if (existing?.id) {
+            openConfirmForInvoice(existing);
+            return true;
+        }
+        return false;
     };
 
     const getConfirmIdempotencyKey = (): string => {
@@ -810,14 +852,14 @@ function PrescriptionCheckout() {
 
     const openPaymentSuccess = (opts: { autoStatus: boolean }) => {
         clearPaymentAttemptKeys();
-        setPaidAmount(totals.total);
+        setPaidAmount(amountDue);
         setPaidItemCount(totals.itemCount);
         setStatusUpdatedManually(!opts.autoStatus);
         setSuccessOpen(true);
     };
 
     const startManualPayment = async (payload: BillingCreatePayload) => {
-        if (partialRxBlocked || isPartialDispense) {
+        if (partialRxBlocked) {
             showGetNewPrescriptionPopup();
             return;
         }
@@ -838,6 +880,7 @@ function PrescriptionCheckout() {
             const billingResponse = await CreateBilling(payload);
             const { invoice_id, payment_url } = parseBillingCreateResponse(billingResponse);
             setPendingInvoiceId(invoice_id);
+            setPendingInvoiceAmount(payload.financials.total_amount);
             setPendingPaymentUrl(payment_url ?? null);
             setManualConfirmOpen(true);
             messageApi.destroy('checkout');
@@ -891,7 +934,7 @@ function PrescriptionCheckout() {
     const confirmManualPayment = async () => {
         if (!pendingInvoiceId) return;
         if (paymentInFlightRef.current) return;
-        if (partialRxBlocked || isPartialDispense) {
+        if (partialRxBlocked) {
             setManualConfirmOpen(false);
             showGetNewPrescriptionPopup();
             return;
@@ -938,24 +981,29 @@ function PrescriptionCheckout() {
         }
     };
 
-    const handleConfirmPay = () => {
+    const handleConfirmPay = async () => {
         if (paying || paymentInFlightRef.current) {
-            return;
-        }
-        if (isPaymentPendingPrescriptionStatus(rxStatus)) {
-            messageApi.warning('Payment pending — awaiting patient payment on the link');
             return;
         }
         if (timerExpired || secondsLeft <= 0) {
             messageApi.warning('Checkout time expired — reload to try again');
             return;
         }
-        if (totals.itemCount === 0 || totals.total <= 0) {
-            messageApi.error('Select at least one item with quantity greater than zero');
+        if (partialRxBlocked) {
+            showGetNewPrescriptionPopup();
             return;
         }
-        if (partialRxBlocked || isPartialDispense) {
-            showGetNewPrescriptionPopup();
+
+        // Unpaid invoice (refresh / closed swipe) — reopen confirm, do not create again
+        if (pendingInvoiceId || isPaymentPendingPrescriptionStatus(rxStatus)) {
+            const opened = await reopenUnpaidInvoiceConfirm();
+            if (opened) return;
+            messageApi.warning('Payment pending — could not load invoice to confirm. Try refresh.');
+            return;
+        }
+
+        if (totals.itemCount === 0 || totals.total <= 0) {
+            messageApi.error('Select at least one item with quantity greater than zero');
             return;
         }
         if (overstockAllocations.length > 0) {
@@ -1034,7 +1082,7 @@ function PrescriptionCheckout() {
             render: (_: unknown, record: CheckoutLineItem) => (
                 <InputNumber
                     min={0}
-                    max={Math.max(record.prescribed_qty, stockAvailable(record.batches), 99)}
+                    max={record.prescribed_qty}
                     value={record.dispense_qty}
                     disabled={!record.selected}
                     onChange={(value) =>
@@ -1129,23 +1177,32 @@ function PrescriptionCheckout() {
                         key: 'allocate_qty',
                         width: 120,
                         align: 'center' as const,
-                        render: (_: unknown, batch: CheckoutBatchAllocation) => (
-                            <InputNumber
-                                min={0}
-                                max={batch.current_stock_units}
-                                value={batch.allocate_qty}
-                                disabled={!record.selected}
-                                onChange={(value) =>
-                                    updateBatchAllocate(
-                                        record.key,
-                                        batch.batch_id,
-                                        typeof value === 'number' ? value : 0,
-                                    )
-                                }
-                                className="checkout-qty-input"
-                                aria-label={`Allocate from ${batch.batch_no}`}
-                            />
-                        ),
+                        render: (_: unknown, batch: CheckoutBatchAllocation) => {
+                            const otherAllocated = record.batches
+                                .filter((b) => b.batch_id !== batch.batch_id)
+                                .reduce((sum, b) => sum + b.allocate_qty, 0);
+                            const maxTake = Math.min(
+                                batch.current_stock_units,
+                                Math.max(0, record.prescribed_qty - otherAllocated),
+                            );
+                            return (
+                                <InputNumber
+                                    min={0}
+                                    max={maxTake}
+                                    value={batch.allocate_qty}
+                                    disabled={!record.selected}
+                                    onChange={(value) =>
+                                        updateBatchAllocate(
+                                            record.key,
+                                            batch.batch_id,
+                                            typeof value === 'number' ? value : 0,
+                                        )
+                                    }
+                                    className="checkout-qty-input"
+                                    aria-label={`Allocate from ${batch.batch_no}`}
+                                />
+                            );
+                        },
                     },
                 ]}
             />
@@ -1302,21 +1359,6 @@ function PrescriptionCheckout() {
                                     </div>
                                 ) : null}
 
-                                {!partialRxBlocked && isPartialDispense ? (
-                                    <div className="checkout-alloc-alert checkout-alloc-alert--partial">
-                                        <WarningOutlined />
-                                        <div>
-                                            <Text strong type="warning">
-                                                Partial dispense not available
-                                            </Text>
-                                            <br />
-                                            <Text type="secondary">
-                                                {PARTIAL_DISPENSE_BLOCK_MESSAGE}
-                                            </Text>
-                                        </div>
-                                    </div>
-                                ) : null}
-
                                 {allocationErrors.length > 0 ? (
                                     <div className="checkout-alloc-alert">
                                         <WarningOutlined />
@@ -1441,12 +1483,14 @@ function PrescriptionCheckout() {
                                         className="confirm-btn"
                                         loading={paying}
                                         disabled={confirmDisabled}
-                                        onClick={handleConfirmPay}
+                                        onClick={() => {
+                                            void handleConfirmPay();
+                                        }}
                                     >
-                                        {isPaymentPendingPrescriptionStatus(rxStatus)
-                                            ? 'Yet to pay'
-                                            : timerExpired
-                                              ? 'Time expired'
+                                        {timerExpired
+                                            ? 'Time expired'
+                                            : canResumeUnpaidInvoice
+                                              ? 'Complete payment'
                                               : 'Confirm & Pay'}
                                     </Button>
                                 </Space>
@@ -1457,7 +1501,7 @@ function PrescriptionCheckout() {
             </Layout>
 
             <Modal
-                open={manualConfirmOpen && !partialRxBlocked && !isPartialDispense}
+                open={manualConfirmOpen && !partialRxBlocked}
                 title={
                     paymentMethod === 'cash'
                         ? 'Confirm cash payment'
@@ -1465,14 +1509,14 @@ function PrescriptionCheckout() {
                 }
                 onCancel={() => {
                     if (paying) return;
-                    resetManualPaymentSession();
+                    dismissManualConfirmModal();
                 }}
                 maskClosable={!paying}
                 footer={[
                     <Button
                         key="cancel"
                         disabled={paying}
-                        onClick={resetManualPaymentSession}
+                        onClick={dismissManualConfirmModal}
                     >
                         Cancel
                     </Button>,
@@ -1484,7 +1528,7 @@ function PrescriptionCheckout() {
                             Amount due
                         </Text>
                         <Text strong className="checkout-manual-amount-value">
-                            {formatInr(totals.total)}
+                            {formatInr(amountDue)}
                         </Text>
                     </div>
 
@@ -1503,7 +1547,7 @@ function PrescriptionCheckout() {
                                     <Text type="secondary">QR code placeholder</Text>
                                 )}
                                 <Text type="secondary" className="checkout-qr-amount">
-                                    {formatInr(totals.total)}
+                                    {formatInr(amountDue)}
                                 </Text>
                             </div>
                             <Text type="secondary" className="checkout-manual-hint">
@@ -1535,8 +1579,8 @@ function PrescriptionCheckout() {
                     </div>
 
                     <SwipeToConfirm
-                        active={manualConfirmOpen && !partialRxBlocked && !isPartialDispense}
-                        disabled={timerExpired || partialRxBlocked || isPartialDispense}
+                        active={manualConfirmOpen && !partialRxBlocked}
+                        disabled={timerExpired || partialRxBlocked}
                         loading={paying}
                         onConfirm={handleManualPaymentConfirmed}
                     />

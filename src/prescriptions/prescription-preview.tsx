@@ -48,6 +48,7 @@ import {
 import { StatusTag } from '../components/status-tag';
 import {
     getPatientStatusType,
+    STATUS_DANGER,
     STATUS_INFO,
     STATUS_SUCCESS,
     STATUS_WARNING,
@@ -73,6 +74,7 @@ interface PrescriptionRow {
     qty: number;
     remaining_quantity: number | null;
     item_status: string;
+    out_of_stock: boolean;
 }
 
 function formatFoodInstruction(value: string | undefined): string {
@@ -120,6 +122,7 @@ function mapMedicineInfoLines(lines: DispenseLineResponse[]): PrescriptionRow[] 
             qty: item.prescribed_quantity ?? 0,
             remaining_quantity: lineRemainingQuantity(item),
             item_status: item.prescription_item_status ?? '',
+            out_of_stock: Boolean(item.out_of_stock),
         };
     });
 }
@@ -133,7 +136,14 @@ const columns = [
         align: 'left' as const,
         render: (_: unknown, record: PrescriptionRow) => (
             <div className='medicine-info'>
-                <Text className='medicine-name'>{record.medicine}</Text>
+                <Space size={6} wrap align="center">
+                    <Text className='medicine-name'>{record.medicine}</Text>
+                    {record.out_of_stock ? (
+                        <StatusTag type={STATUS_DANGER} className="schedule-tag out-of-stock-tag">
+                            Out of stock
+                        </StatusTag>
+                    ) : null}
+                </Space>
                 {record.composition ? (
                     <Text className='medicine-generic'>{record.composition}</Text>
                 ) : null}
