@@ -179,6 +179,8 @@ export interface DispenseLineResponse {
     /** e.g. fully_dispensed, pending */
     prescription_item_status?: string;
     food_instruction?: string;
+    /** True when this line cannot be fulfilled from current inventory. */
+    out_of_stock?: boolean;
     medicine_batches: MedicineBatch[];
     supplier_id?: string;
 }
