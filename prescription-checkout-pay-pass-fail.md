@@ -47,19 +47,19 @@ Source results from `prescription-checkout-pay-test-scenarios.md` (tester fill-i
 
 ## Fail (still open)
 
-Needs fix or clear retest before release.
+Needs fix or clear retest before release. Priorities: see `prescription-checkout-pay-failed.md`.
 
-| ID | Scenario | Tester | Date | Notes |
-|----|----------|--------|------|-------|
-| **R1** | Create OK, leave before swipe | sachin | 28-07-2026 | Related to R5 Yet-to-pay / swipe loss — retest after R5 fix |
-| **S1** | Take qty > on-hand | Sachin | 28-07-2026 | Could add more qty than prescribed (overlaps S0; retest stock clamp) |
-| **S6** | Zero billed lines | sachin | 28-07-2026 | Button grey but invoice still creatable with zero meds |
-| **P1** | Mode switching mid-flow | Sachin | 28-07-2026 | BE blocked on mode switch — notes say fixed; **retest → Pass if OK** |
-| **P3** | Missing org / cashier / supplier | sachin | 28-07-2026 | Cleared org/user still allowed updateManual — must block |
-| **B2** | Enter checkout while payment-pending | Sachin | 28-07-2026 | Complete payment blocked for payment-pending |
-| **N7** | payment/confirm timeout then success | Sachin | 29-07-2026 | **Idempotency key missing** on confirm |
-| **C1** | Two tabs both Confirm & Pay | Sachin | 29-07-26 | Second tab odd; refresh should show bill paid |
-| **V4** | Discard order | Sachin | 29-07-2026 | Not integrated / not working |
+| Pri | ID | Scenario | Tester | Date | Notes |
+|-----|----|----------|--------|------|-------|
+| **P0** | **N7** | payment/confirm timeout then success | Sachin | 29-07-2026 | **Idempotency key missing** — double-settle risk |
+| **P0** | **S6** | Zero billed lines | sachin | 28-07-2026 | Grey button but zero-med invoice still creatable |
+| **P0** | **P3** | Missing org / cashier / supplier | sachin | 28-07-2026 | Cleared org/user still allowed pay — must block |
+| **P1** | **B2** | Enter checkout while payment-pending | Sachin | 28-07-2026 | Complete payment blocked for payment-pending |
+| **P1** | **C1** | Two tabs both Confirm & Pay | Sachin | 29-07-26 | Second tab odd; refresh should show bill paid |
+| **P1** | **S1** | Take qty > on-hand | Sachin | 28-07-2026 | Over-allocate vs stock/prescribed — verify clamp |
+| **P2** | **R1** | Create OK, leave before swipe | sachin | 28-07-2026 | Retest after R5 fix |
+| **P2** | **P1** | Mode switching mid-flow | Sachin | 28-07-2026 | Notes say BE fixed — **retest → Pass if OK** |
+| **P3** | **V4** | Discard order | Sachin | 29-07-2026 | Not integrated / not working |
 
 ---
 
@@ -99,10 +99,12 @@ Needs fix or clear retest before release.
 
 ## Priority follow-ups
 
-1. **Open fails:** N7 (idempotency key), S6 (zero-line create), P3 (missing ids), B2 (payment-pending complete), V4 (discard), C1 (two tabs).
-2. **Retest:** R1, S1, P1 after fixes; promote R5 / S0 to Pass if still good.
-3. **Hygiene:** N2 sample fallback on checkout error; C4 discard UX.
-4. **Happy path still blank:** H1–H4.
+1. **P0:** N7 → S6 → P3  
+2. **P1:** B2 → C1 → S1  
+3. **P2 retest:** R1, P1; promote R5 / S0 to Pass if still good  
+4. **P3:** V4 discard  
+5. **Hygiene:** N2 sample fallback; C4 discard UX  
+6. **Happy path still blank:** H1–H4
 
 ---
 

@@ -311,6 +311,7 @@ export interface GetInvoiceByPrescriptionResponse {
 /** Cash / QR — pharmacist swipe confirms payment. */
 export interface ConfirmPaymentPayload {
     invoice_id: string;
+    organisation_id: string;
     payment_mode: CheckoutPaymentMethod;
     /** Unique per confirm attempt — prevents double-confirm on rapid swipes. */
     idempotency_key: string;

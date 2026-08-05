@@ -384,10 +384,7 @@ function PharmacistPrescriptionDetail() {
             messageApi.info('This prescription is already completed. Bill paid.');
             return;
         }
-        if (showPaymentPending) {
-            messageApi.warning('Payment link already created — awaiting payment (Payment pending)');
-            return;
-        }
+        // payment-pending / unpaid invoice — allow re-enter checkout to Complete payment
         if (isPartiallyDispensedPrescriptionStatus(prescriptionStatus)) {
             showGetNewPrescriptionPopup();
             return;
@@ -551,9 +548,19 @@ function PharmacistPrescriptionDetail() {
                                                 Bill paid
                                             </StatusTag>
                                         ) : showPaymentPending ? (
-                                            <StatusTag type={STATUS_WARNING}>
-                                                Payment pending
-                                            </StatusTag>
+                                            <Space wrap>
+                                                <StatusTag type={STATUS_WARNING}>
+                                                    Yet to pay
+                                                </StatusTag>
+                                                <Button
+                                                    type='primary'
+                                                    icon={<CheckCircleOutlined />}
+                                                    className='confirm-btn'
+                                                    onClick={handleProceedToCheckout}
+                                                >
+                                                    Complete payment
+                                                </Button>
+                                            </Space>
                                         ) : (
                                             !isDraftPrescriptionStatus(prescriptionStatus) && (
                                                 <Button

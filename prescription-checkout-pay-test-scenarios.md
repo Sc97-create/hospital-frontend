@@ -22,6 +22,8 @@ Includes happy paths **and** complex / failure / edge paths.
 
 ---
 
+
+
 ## Status vocabulary (current)
 
 
@@ -38,6 +40,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 
 ---
 
+
+
 ## APIs under test
 
 
@@ -51,6 +55,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 
 
 ---
+
+
 
 ## Preconditions / fixtures
 
@@ -70,7 +76,11 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 
 ---
 
+
+
 ## 1. Happy paths
+
+
 
 ### H1 — Cash full dispense
 
@@ -91,6 +101,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | **H1** |                |        |      |       |
 
 
+
+
 ### H2 — QR full dispense
 
 
@@ -105,6 +117,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | ID     | Result (P/F/B) | Tester | Date | Notes |
 | ------ | -------------- | ------ | ---- | ----- |
 | **H2** |                |        |      |       |
+
+
 
 
 ### H3 — Link pay
@@ -122,6 +136,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | ID     | Result (P/F/B) | Tester | Date | Notes |
 | ------ | -------------- | ------ | ---- | ----- |
 | **H3** |                |        |      |       |
+
+
 
 
 ### H4 — Partial qty allowed (less tablets)
@@ -143,7 +159,11 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 
 ---
 
+
+
 ## 2. Detail gates (before checkout)
+
+
 
 ### D1 — Completed → Bill paid
 
@@ -161,6 +181,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | **D1** | P              | NA     | 28-07-2026 | NA    |
 
 
+
+
 ### D2 — Payment pending
 
 
@@ -174,6 +196,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | ID     | Result (P/F/B) | Tester | Date       | Notes |
 | ------ | -------------- | ------ | ---------- | ----- |
 | **D2** | P              | NA     | 28-07-2026 | NA    |
+
+
 
 
 ### D3 — Tentative → popup
@@ -191,6 +215,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | **D3** | P              | NA     | 28-07-2026 | NA    |
 
 
+
+
 ### D4 — Tags from getMedicineInfo
 
 
@@ -205,6 +231,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | ID     | Result (P/F/B) | Tester | Date       | Notes                                                        |
 | ------ | -------------- | ------ | ---------- | ------------------------------------------------------------ |
 | **D4** | B              | NA     | 28-07-2026 | when oos comes we can check whether it is set properly or no |
+
+
 
 
 ### D5 — Draft / cancelled
@@ -224,7 +252,11 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 
 ---
 
+
+
 ## 3. Invoice resume (complex — must not double-bill)
+
+
 
 ### R1 — Create OK, leave before swipe
 
@@ -244,6 +276,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | **R1** | F              | sachin | 28-07-2026 | Related: after refresh, payment-pending / Yet to pay blocked swipe — see **R5** |
 
 
+
+
 ### R2 — Confirm fails, retry
 
 
@@ -258,6 +292,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | ID     | Result (P/F/B) | Tester | Date       | Notes                  |
 | ------ | -------------- | ------ | ---------- | ---------------------- |
 | **R2** | B              | sachin | 28-07-2026 | need to reproduce this |
+
+
 
 
 ### R3 — Double-click Confirm & Pay
@@ -275,6 +311,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | **R3** | P              | Sachin | 28-07-26 | clicked many times still only one invoice is created and pop up appears everytime |
 
 
+
+
 ### R4 — Detail after unpaid create
 
 
@@ -288,6 +326,8 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 | ID     | Result (P/F/B) | Tester | Date       | Notes                                                            |
 | ------ | -------------- | ------ | ---------- | ---------------------------------------------------------------- |
 | **R4** | P              | sachin | 28-07-2026 | not creating new invoice and we have introduced complete payment |
+
+
 
 
 ### R5 — Refresh + close (X) confirm → Yet to pay with no swipe
@@ -314,7 +354,11 @@ Item-level (from `getMedicineInfo`): `remaining_quantity`, `prescription_item_st
 
 ---
 
+
+
 ## 4. Stock / allocation (complex)
+
+
 
 ### S0 — Dispense / take qty > prescribed
 
@@ -334,6 +378,8 @@ Pharmacist **cannot** choose more than prescribed. Partial (less) is allowed.
 | **S0** | F->fixed       | Sachin | 28-07-2026 | it didnt block when more qty were selected, now it is resolved |
 
 
+
+
 ### S1 — Take qty > on-hand
 
 
@@ -347,6 +393,8 @@ Pharmacist **cannot** choose more than prescribed. Partial (less) is allowed.
 | ID     | Result (P/F/B) | Tester | Date       | Notes                                      |
 | ------ | -------------- | ------ | ---------- | ------------------------------------------ |
 | **S1** | F              | Sachin | 28-07-2026 | i was able to add more qty then prescribed |
+
+
 
 
 ### S2 — Allocated ≠ dispense qty
@@ -364,6 +412,8 @@ Pharmacist **cannot** choose more than prescribed. Partial (less) is allowed.
 | **S2** | P              | Sachin | 28-07-2026 | Confirm and pay able to click but message pops up |
 
 
+
+
 ### S3 — Multi-batch FEFO
 
 
@@ -378,6 +428,8 @@ Pharmacist **cannot** choose more than prescribed. Partial (less) is allowed.
 | ID     | Result (P/F/B) | Tester | Date       | Notes               |
 | ------ | -------------- | ------ | ---------- | ------------------- |
 | **S3** | P              | Sachin | 28-07-2026 | Working as expected |
+
+
 
 
 ### S4 — Two batches, same medicine — take from one only
@@ -410,6 +462,8 @@ dispense_items: [
 | **S4** | P              | Sachin | 28-07-2026 | NA    |
 
 
+
+
 ### S4b — Same medicine, two prescription lines
 
 **Fixture:** **F3** — same `medicine_id`, two `prescription_item_id`s (e.g. MOR + NIT).
@@ -428,6 +482,8 @@ dispense_items: [
 | **S4b** | P              | Sachin | 28-07-26 | NA    |
 
 
+
+
 ### S5 — Out of stock flag
 
 
@@ -441,6 +497,8 @@ dispense_items: [
 | ID     | Result (P/F/B) | Tester | Date | Notes                             |
 | ------ | -------------- | ------ | ---- | --------------------------------- |
 | **S5** | -              | -      | -    | need to reproduce when stock is 0 |
+
+
 
 
 ### S6 — Zero billed lines
@@ -459,7 +517,11 @@ dispense_items: [
 
 ---
 
+
+
 ## 5. Payment mode & session
+
+
 
 ### P1 — Mode switching mid-flow
 
@@ -478,6 +540,8 @@ dispense_items: [
 | **P1** | F              | Sachin | 28-07-2026 | when i switch the mode, backend blocked and it is fixed now |
 
 
+
+
 ### P2 — Checkout timer expiry
 
 
@@ -492,6 +556,8 @@ dispense_items: [
 | ID     | Result (P/F/B) | Tester | Date       | Notes                                                                   |
 | ------ | -------------- | ------ | ---------- | ----------------------------------------------------------------------- |
 | **P2** | P              | Sachin | 28-07-2026 | i waited for 2min and then swipe disappeared and on refresh it appeared |
+
+
 
 
 ### P3 — Missing org / cashier / supplier
@@ -509,6 +575,8 @@ dispense_items: [
 | **P3** | F              | sachin | 28-07-2026 | when orgID and userID is cleared still updatemanually worked, it shouldnt work, need to block then there |
 
 
+
+
 ### P4 — Auth failure mid-pay
 
 
@@ -519,14 +587,18 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **P4** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                             |
+| ------ | -------------- | ------ | ---------- | --------------------------------- |
+| **P4** | B              | sachin | 28-07-2026 | need to implement jwt for all api |
 
 
 ---
 
+
+
 ## 6. Status-driven checkout blocks
+
+
 
 ### B1 — Enter checkout while tentative
 
@@ -538,9 +610,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **B1** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                                                                                |
+| ------ | -------------- | ------ | ---------- | ------------------------------------------------------------------------------------ |
+| **B1** | P              | Sachin | 28-07-2026 | i checked with tentative status and confirm and pay is blocked and i can see warning |
+
+
 
 
 ### B2 — Enter checkout while payment-pending
@@ -553,9 +627,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **B2** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                                               |
+| ------ | -------------- | ------ | ---------- | --------------------------------------------------- |
+| **B2** | F              | Sachin | 28-07-2026 | for payment pending the complete payment is blocked |
+
+
 
 
 ### B3 — Enter checkout while completed
@@ -568,14 +644,18 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **B3** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                                                    |
+| ------ | -------------- | ------ | ---------- | -------------------------------------------------------- |
+| **B3** | P              | Sachin | 28-07-2026 | backend rejecting with invoice already paid or not found |
 
 
 ---
 
+
+
 ## 7. Network / API failure matrix
+
+
 
 ### N1 — getMedicineInfo 500 on detail
 
@@ -586,9 +666,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **N1** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                                                                       |
+| ------ | -------------- | ------ | ---------- | --------------------------------------------------------------------------- |
+| **N1** | P              | Sachin | 29-07-2026 | when backend server was not running, it didnt crash instead popup the error |
+
+
 
 
 ### N2 — getMedicineInfo 500 on checkout
@@ -600,9 +682,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **N2** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                                                           |
+| ------ | -------------- | ------ | ---------- | --------------------------------------------------------------- |
+| **N2** | P              | Sachin | 29-07-2026 | no data but it is showing sample data, that needs to be removed |
+
+
 
 
 ### N3 — getInvoice 404
@@ -614,9 +698,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **N3** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                                             |
+| ------ | -------------- | ------ | ---------- | ------------------------------------------------- |
+| **N3** | P              | Sachin | 29-07-2026 | when no invoice is found then this error is valid |
+
+
 
 
 ### N4 — getInvoice 500
@@ -628,9 +714,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **N4** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes              |
+| ------ | -------------- | ------ | ---------- | ------------------ |
+| **N4** | -              | NA     | 29-07-2026 | it is working fine |
+
+
 
 
 ### N5 — billing/create 400
@@ -642,9 +730,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **N5** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes |
+| ------ | -------------- | ------ | ---------- | ----- |
+| **N5** | p              | Sachin | 29-07-2026 | -     |
+
+
 
 
 ### N6 — billing/create 409 duplicate
@@ -656,9 +746,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **N6** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                           |
+| ------ | -------------- | ------ | ---------- | ------------------------------- |
+| **N6** | P              | -      | 29-07-2026 | Now changed to complete payment |
+
+
 
 
 ### N7 — payment/confirm timeout then success
@@ -670,9 +762,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **N7** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                      |
+| ------ | -------------- | ------ | ---------- | -------------------------- |
+| **N7** | F              | Sachin | 29-07-2026 | Idempotency key is missing |
+
+
 
 
 ### N8 — Offline mid-swipe
@@ -684,14 +778,18 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **N8** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                  |
+| ------ | -------------- | ------ | ---------- | ---------------------- |
+| **N8** | P              | Sachin | 29-07-2026 | received network error |
 
 
 ---
 
+
+
 ## 8. Race & concurrency (complex)
+
+
 
 ### C1 — Two tabs both Confirm & Pay
 
@@ -702,9 +800,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **C1** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date     | Notes                                                                                          |
+| ------ | -------------- | ------ | -------- | ---------------------------------------------------------------------------------------------- |
+| **C1** | F              | Sachin | 29-07-26 | when two tabs open new confirm and pay is not creating but on refresh it should show bill paid |
+
+
 
 
 ### C2 — Tab A creates; Tab B loads checkout
@@ -716,9 +816,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **C2** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                                                                             |
+| ------ | -------------- | ------ | ---------- | --------------------------------------------------------------------------------- |
+| **C2** | P              | Sachin | 29-07-2026 | it passed but for tab b it is giving failed with 500 not exact error it is giving |
+
+
 
 
 ### C3 — Tab A confirms; Tab B still on swipe
@@ -730,9 +832,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **C3** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date     | Notes               |
+| ------ | -------------- | ------ | -------- | ------------------- |
+| **C3** | P              | Sachin | 29-07-26 | b failed with error |
+
+
 
 
 ### C4 — Discard while create in flight
@@ -744,14 +848,18 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **C4** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                                          |
+| ------ | -------------- | ------ | ---------- | ---------------------------------------------- |
+| **C4** | p              | Sachin | 29-07-2026 | discard has no point there need to remove that |
 
 
 ---
 
+
+
 ## 9. Patient / navigation edge cases
+
+
 
 ### V1 — Checkout without `?patientId=`
 
@@ -762,9 +870,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **V1** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes     |
+| ------ | -------------- | ------ | ---------- | --------- |
+| **V1** | P              | Sachin | 29-07-2026 | it worked |
+
+
 
 
 ### V2 — Back from checkout
@@ -776,9 +886,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **V2** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date | Notes                     |
+| ------ | -------------- | ------ | ---- | ------------------------- |
+| **V2** | -              | -      | -    | didnt get idea what to do |
+
+
 
 
 ### V3 — Breadcrumb Detail while unpaid invoice
@@ -790,9 +902,11 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **V3** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date     | Notes                                      |
+| ------ | -------------- | ------ | -------- | ------------------------------------------ |
+| **V3** | p              | Sachin | 29-07-26 | we have changed button to complete payment |
+
+
 
 
 ### V4 — Discard order
@@ -804,12 +918,14 @@ dispense_items: [
 
 
 
-| ID     | Result (P/F/B) | Tester | Date | Notes |
-| ------ | -------------- | ------ | ---- | ----- |
-| **V4** |                |        |      |       |
+| ID     | Result (P/F/B) | Tester | Date       | Notes                         |
+| ------ | -------------- | ------ | ---------- | ----------------------------- |
+| **V4** | F              | Sachin | 29-07-2026 | not integrated or not working |
 
 
 ---
+
+
 
 ## 10. Master sign-off sheet (fill as you go)
 
@@ -863,6 +979,8 @@ Copy results from each scenario above into this rollup.
 | V2  | Back keeps patient               |       |        |            |                                                 |
 | V3  | Breadcrumb + unpaid resume       |       |        |            |                                                 |
 | V4  | Discard cancels Rx               |       |        |            |                                                 |
+
+
 
 
 ### Smoke subset (must pass before release)
