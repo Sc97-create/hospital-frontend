@@ -50,6 +50,7 @@ import {
     formatPrescriptionStatusLabel,
     getPrescriptionStatusTagColor,
     isPartiallyDispensedPrescriptionStatus,
+    isPaidInvoiceStatus,
     isPaymentPendingPrescriptionStatus,
     PARTIAL_DISPENSE_BLOCK_MESSAGE,
     prescriptionPath,
@@ -509,6 +510,14 @@ function PrescriptionCheckout() {
 
                 const existingInvoice = await fetchExistingInvoice(id);
                 if (!cancelled && existingInvoice?.id) {
+                    if (isPaidInvoiceStatus(existingInvoice.status)) {
+                        messageApi.info('This bill is already paid.');
+                        navigate(prescriptionPath(id, { patientId }), {
+                            replace: true,
+                            state: { patientId },
+                        });
+                        return;
+                    }
                     openConfirmForInvoice(existingInvoice);
                 }
             } catch (error) {
@@ -587,12 +596,10 @@ function PrescriptionCheckout() {
     /** Prefer locked invoice total (resume / after create) over live line recalculation. */
     const amountDue = pendingInvoiceAmount ?? totals.total;
 
-    const confirmDisabled =
-        timerExpired ||
-        partialRxBlocked;
-
     const isPaymentPending = isPaymentPendingPrescriptionStatus(rxStatus);
     const canResumeUnpaidInvoice = Boolean(pendingInvoiceId) || isPaymentPending;
+    /** At least one checked line with qty > 0 (S6 — block empty create). */
+    const hasBillableLines = totals.itemCount > 0 && totals.total > 0;
 
     const overstockAllocations = useMemo(() => {
         return lines
@@ -642,6 +649,12 @@ function PrescriptionCheckout() {
             });
     }, [lines]);
 
+    const confirmDisabled =
+        timerExpired ||
+        partialRxBlocked ||
+        (!canResumeUnpaidInvoice &&
+            (!hasBillableLines || allocationErrors.length > 0));
+
     const setDispenseQty = (key: string, dispense_qty: number) => {
         const line = lines.find((l) => l.key === key);
         if (!line) return;
@@ -670,37 +683,55 @@ function PrescriptionCheckout() {
     };
 
     const updateBatchAllocate = (lineKey: string, batchId: string, allocate_qty: number) => {
+        const nextQty = Math.max(0, Math.floor(Number(allocate_qty) || 0));
         const line = lines.find((l) => l.key === lineKey);
         const batch = line?.batches.find((b) => b.batch_id === batchId);
-        if (!batch || !line) return;
-
-        const nextQty = Math.max(0, allocate_qty);
-        const otherAllocated = line.batches
-            .filter((b) => b.batch_id !== batchId)
-            .reduce((sum, b) => sum + b.allocate_qty, 0);
-        const roomUnderPrescribed = Math.max(0, line.prescribed_qty - otherAllocated);
-        const maxAllowed = Math.min(batch.current_stock_units, roomUnderPrescribed);
-        const capped = Math.min(nextQty, maxAllowed);
-
-        if (nextQty > batch.current_stock_units) {
-            messageApi.warning(
-                `Batch ${batch.batch_no}: take qty cannot exceed stock (${batch.current_stock_units}). Reduce to ${batch.current_stock_units} or less.`,
-            );
-        } else if (nextQty > roomUnderPrescribed) {
-            messageApi.warning(
-                `${line.medicine_name}: cannot take more than prescribed (${line.prescribed_qty}). Max for this batch is ${roomUnderPrescribed}.`,
-            );
+        if (line && batch) {
+            const otherAllocated = line.batches
+                .filter((b) => b.batch_id !== batchId)
+                .reduce((sum, b) => sum + b.allocate_qty, 0);
+            const roomUnderPrescribed = Math.max(0, line.prescribed_qty - otherAllocated);
+            const stockCap = Math.max(0, batch.current_stock_units);
+            if (nextQty > stockCap) {
+                messageApi.warning(
+                    `Batch ${batch.batch_no}: take qty cannot exceed stock (${stockCap}). Reduce to ${stockCap} or less.`,
+                );
+            } else if (nextQty > roomUnderPrescribed) {
+                messageApi.warning(
+                    `${line.medicine_name}: cannot take more than prescribed (${line.prescribed_qty}). Max for this batch is ${roomUnderPrescribed}.`,
+                );
+            }
         }
 
-        setLines((prev) =>
-            prev.map((row) => {
-                if (row.key !== lineKey) return row;
-                const batches = row.batches.map((b) =>
+        setLines((prev) => {
+            const row = prev.find((l) => l.key === lineKey);
+            const currentBatch = row?.batches.find((b) => b.batch_id === batchId);
+            if (!row || !currentBatch) return prev;
+
+            const otherAllocated = row.batches
+                .filter((b) => b.batch_id !== batchId)
+                .reduce((sum, b) => sum + b.allocate_qty, 0);
+            const roomUnderPrescribed = Math.max(0, row.prescribed_qty - otherAllocated);
+            const maxAllowed = Math.min(
+                Math.max(0, currentBatch.current_stock_units),
+                roomUnderPrescribed,
+            );
+            const capped = Math.min(nextQty, maxAllowed);
+            if (capped === currentBatch.allocate_qty) return prev;
+
+            return prev.map((item) => {
+                if (item.key !== lineKey) return item;
+                const batches = item.batches.map((b) =>
                     b.batch_id === batchId ? { ...b, allocate_qty: capped } : b,
                 );
-                return { ...row, batches, dispense_qty: allocationSum(batches) };
-            }),
-        );
+                const allocated = allocationSum(batches);
+                return {
+                    ...item,
+                    batches,
+                    dispense_qty: Math.min(allocated, item.prescribed_qty),
+                };
+            });
+        });
     };
 
     const handleDiscard = () => {
@@ -784,6 +815,7 @@ function PrescriptionCheckout() {
         }
 
         if (dispense_items.length === 0) {
+            messageApi.error('Select at least one item with quantity greater than zero');
             return null;
         }
 
@@ -818,24 +850,46 @@ function PrescriptionCheckout() {
         confirmIdempotencyKeyRef.current = null;
     };
 
+    const clearPaymentAttemptKeys = () => {
+        billingIdempotencyKeyRef.current = null;
+        confirmIdempotencyKeyRef.current = null;
+    };
+
+    /** Other tab already paid — send pharmacist to detail (Bill paid). */
+    const navigateToBillPaidDetail = () => {
+        if (!id) return;
+        resetManualPaymentSession();
+        clearPaymentAttemptKeys();
+        messageApi.info('This bill is already paid.');
+        navigate(prescriptionPath(id, { patientId: resolvedPatientId }), {
+            replace: true,
+            state: { patientId: resolvedPatientId },
+        });
+    };
+
+    /**
+     * Fresh invoice check before create / resume / swipe (C1 multi-tab).
+     * Returns paid → navigate; unpaid → invoice; none → no invoice yet.
+     */
+    const resolveInvoiceBeforePay = async (): Promise<
+        | { kind: 'paid' }
+        | { kind: 'unpaid'; invoice: InvoiceByPrescription }
+        | { kind: 'none' }
+    > => {
+        if (!id) return { kind: 'none' };
+        const existing = await fetchExistingInvoice(id);
+        if (!existing?.id) return { kind: 'none' };
+        if (isPaidInvoiceStatus(existing.status)) {
+            navigateToBillPaidDetail();
+            return { kind: 'paid' };
+        }
+        return { kind: 'unpaid', invoice: existing };
+    };
+
     /** Close swipe modal but keep unpaid invoice so pharmacist can reopen. */
     const dismissManualConfirmModal = () => {
         setManualConfirmOpen(false);
         setTransactionReference('');
-    };
-
-    const reopenUnpaidInvoiceConfirm = async (): Promise<boolean> => {
-        if (pendingInvoiceId) {
-            setManualConfirmOpen(true);
-            return true;
-        }
-        if (!id) return false;
-        const existing = await fetchExistingInvoice(id);
-        if (existing?.id) {
-            openConfirmForInvoice(existing);
-            return true;
-        }
-        return false;
     };
 
     const getConfirmIdempotencyKey = (): string => {
@@ -843,11 +897,6 @@ function PrescriptionCheckout() {
             confirmIdempotencyKeyRef.current = createIdempotencyKey();
         }
         return confirmIdempotencyKeyRef.current;
-    };
-
-    const clearPaymentAttemptKeys = () => {
-        billingIdempotencyKeyRef.current = null;
-        confirmIdempotencyKeyRef.current = null;
     };
 
     const openPaymentSuccess = (opts: { autoStatus: boolean }) => {
@@ -863,8 +912,10 @@ function PrescriptionCheckout() {
             showGetNewPrescriptionPopup();
             return;
         }
-        if (pendingInvoiceId) {
-            setManualConfirmOpen(true);
+        const gate = await resolveInvoiceBeforePay();
+        if (gate.kind === 'paid') return;
+        if (gate.kind === 'unpaid') {
+            openConfirmForInvoice(gate.invoice);
             return;
         }
         if (paymentInFlightRef.current) return;
@@ -944,6 +995,22 @@ function PrescriptionCheckout() {
             return;
         }
 
+        const organisation_id = localStorage.getItem('organisation_id') || '';
+        if (!organisation_id) {
+            messageApi.error('Missing organisation id — please log in again');
+            return;
+        }
+
+        const gate = await resolveInvoiceBeforePay();
+        if (gate.kind === 'paid') return;
+        if (gate.kind === 'none') {
+            messageApi.warning('Invoice not found — refresh and try again.');
+            return;
+        }
+        if (gate.invoice.id !== pendingInvoiceId) {
+            openConfirmForInvoice(gate.invoice);
+        }
+
         paymentInFlightRef.current = true;
         setPaying(true);
         messageApi.loading({
@@ -955,7 +1022,8 @@ function PrescriptionCheckout() {
         try {
             const trimmedRef = transactionReference.trim();
             await ConfirmPayment({
-                invoice_id: pendingInvoiceId,
+                invoice_id: gate.invoice.id,
+                organisation_id,
                 payment_mode: paymentMethod,
                 idempotency_key: getConfirmIdempotencyKey(),
                 ...(trimmedRef ? { transaction_reference: trimmedRef } : {}),
@@ -994,15 +1062,21 @@ function PrescriptionCheckout() {
             return;
         }
 
-        // Unpaid invoice (refresh / closed swipe) — reopen confirm, do not create again
+        // Always re-check invoice before create / resume (C1 — other tab may have paid)
+        const gate = await resolveInvoiceBeforePay();
+        if (gate.kind === 'paid') return;
+        if (gate.kind === 'unpaid') {
+            openConfirmForInvoice(gate.invoice);
+            return;
+        }
         if (pendingInvoiceId || isPaymentPendingPrescriptionStatus(rxStatus)) {
-            const opened = await reopenUnpaidInvoiceConfirm();
-            if (opened) return;
-            messageApi.warning('Payment pending — could not load invoice to confirm. Try refresh.');
+            messageApi.warning(
+                'Payment pending — could not load invoice to confirm. Try refresh.',
+            );
             return;
         }
 
-        if (totals.itemCount === 0 || totals.total <= 0) {
+        if (!hasBillableLines) {
             messageApi.error('Select at least one item with quantity greater than zero');
             return;
         }
@@ -1083,6 +1157,8 @@ function PrescriptionCheckout() {
                 <InputNumber
                     min={0}
                     max={record.prescribed_qty}
+                    step={1}
+                    precision={0}
                     value={record.dispense_qty}
                     disabled={!record.selected}
                     onChange={(value) =>
@@ -1189,6 +1265,8 @@ function PrescriptionCheckout() {
                                 <InputNumber
                                     min={0}
                                     max={maxTake}
+                                    step={1}
+                                    precision={0}
                                     value={batch.allocate_qty}
                                     disabled={!record.selected}
                                     onChange={(value) =>

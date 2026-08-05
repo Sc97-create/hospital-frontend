@@ -114,12 +114,24 @@ export function isFullyDispensedPrescriptionStatus(status: string | undefined | 
     );
 }
 
-/** Payment link generated — awaiting patient pay. */
+/** Payment link generated / unpaid invoice — awaiting patient or counter pay. */
 export function isPaymentPendingPrescriptionStatus(
     status: string | undefined | null,
 ): boolean {
     const normalized = normalizePrescriptionStatus(status);
     return normalized === 'payment_pending' || normalized === 'payment_link_created';
+}
+
+/** Invoice already settled — do not create/confirm again (multi-tab C1). */
+export function isPaidInvoiceStatus(status: string | undefined | null): boolean {
+    const normalized = normalizePrescriptionStatus(status);
+    return (
+        normalized === 'paid' ||
+        normalized === 'completed' ||
+        normalized === 'settled' ||
+        normalized === 'success' ||
+        normalized === 'fully_paid'
+    );
 }
 
 /**
