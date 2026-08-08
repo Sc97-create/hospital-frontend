@@ -49,6 +49,18 @@ export function prescriptionPath(
     };
 }
 
+/** Build printable receipt/invoice preview path while keeping patientId in the query string. */
+export function prescriptionReceiptPath(
+    prescriptionId: string,
+    options?: { patientId?: string | null },
+): { pathname: string; search?: string } {
+    const patientId = options?.patientId?.trim();
+    return {
+        pathname: `/prescription/${prescriptionId}/receipt`,
+        search: patientId ? `?patientId=${encodeURIComponent(patientId)}` : undefined,
+    };
+}
+
 /** Resolve patient_id from list navigation, query string, cache, or prescription APIs. */
 export function resolvePrescriptionPatientId(sources: {
     locationPatientId?: string | null;

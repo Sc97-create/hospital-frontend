@@ -22,6 +22,7 @@ import Appointment from './appointment-step/appointment'
 import PrescriptionDetails from './prescriptions/prescription-details'
 import AddPrescription from './prescriptions/add-prescription'
 import PrescriptionCheckout from './prescriptions/prescription-checkout'
+import PrescriptionReceipt from './prescriptions/prescription-receipt'
 import GeneralInfo from './patientmangement/singlepatientdetail/patient-profile'
 import AddAppointment from './patientmangement/patient-appointment/addAppointment'
 import AppointmentsPage from './patientmangement/patient-appointment/appointment-list'
@@ -68,6 +69,7 @@ function App() {
           <Route path='/prescription' element={<AuthGuard><PrescriptionDetails /> </AuthGuard>} />
           <Route path='/prescription/add-prescription/:appointmentID' element={<AuthGuard><AddPrescription /></AuthGuard>} />
           <Route path='/prescription/:id/checkout' element={<AuthGuard><PrescriptionCheckout /></AuthGuard>} />
+          <Route path='/prescription/:id/receipt' element={<AuthGuard><PrescriptionReceipt /></AuthGuard>} />
           <Route path='/prescription/:id' element={<AuthGuard><PrescPreview /></AuthGuard>} />
           <Route path='/bed-arrangement' element={<CreateBed />} />
           <Route path='/bed-arrangement/step-2' element={<CreateRooms />} />
