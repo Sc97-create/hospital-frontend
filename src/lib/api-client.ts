@@ -107,6 +107,7 @@ apiClient.interceptors.response.use(
                 // If refresh fails, clear storage and redirect to login
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("user_id");
+                localStorage.removeItem("organisation_id");
                 window.location.href = "/login";
 
                 return Promise.reject(refreshError);

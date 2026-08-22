@@ -6,43 +6,33 @@ import {
     Pagination,
     Space,
     Table,
-    Tag,
 } from "antd";
 
 import {
+    EyeOutlined,
     HomeOutlined,
     MedicineBoxOutlined,
-    PlusCircleOutlined,
     SearchOutlined,
 } from "@ant-design/icons";
 
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { FindAllPrescription } from "./api/prescription";
-import type { PrescriptionListItem } from "./types/prescriptionmodel";
+import { useEffect, useRef, useState } from "react";
+import { FindAllPrescription, GetByStatus } from "./api/prescription";
+import type { PrescriptionListItem, PrescriptionStatusFilter } from "./types/prescriptionmodel";
+import {
+    formatPrescriptionStatusLabel,
+    getPrescriptionStatusTagColor,
+    rememberPrescriptionPatientId,
+} from "./prescription-patient";
+import { StatusTag } from "../components/status-tag";
+import { STATUS_INFO } from "../constants/status-colors";
 
 import Sidebar from "../sidebar";
 
 import "./prescription-details.css";
 
 const { Content } = Layout;
-
-const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-        case "sent":
-            return "green";
-        case "pending":
-            return "orange";
-        case "draft":
-            return "gray";
-        case "dispensed":
-            return "green";
-        case "expired":
-            return "red";
-        default:
-            return "default";
-    }
-};
+const SEARCH_DEBOUNCE_MS = 400;
 
 function PrescriptionList() {
     const navigate = useNavigate();
@@ -50,93 +40,145 @@ function PrescriptionList() {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
+    const [searchInput, setSearchInput] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState<PrescriptionStatusFilter>("all");
     const pageSize = 10;
+    const requestIdRef = useRef(0);
 
-    const fetchPrescriptions = async (currentPage: number) => {
+    const fetchPrescriptions = async (
+        currentPage: number,
+        search: string,
+        status: PrescriptionStatusFilter,
+    ) => {
+        const requestId = ++requestIdRef.current;
         setLoading(true);
         try {
             const organisation_id = localStorage.getItem("organisation_id") || "";
-            const response = await FindAllPrescription(pageSize, currentPage, organisation_id);
+            const response = status === "all"
+                ? await FindAllPrescription(
+                    pageSize,
+                    currentPage,
+                    organisation_id,
+                    search || undefined,
+                )
+                : await GetByStatus(
+                    pageSize,
+                    currentPage,
+                    organisation_id,
+                    status,
+                    search || undefined,
+                );
+            // Ignore stale responses from earlier keystrokes / remounts
+            if (requestId !== requestIdRef.current) return;
             if (response.code === "200") {
-                setPrescriptions(response.data);
-                setTotal(response.total_count);
+                setPrescriptions(response.data ?? []);
+                setTotal(response.total_count ?? 0);
             }
         } catch (error) {
+            if (requestId !== requestIdRef.current) return;
             console.error("Failed to fetch prescriptions:", error);
         } finally {
-            setLoading(false);
+            if (requestId === requestIdRef.current) {
+                setLoading(false);
+            }
         }
     };
 
+    const handleStatusFilterChange = (status: PrescriptionStatusFilter) => {
+        setStatusFilter(status);
+        setPage(1);
+    };
+
+    // Debounce: only update the search used for API after the user stops typing
     useEffect(() => {
-        fetchPrescriptions(page);
-    }, [page]);
+        const nextSearch = searchInput.trim();
+        if (nextSearch === debouncedSearch) return;
+
+        const timer = setTimeout(() => {
+            setPage(1);
+            setDebouncedSearch(nextSearch);
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => clearTimeout(timer);
+    }, [searchInput, debouncedSearch]);
+
+    useEffect(() => {
+        fetchPrescriptions(page, debouncedSearch, statusFilter);
+    }, [page, debouncedSearch, statusFilter]);
 
     const columns = [
         {
             title: "Code",
             dataIndex: "code",
             key: "code",
-            className: "column-layout",
-            render: (text: string, record: PrescriptionListItem) => (
-                <span
-                    className="code-badge"
-                    onClick={() => navigate(`/prescription/${record.id}`)}
-                >
-                    {text}
-                </span>
+            render: (text: string) => (
+                <StatusTag type={STATUS_INFO}>{text}</StatusTag>
             ),
+        },
+        {
+            title: "Patient",
+            dataIndex: "patient_name",
+            key: "patient_name",
+            render: (name: string | undefined) => name?.trim() || "—",
         },
         {
             title: "Doctor",
             dataIndex: "prescribed_by",
             key: "doctor",
-            className: "other-layout",
+            color: "#6B7280",
         },
         {
             title: "Issued On",
             dataIndex: "created_at",
             key: "created_at",
-            className: "other-layout",
-            render: (date: string) => new Date(date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
+            color: "#6B7280",
+            render: (date: string) => new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
             }),
-        },
-        {
-            title: "Medicines",
-            key: "medicines",
-            className: "other-layout",
-            render: (_: unknown, record: PrescriptionListItem) => {
-                const meds = record.medicines || [];
-                const firstMed = meds.length > 0 ? meds[0].medicine_name || "Unknown Medicine" : "No medicines";
-                const moreCount = meds.length > 1 ? meds.length - 1 : 0;
-
-                return (
-                    <div className="medicine-cell">
-                        <span
-                            className="medicine-name"
-                            onClick={() => navigate(`/prescription/${record.id}`)}
-                        >
-                            {firstMed}
-                        </span>
-                        {moreCount > 0 && (
-                            <Tag className="more-tag">+{moreCount} more</Tag>
-                        )}
-                    </div>
-                );
-            },
         },
         {
             title: "Pharma Status",
             dataIndex: "status",
             key: "status",
-            align: "center" as const,
+            color: "#6B7280",
             render: (status: string) => (
-                <Tag color={getStatusColor(status)} bordered className="app-tag">
-                    {status}
-                </Tag>
+                <StatusTag type={getPrescriptionStatusTagColor(status)} bordered>
+                    {formatPrescriptionStatusLabel(status)}
+                </StatusTag>
+            ),
+        },
+        {
+            title: "Action",
+            key: "action",
+            align: "center" as const,
+            render: (_: unknown, record: PrescriptionListItem) => (
+                <Button
+                    type="primary"
+                    size="small"
+                    className="view-prescription-btn"
+                    icon={<EyeOutlined />}
+                    onClick={() => {
+                        rememberPrescriptionPatientId(record.id, record.patient_id);
+                        navigate(
+                            {
+                                pathname: `/prescription/${record.id}`,
+                                search: record.patient_id
+                                    ? `?patientId=${encodeURIComponent(record.patient_id)}`
+                                    : undefined,
+                            },
+                            { state: {
+                                patientId: record.patient_id,
+                                status: record.status,
+                                createdAt: record.created_at,
+                            } },
+                        );
+                    }}
+                >
+                    View
+                </Button>
             ),
         },
     ];
@@ -164,20 +206,13 @@ function PrescriptionList() {
                 />
 
                 <Content className="main-layout">
-                    <div className="button-layout">
-                        <Button
-                            className="appointment-button"
-                            icon={<PlusCircleOutlined />}
-                            onClick={() => navigate("/prescription/add-prescription/new")}
-                        >
-                            Add Prescription
-                        </Button>
-                    </div>
-
                     <div className="search-layout">
                         <Input
                             placeholder="Search prescriptions"
                             className="search-input1"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value ?? "")}
+                            allowClear
                             suffix={
                                 <SearchOutlined
                                     style={{ cursor: "pointer", width: "14px", height: "14px" }}
@@ -186,9 +221,24 @@ function PrescriptionList() {
                         />
 
                         <Space.Compact>
-                            <Button type="primary">All</Button>
-                            <Button>Sent</Button>
-                            <Button>Pending</Button>
+                            <Button
+                                type={statusFilter === "all" ? "primary" : "default"}
+                                onClick={() => handleStatusFilterChange("all")}
+                            >
+                                All
+                            </Button>
+                            <Button
+                                type={statusFilter === "draft" ? "primary" : "default"}
+                                onClick={() => handleStatusFilterChange("draft")}
+                            >
+                                Draft
+                            </Button>
+                            <Button
+                                type={statusFilter === "sent" ? "primary" : "default"}
+                                onClick={() => handleStatusFilterChange("sent")}
+                            >
+                                Sent
+                            </Button>
                         </Space.Compact>
                     </div>
 

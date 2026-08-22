@@ -10,3 +10,8 @@ export interface loginResponse{
     refresh_token:string;
 
 }
+
+export interface logoutResponse {
+    message?: string;
+    code?: string;
+}

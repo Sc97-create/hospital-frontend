@@ -1,4 +1,4 @@
-import { Layout, Breadcrumb, Button, Input, Table, Tag, Pagination } from 'antd'
+import { Layout, Breadcrumb, Button, Input, Table, Pagination } from 'antd'
 import { useState, useEffect } from 'react'
 import type { TableColumnsType, TablePaginationConfig } from 'antd'
 import './patient-list.css'
@@ -13,6 +13,8 @@ import {
 } from '@ant-design/icons'
 import { findMany } from '../api/patients'
 import type { Patientlistresponse } from '../types/patients'
+import { StatusTag } from '../../components/status-tag'
+import { getPatientStatusType, STATUS_INFO } from '../../constants/status-colors'
 
 const { Content } = Layout
 
@@ -23,6 +25,7 @@ interface DataType {
     weight: number;
     gender: string;
     issued_at: Date;
+    patient_created_at: string;
     status: string;
 }
 
@@ -38,9 +41,7 @@ function PatientList() {
             className: 'column-layout',
             showSorterTooltip: { target: 'full-header' },
             render: (text: string) => (
-                <span style={{ backgroundColor: '#FFF9C4', color: '#000', padding: '4px 8px', borderRadius: '6px', fontWeight: '600' }}>
-                    {text}
-                </span>
+                <StatusTag type={STATUS_INFO}>{text}</StatusTag>
             )
         },
         {
@@ -91,9 +92,9 @@ function PatientList() {
             dataIndex: 'issued_at',
             className: 'other-layout',
             showSorterTooltip: { target: 'full-header' },
-            render: (date: Date) => datecheck(date).format('DD MMMM YYYY'),
+            render: (_date: Date, record) => datecheck(record.patient_created_at).format('DD MMMM YYYY'),
             defaultSortOrder: 'descend',
-            sorter: (a, b) => new Date(a.issued_at).getTime() - new Date(b.issued_at).getTime()
+            sorter: (a, b) => new Date(a.patient_created_at).getTime() - new Date(b.patient_created_at).getTime()
         },
         {
             title: 'Status',
@@ -103,13 +104,11 @@ function PatientList() {
                 const toTitleCase = (str: string) =>
                     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
-                const colorMap: Record<string, string> = {
-                    pending: 'orange',
-                    active: 'green',
-                    completed: 'blue',
-                    cancelled: 'red',
-                };
-                return <Tag color={colorMap[status.toLowerCase()]} bordered={true} className='app-tag'>{toTitleCase(status)}</Tag>
+                return (
+                    <StatusTag type={getPatientStatusType(status)} bordered>
+                        {toTitleCase(status)}
+                    </StatusTag>
+                );
             }
         }
     ];
@@ -154,6 +153,7 @@ function PatientList() {
         weight: patient.patient_weight,
         gender: patient.patient_gender,
         issued_at: patient.admission_date,
+        patient_created_at: patient.patient_created_at,
         status: patient.patient_status || 'active'
     }));
     const onChange = (page: number, pageSize?: number) => {

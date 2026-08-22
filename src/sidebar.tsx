@@ -3,6 +3,7 @@ import { Button, Menu } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     AppstoreOutlined,
+    CalendarOutlined,
     MedicineBoxOutlined,
     MenuFoldOutlined,
     ShopOutlined,
@@ -18,13 +19,12 @@ function Sidebar() {
     const navigate = useNavigate();
     const [collapse, setCollapse] = useState(false);
     const [hover, setHover] = useState(false);
-    const routeMap: Record<'/patients' | '/appointment' | '/suppliers' | '/employees' | '/bed-arrangement' | '/prescription', string> = {
+    const routeMap: Record<'/patients' | '/appointment' | '/suppliers' | '/employees' | '/prescription', string> = {
         '/patients': '/patients',
-        '/appointment': '/appointment',
         '/suppliers': '/suppliers',
         "/employees": '/employees',
-        "/bed-arrangement": '/bed-arrangement',
-        "/prescription": '/prescription'
+        "/prescription": '/prescription',
+        "/appointment":'/appointments',
     };
 
     const matchedKey = (Object.keys(routeMap) as Array<keyof typeof routeMap>).find(
@@ -84,6 +84,11 @@ function Sidebar() {
                                 label: 'Patients',
                             },
                             {
+                                key:'/appointments',
+                                icon:<CalendarOutlined/>,
+                                label:'Appointmets'
+                            },
+                            {
                                 key: '/suppliers',
                                 icon: <ShopOutlined />,
                                 label: 'Suppliers',
@@ -94,15 +99,11 @@ function Sidebar() {
                                 label: 'Employees'
                             },
                             {
-                                key: '/bed-arrangement',
-                                icon: <UserOutlined />,
-                                label: 'Bed Arrangement'
-                            },
-                            {
                                 key: '/prescription',
                                 icon: <MedicineBoxOutlined />,
                                 label: 'Prescription'
-                            }
+                            },
+                            
                         ]}
                     />
 

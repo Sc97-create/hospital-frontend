@@ -25,10 +25,12 @@
 }
 
 .patient-avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 12px;
-    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 12px !important;
+    background: var(--status-info-lighter) !important;
+    color: var(--status-info-darker) !important;
+    font-size: var(--text-lg) !important;
+    font-weight: 700;
 }
 
 .patient-main-info h2 {
@@ -90,110 +92,7 @@
     padding-bottom: 8px;
 }
 
-/* CARDS */
-
-.overview-card,
-.insurance-card {
-    border-radius: 16px;
-    border: 1px solid #e5e7eb;
-    min-height: 100%;
-}
-
-.card-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-}
-
-.card-title h3 {
-    margin: 0;
-    font-size: var(--text-md);
-    font-weight: 600;
-    color: #111827;
-}
-
-.edit-link {
-    font-size: var(--text-sm);
-    color: #2563eb;
-    cursor: pointer;
-}
-
-/* INFO GRID */
-
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
-}
-
-.info-grid label,
-.contact-item label,
-.medical-item label,
-.insurance-grid label {
-    display: block;
-    font-size: var(--text-xs);
-    font-weight: 700;
-    color: #6b7280;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-    letter-spacing: 0.4px;
-}
-
-.info-grid p,
-.contact-item p,
-.medical-item p,
-.insurance-grid p {
-    margin: 0;
-    font-size: var(--text-base);
-    color: #111827;
-    font-weight: 500;
-}
-
-/* CONTACT */
-
-.contact-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-/* MEDICAL */
-
-.medical-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.medical-tags {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-/* INSURANCE */
-
-.insurance-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-}
-
-.insurance-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-}
-
 /* RESPONSIVE */
-
-@media (max-width: 1200px) {
-    .insurance-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 
 @media (max-width: 992px) {
     .patient-header-container {
@@ -204,19 +103,12 @@
         flex-direction: column;
     }
 
-    .info-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 @media (max-width: 768px) {
     .patient-tabs {
         overflow-x: auto;
         white-space: nowrap;
-    }
-
-    .insurance-grid {
-        grid-template-columns: 1fr;
     }
 
     .patient-action-buttons {

@@ -94,10 +94,6 @@
     font-weight: 600;
 }
 
-.ant-table-thead > tr > th.column-layout {
-    color: #6B7280;
-    font-weight: 600;
-}
 
 .other-layout {
     color: #6B7280;
@@ -138,6 +134,28 @@
 
 /* Prescription-specific */
 
+.view-prescription-btn {
+    height: 28px !important;
+    padding: 0 10px !important;
+    font-size: var(--text-xs) !important;
+    font-weight: 500;
+    line-height: 1;
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: #F9FAFB !important;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+.view-prescription-btn:hover,
+.view-prescription-btn:focus {
+    background-color: var(--color-primary) !important;
+    border-color: #E6F9EF !important;
+    color: #F9FAFB !important;
+    opacity: 0.9;
+    box-shadow: none !important;
+}
+
 .code-badge {
     background-color: #FFF9C4;
     color: #000;
@@ -149,15 +167,12 @@
 
 .medicine-cell {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    justify-content: center; /* <- likely culprit */
 }
 
 .medicine-name {
-    font-size: var(--text-base);
-    text-decoration: underline;
-    cursor: pointer;
-    color: #1F2937;
+    width: 100%;
 }
 
 .more-tag {

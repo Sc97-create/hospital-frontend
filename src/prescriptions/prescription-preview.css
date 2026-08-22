@@ -26,6 +26,24 @@
     font-size: var(--text-xs);
     color: #8c8c8c;
     font-weight: 600;
+    letter-spacing: 0.02em;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.patient-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 28px 48px;
+}
+
+.patient-meta__item {
+    min-width: 110px;
+}
+
+.patient-card .ant-card-body {
+    padding: 20px 24px;
 }
 
 .alert-card {
@@ -87,21 +105,47 @@
     color: #8c8c8c;
 }
 
+/* Compact tags on prescription detail — smaller than global .app-tag (28px) */
+.pharmacy-main-layout .status-tag.app-tag,
+.pharmacy-main-layout .app-tag {
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 8px !important;
+    font-size: var(--text-xs) !important;
+    line-height: 20px !important;
+    border-radius: 4px !important;
+    margin-inline-end: 4px !important;
+}
+
 .schedule-tag {
-    font-size: var(--text-xs);
-    border-radius: 6px;
-    padding-inline: 6px;
+    height: 20px !important;
+    min-height: 20px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    line-height: 18px !important;
+    border-radius: 4px !important;
+    margin-inline-end: 0 !important;
+}
+
+.out-of-stock-tag {
+    text-transform: none !important;
+    letter-spacing: 0;
+}
+
+.medicine-table .ant-space {
+    flex-wrap: wrap;
+    row-gap: 4px !important;
 }
 
 .qty-box {
-    width: 32px;
-    height: 28px;
+    width: 28px;
+    height: 24px;
     border: 1px solid #e8e8e8;
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 11px;
     margin: 0 auto;
 }
 
@@ -123,15 +167,15 @@
 }
 
 .stock-status.success .stock-dot {
-    background: #52c41a;
+    background: var(--status-success-default);
 }
 
 .stock-status.warning .stock-dot {
-    background: #faad14;
+    background: var(--status-warning-default);
 }
 
 .stock-status.danger .stock-dot {
-    background: #ff4d4f;
+    background: var(--status-danger-default);
 }
 
 .dispense-btn {
@@ -190,4 +234,73 @@
     height: 40px;
     border-radius: 10px;
     font-weight: 600;
+}
+
+.schedule-tag--active {
+    background: var(--status-info-lighter);
+    border-color: var(--status-info-default);
+    color: var(--status-info-darker);
+}
+
+/* Skeleton — mirrors patient header + medicine table */
+
+.rx-skel-patient__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.rx-skel-patient__meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.rx-skel-patient__meta .ant-skeleton {
+    width: 110px;
+}
+
+.rx-skel-table {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.rx-skel-table__head {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.4fr 1fr 0.6fr;
+    gap: 12px;
+    padding: 0 4px 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.rx-skel-table__col-label {
+    font-size: var(--text-xs);
+    color: #8c8c8c;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.rx-skel-table__row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.4fr 1fr 0.6fr;
+    gap: 12px;
+    align-items: center;
+}
+
+.rx-skel-footer {
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .rx-skel-table__head,
+    .rx-skel-table__row {
+        grid-template-columns: 1fr;
+    }
+
+    .rx-skel-table__head {
+        display: none;
+    }
 }

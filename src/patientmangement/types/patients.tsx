@@ -20,6 +20,7 @@ export interface patientlist {
     patient_weight: number;
     patient_status: string;
     admission_date: Date;
+    patient_created_at: string;
     patient_address: string;
     patient_bg: string;
     waiting_time:string;

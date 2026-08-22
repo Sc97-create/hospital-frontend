@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Input, Layout, Pagination, Table, Tag } from "antd"
+import { Breadcrumb, Button, Input, Layout, Pagination, Table } from "antd"
 import type { TableColumnsType } from "antd"
 import Sidebar from "./sidebar"
 import './employees.css'
@@ -7,6 +7,8 @@ import { HomeOutlined, PlusCircleOutlined, SearchOutlined, TeamOutlined } from '
 import { Content } from "antd/es/layout/layout"
 import { useMemo, useState } from "react"
 import dayjs from "dayjs"
+import { StatusTag } from "./components/status-tag"
+import { getEmployeeStatusType } from "./constants/status-colors"
 
 interface Employee {
     id: string;
@@ -80,12 +82,6 @@ const employees: Employee[] = [
     },
 ];
 
-const statusColorMap: Record<Employee["status"], string> = {
-    active: "green",
-    on_leave: "orange",
-    inactive: "red",
-};
-
 const statusLabelMap: Record<Employee["status"], string> = {
     active: "Active",
     on_leave: "On Leave",
@@ -147,9 +143,9 @@ function Employees() {
             dataIndex: "status",
             align: "center",
             render: (status: Employee["status"]) => (
-                <Tag color={statusColorMap[status]} bordered className="app-tag">
+                <StatusTag type={getEmployeeStatusType(status)} bordered>
                     {statusLabelMap[status]}
-                </Tag>
+                </StatusTag>
             ),
         },
     ]
