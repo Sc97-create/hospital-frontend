@@ -1,5 +1,5 @@
-import { Layout, Breadcrumb, Button, Input, Table, Pagination } from 'antd'
-import { useState, useEffect } from 'react'
+import { Layout, Breadcrumb, Button, Input, Table, Pagination, message } from 'antd'
+import { useState, useEffect, useRef } from 'react'
 import type { TableColumnsType, TablePaginationConfig } from 'antd'
 import './patient-list.css'
 import Sidebar from '../../sidebar'
@@ -15,11 +15,14 @@ import { findMany } from '../api/patients'
 import type { Patientlistresponse } from '../types/patients'
 import { StatusTag } from '../../components/status-tag'
 import { getPatientStatusType, STATUS_INFO } from '../../constants/status-colors'
+import { usePermissions } from '../../auth/permissions-context'
 
 const { Content } = Layout
+const SEARCH_DEBOUNCE_MS = 400;
 
 interface DataType {
     key: React.Key;
+    code: string;
     patient_name: string;
     age: number;
     weight: number;
@@ -29,19 +32,30 @@ interface DataType {
     status: string;
 }
 
-
-
 function PatientList() {
     const navigate = useNavigate()
-    const columns: TableColumnsType<DataType> = [
+    const { canCreate } = usePermissions()
+    const [messageApi, contextHolder] = message.useMessage()
+    const [response, setresponse] = useState<Patientlistresponse>();
+    const [loading, setLoading] = useState(false);
+    const [searchInput, setSearchInput] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [pagination, setPagination] = useState<TablePaginationConfig>({
+        current: 1,
+        pageSize: 10,
+        total: 0,
+    });
+    const organisationId = localStorage.getItem("organisation_id") || "";
+    const requestIdRef = useRef(0);
 
+    const columns: TableColumnsType<DataType> = [
         {
             title: 'Code',
             dataIndex: 'code',
             className: 'column-layout',
             showSorterTooltip: { target: 'full-header' },
             render: (text: string) => (
-                <StatusTag type={STATUS_INFO}>{text}</StatusTag>
+                <StatusTag type={STATUS_INFO} className="code-badge">{text}</StatusTag>
             )
         },
         {
@@ -57,7 +71,6 @@ function PatientList() {
                     {text}
                 </span>
             )
-
         },
         {
             title: 'Age',
@@ -84,8 +97,6 @@ function PatientList() {
                     value: 'female',
                 }],
             onFilter: (value, record) => record.gender.indexOf(value as string) === 0,
-
-
         },
         {
             title: 'Issued At',
@@ -112,39 +123,61 @@ function PatientList() {
             }
         }
     ];
-    const [response, setresponse] = useState<Patientlistresponse>();
-    const [loading, setLoading] = useState(false);
-    const patientlist = async (page = 1, pageSize = 10) => {
+
+    useEffect(() => {
+        const nextSearch = searchInput.trim();
+        if (nextSearch === debouncedSearch) return;
+        const timer = window.setTimeout(() => {
+            setDebouncedSearch(nextSearch);
+            setPagination((prev) => ({ ...prev, current: 1 }));
+        }, SEARCH_DEBOUNCE_MS);
+        return () => window.clearTimeout(timer);
+    }, [searchInput, debouncedSearch]);
+
+    const patientlist = async (page = 1, pageSize = 10, search = "") => {
+        if (!organisationId) {
+            messageApi.error("Missing organisation — please log in again");
+            return;
+        }
+
+        const requestId = ++requestIdRef.current;
         setLoading(true);
         try {
-            const res = await findMany(pageSize, page, localStorage.getItem("organisation_id") || "");
-            setresponse(res);
+            const trimmedSearch = search.trim();
+            const res = await findMany({
+                organisation_id: organisationId,
+                limit: pageSize,
+                page_no: page,
+                ...(trimmedSearch ? { search: trimmedSearch } : {}),
+            });
+            if (requestId !== requestIdRef.current) return;
 
-            setPagination(prev => ({
+            const total = Number(res?.total);
+            setresponse(res);
+            setPagination((prev) => ({
                 ...prev,
                 current: page,
-                pageSize: pageSize,
-                total: res?.total || 0 
+                pageSize,
+                total: Number.isFinite(total) ? total : 0,
             }));
-        }
-        catch (e) {
-            console.log(e);
-        }
-        finally {
-            setLoading(false);
+        } catch (e) {
+            if (requestId !== requestIdRef.current) return;
+            console.error(e);
+            messageApi.error("Failed to load patients");
+            setresponse(undefined);
+            setPagination((prev) => ({ ...prev, total: 0 }));
+        } finally {
+            if (requestId === requestIdRef.current) {
+                setLoading(false);
+            }
         }
     };
 
     useEffect(() => {
-        patientlist(pagination.current, pagination.pageSize);
-    }, []);
+        patientlist(pagination.current || 1, pagination.pageSize || 10, debouncedSearch);
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when page / search changes
+    }, [pagination.current, pagination.pageSize, debouncedSearch, organisationId]);
 
-
-    const [pagination, setPagination] = useState<TablePaginationConfig>({
-        current: 1,
-        pageSize: 10,
-        total: response?.data?.length || 0
-    })
     const currentData: DataType[] = (response?.data || []).map(patient => ({
         key: patient.patient_id,
         code: '#' + patient.patient_code,
@@ -156,18 +189,21 @@ function PatientList() {
         patient_created_at: patient.patient_created_at,
         status: patient.patient_status || 'active'
     }));
-    const onChange = (page: number, pageSize?: number) => {
-        patientlist(page, pageSize);
-    };
 
+    const onChange = (page: number, pageSize?: number) => {
+        setPagination((prev) => ({
+            ...prev,
+            current: page,
+            pageSize: pageSize || prev.pageSize,
+        }));
+    };
 
     return (
         <>
+            {contextHolder}
             <Layout>
-
                 <Sidebar />
                 <Layout>
-
                     <Breadcrumb
                         className='breadcrumb-layout'
                         items={[
@@ -176,7 +212,6 @@ function PatientList() {
                                 title: <HomeOutlined />,
                             },
                             {
-
                                 title: (
                                     <>
                                         <UserOutlined />
@@ -184,42 +219,54 @@ function PatientList() {
                                     </>
                                 ),
                             },
-
                         ]}
                     />
                     <Content className='main-layout'>
                         <div className="button-layout">
-                            <Button
-                                className='appointment-button'
-                                icon={<PlusCircleOutlined />}
-                                onClick={() => { navigate('/patients/add-patient') }}
-                            >
-                                Add New Patient
-                            </Button>
+                            {canCreate("patient") ? (
+                                <Button
+                                    className='appointment-button'
+                                    icon={<PlusCircleOutlined />}
+                                    onClick={() => { navigate('/patients/add-patient') }}
+                                >
+                                    Add New Patient
+                                </Button>
+                            ) : null}
                         </div>
                         <div className="search-layout">
-
-                            <Input placeholder='search patients' className='search-input1' suffix={<SearchOutlined
-                                style={{ cursor: 'pointer', width: '14px', height: '14px' }}
-                            />} />
+                            <Input
+                                allowClear
+                                placeholder='Search by patient name, code, or phone...'
+                                className='search-input1'
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
+                                suffix={
+                                    <SearchOutlined
+                                        style={{ cursor: 'pointer', width: '14px', height: '14px' }}
+                                    />
+                                }
+                            />
                         </div>
                         <div className="table-data">
                             <Table<DataType>
                                 columns={columns}
                                 dataSource={currentData}
                                 showSorterTooltip={{ target: 'sorter-icon' }}
-                                scroll={{ x: 'max-content', y: 400 }}
                                 pagination={false}
                                 loading={loading}
+                                size="small"
                             />
                         </div>
                         <div className="pagination-tab">
-                            <span className="count-label">Total Patients ({response?.data?.length || 0})</span>
+                            <span className="count-label">
+                                Total Patients ({pagination.total || 0})
+                            </span>
                             <Pagination
                                 current={pagination.current}
                                 pageSize={pagination.pageSize}
                                 total={pagination.total}
                                 onChange={onChange}
+                                showSizeChanger={false}
                             />
                         </div>
                     </Content>

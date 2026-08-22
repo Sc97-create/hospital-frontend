@@ -7,21 +7,29 @@ import {
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { logoutAndRedirect } from './authentication/logout'
+import { usePermissions } from './auth/permissions-context'
 
 function HeaderLayout() {
     const navigate = useNavigate()
+    const { clearAccess } = usePermissions()
 
     const items = [
+        {
+            key: 'my-profile',
+            label: 'My Profile',
+            onClick: () => navigate('/profile'),
+        },
+        {
+            key: 'update-password',
+            label: 'Update Password',
+            onClick: () => navigate('/update-password'),
+        },
         {
             key: 'logout',
             label: 'Logout',
             onClick: () => {
-                void logoutAndRedirect(navigate)
+                void logoutAndRedirect(navigate, clearAccess)
             },
-        },
-        {
-            key: 'settings',
-            label: 'Settings',
         },
     ]
 

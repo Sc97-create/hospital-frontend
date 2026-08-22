@@ -4,6 +4,14 @@ export interface Patientlistresponse {
     message: string;
     code: number;
 }
+
+export interface GetPatientsPayload {
+    organisation_id: string;
+    search?: string;
+    limit: number;
+    page_no: number;
+}
+
 export interface PatientResponse {
     data: patientlist;
     message: string;

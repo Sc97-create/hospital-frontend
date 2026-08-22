@@ -24,11 +24,13 @@ import type { previewAppointmentData, statusUpdate } from "../types/appointments
 import dayjs from "dayjs";
 import { StatusTag } from "../../components/status-tag";
 import { getAppointmentStatusType } from "../../constants/status-colors";
+import { usePermissions } from "../../auth/permissions-context";
 
 const { Text } = Typography;
 
 const AppointmentDetails: React.FC = () => {
     const navigate = useNavigate()
+    const { canCreate } = usePermissions()
     const { appointmentID } = useParams<{ appointmentID: string }>();
     const organisationID = localStorage.getItem("organisation_id") || ""
     const [previewData, setPreviewData] = useState<previewAppointmentData>()
@@ -276,15 +278,17 @@ const AppointmentDetails: React.FC = () => {
                             </Button>
                         )}
 
-                        <Button
-                            type="primary"
-                            icon={<PlayCircleOutlined />}
-                            className="start-btn"
-                            onClick={updatestatus}
-                            disabled={previewData?.status === "missed" || previewData?.status === "reschedule_required"}
-                        >
-                            Start Consultation
-                        </Button>
+                        {canCreate("prescription") ? (
+                            <Button
+                                type="primary"
+                                icon={<PlayCircleOutlined />}
+                                className="start-btn"
+                                onClick={updatestatus}
+                                disabled={previewData?.status === "missed" || previewData?.status === "reschedule_required"}
+                            >
+                                Start Consultation
+                            </Button>
+                        ) : null}
                     </div>
                 </div>
             </Content>

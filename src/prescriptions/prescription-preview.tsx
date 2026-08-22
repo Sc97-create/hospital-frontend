@@ -491,7 +491,7 @@ function PharmacistPrescriptionDetail() {
                                                 <Text className='info-label'>RX STATUS</Text>
                                                 <Space size={4} wrap>
                                                     {prescriptionCode ? (
-                                                        <StatusTag type={STATUS_INFO} bordered>
+                                                        <StatusTag type={STATUS_INFO} bordered className="code-badge">
                                                             {prescriptionCode}
                                                         </StatusTag>
                                                     ) : null}

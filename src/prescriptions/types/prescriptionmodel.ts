@@ -100,7 +100,16 @@ export interface PrescriptionByPatientIdResponse {
     message: string;
 }
 
-export type PrescriptionStatusFilter = "all" | "draft" | "sent";
+export type PrescriptionStatusFilter = "all" | "sent" | "completed" | "tentative";
+
+export interface GetPrescriptionsPayload {
+    organisation_id: string;
+    search?: string;
+    limit: number;
+    page_no: number;
+    status?: Exclude<PrescriptionStatusFilter, "all">;
+}
+
 export interface UpdatePrescriptionStatus {
     prescription_id: string;
     appointment_id: string;
@@ -200,6 +209,9 @@ export interface CheckoutBatchAllocationPayload {
 
 export type CheckoutPaymentMethod = "cash" | "qr" | "link";
 
+/** `consultation` = reception collecting the visit fee, `prescription` = pharmacy dispense billing. */
+export type PaymentType = "consultation" | "prescription";
+
 export interface PrescriptionCheckoutPayload {
     prescription_id: string;
     payment_method: CheckoutPaymentMethod;
@@ -238,6 +250,8 @@ export interface BillingCreateFinancials {
 }
 
 export interface BillingCreatePayload {
+    /** Omit / `"prescription"` — back-compat with pharmacy checkout. */
+    payment_type?: PaymentType;
     prescription_id: string;
     patient_id: string;
     cashier_id: string;
@@ -252,6 +266,21 @@ export interface BillingCreatePayload {
     idempotency_key: string;
     financials: BillingCreateFinancials;
     dispense_items: BillingDispenseItem[];
+}
+
+/**
+ * Consultation (reception) fee billing — no prescription/dispense fields.
+ * `cash` / `qr` only for this pass; see frontend-payment-type-api-changes.md.
+ */
+export interface ConsultationBillingCreatePayload {
+    payment_type: "consultation";
+    appointment_id: string;
+    patient_id: string;
+    cashier_id: string;
+    organisation_id: string;
+    payment_mode: "cash" | "qr";
+    idempotency_key: string;
+    financials: BillingCreateFinancials;
 }
 
 export interface BillingPaymentInfo {
@@ -286,6 +315,49 @@ export interface InvoiceByPrescription {
     updated_at: string;
 }
 
+/** Existing invoice for an appointment (resume unpaid consultation payment). */
+export interface InvoiceByAppointment {
+    id: string;
+    invoice_code: string;
+    payment_type: PaymentType;
+    appointment_id: string;
+    patient_id: string;
+    status: string;
+    cashier_id: string;
+    organisation_id: string;
+    payment_mode: string;
+    sub_total_amount: number;
+    tax_amount: number;
+    total_amount: number;
+    discount_amount: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface GetInvoiceByAppointmentResponse {
+    code?: string | number;
+    message?: string;
+    error?: string;
+    /** Wrapped success body */
+    data?: InvoiceByAppointment;
+    /** Unwrapped success body fields (same as InvoiceByAppointment) */
+    id?: string;
+    invoice_code?: string;
+    payment_type?: PaymentType;
+    appointment_id?: string;
+    patient_id?: string;
+    status?: string;
+    cashier_id?: string;
+    organisation_id?: string;
+    payment_mode?: string;
+    sub_total_amount?: number;
+    tax_amount?: number;
+    total_amount?: number;
+    discount_amount?: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
 export interface GetInvoiceByPrescriptionResponse {
     code?: string | number;
     message?: string;
@@ -306,6 +378,57 @@ export interface GetInvoiceByPrescriptionResponse {
     discount_amount?: number;
     created_at?: string;
     updated_at?: string;
+}
+
+/** One line (consultation OR prescription) inside the combined bill-details receipt. */
+export interface BillDetailsLine {
+    code: string;
+    category: string;
+    qty: number;
+    tax: number;
+    discount: number;
+    total_amount: number;
+    invoice_status: string;
+    payment_mode: string;
+}
+
+export interface BillDetailsPatient {
+    id: string;
+    uhid: string;
+    name: string;
+    age: number;
+    gender: string;
+    phone: string;
+    email: string;
+}
+
+export interface BillDetailsAppointment {
+    id: string;
+    appointment_code: string;
+    visit_type: string;
+    status: string;
+}
+
+export interface BillDetailsPaymentDetails {
+    consultation?: BillDetailsLine;
+    prescription?: BillDetailsLine;
+}
+
+/** Combined receipt data — one appointment's consultation fee + its prescription bill, if any. */
+export interface BillDetails {
+    patientDetail: BillDetailsPatient;
+    appointmentDetail: BillDetailsAppointment;
+    paymentDetails: BillDetailsPaymentDetails;
+    invoice_status: string;
+    invoice_code: string;
+    created_at: string;
+    invoice_id: string;
+}
+
+export interface GetBillDetailsByPrescriptionResponse {
+    code?: number | string;
+    message?: string;
+    data?: BillDetails;
 }
 
 /** Cash / QR — pharmacist swipe confirms payment. */

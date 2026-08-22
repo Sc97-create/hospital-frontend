@@ -2,6 +2,8 @@
 
 Manual QA checklist for patient flows. Use with a logged-in user and a valid `organisation_id` in localStorage.
 
+**Deep coverage (filters / search / pagination / sorting / 500 / responsive):** see [`list-filters-search-pagination-sorting-test-scenarios.md`](list-filters-search-pagination-sorting-test-scenarios.md) — per-case sign-off for today’s run.
+
 **Routes under test**
 
 | Screen | Path |
@@ -60,6 +62,12 @@ Manual QA checklist for patient flows. Use with a logged-in user and a valid `or
 | 2 | Force API 401/500 | Page does not white-screen (today: error only in console — note as known gap) |
 | 3 | Missing `organisation_id` | Request still fires with `""` — note as known gap |
 
+**Full 500 + responsive cases:** `E1`–`E6`, `R1`–`R5` in [`list-filters-search-pagination-sorting-test-scenarios.md`](list-filters-search-pagination-sorting-test-scenarios.md).
+
+| ID | Result (P/F/B) | Tester | Date | Notes |
+|----|----------------|--------|------|-------|
+| **A3** | | | 09-08-2026 | |
+
 ### A4 — Pagination
 
 | Step | Action | Expected |
@@ -70,6 +78,12 @@ Manual QA checklist for patient flows. Use with a logged-in user and a valid `or
 
 **Known gap:** Footer label uses `response?.data?.length` (page size), not `response.total`.
 
+**Detail cases:** `P1`–`P5` in list-controls scenarios file.
+
+| ID | Result (P/F/B) | Tester | Date | Notes |
+|----|----------------|--------|------|-------|
+| **A4** | | | 09-08-2026 | |
+
 ### A5 — Sort & filter
 
 | Step | Action | Expected |
@@ -77,6 +91,12 @@ Manual QA checklist for patient flows. Use with a logged-in user and a valid `or
 | 1 | Sort Age | Client-side reorder |
 | 2 | Sort Issued At | Client-side by date |
 | 3 | Filter Gender Male/Female | Rows filter client-side |
+
+**Detail cases:** `F-PL1`–`F-PL2`, `SO1`–`SO3` in list-controls scenarios file.
+
+| ID | Result (P/F/B) | Tester | Date | Notes |
+|----|----------------|--------|------|-------|
+| **A5** | | | 09-08-2026 | |
 
 ### A6 — Navigation from list
 
@@ -86,6 +106,10 @@ Manual QA checklist for patient flows. Use with a logged-in user and a valid `or
 | 2 | Click **Add New Patient** | `/patients/add-patient` |
 | 3 | Breadcrumb Home | `/dashboard` |
 
+| ID | Result (P/F/B) | Tester | Date | Notes |
+|----|----------------|--------|------|-------|
+| **A6** | | | 09-08-2026 | |
+
 ### A7 — Search (current behavior)
 
 | Step | Action | Expected |
@@ -94,6 +118,12 @@ Manual QA checklist for patient flows. Use with a logged-in user and a valid `or
 | 2 | Click search icon | No filter applied |
 
 **Future pass criteria (when wired):** debounce search by name / UHID / phone; empty → “No patients found”.
+
+**Detail cases:** `S1`–`S2` (patients) and `S3`–`S7` (appointments) in list-controls scenarios file.
+
+| ID | Result (P/F/B) | Tester | Date | Notes |
+|----|----------------|--------|------|-------|
+| **A7** | | | 09-08-2026 | |
 
 ---
 
@@ -209,11 +239,21 @@ Manual QA checklist for patient flows. Use with a logged-in user and a valid `or
 
 ## F. Responsive / iPad
 
+Use Chrome DevTools exact **Width × Height** (CSS px), zoom 100%.
+
+| Viewport | Width × Height | Checks |
+|----------|----------------|--------|
+| Desktop | **1440 × 900**, **1280 × 800** | Table + Add button aligned; no sidebar overlap |
+| iPad portrait | **768 × 1024** | Table scrolls inside if needed; Add reachable |
+| iPad landscape | **1024 × 768** | Same |
+| Phone | **390 × 844**, **375 × 667** | Header actions wrap; tappable ≥44px where possible |
+| Stress | **360 × 640** | No clipped critical actions |
+
 | Step | Action | Expected |
 |------|--------|----------|
-| 1 | Width ~768–1024 | Table scrolls horizontally if needed; Add button reachable |
-| 2 | Sidebar collapse | Content usable; no overlap |
-| 3 | Profile header actions | Buttons wrap; still tappable (≥44px where possible) |
+| 1 | Set each size above on `/patients` + profile | Layout usable; no white-screen |
+| 2 | Sidebar collapse at **1280 × 800** and **768 × 1024** | Content usable; no overlap |
+| 3 | Profile header actions at **390 × 844** | Buttons wrap; still tappable |
 
 ---
 

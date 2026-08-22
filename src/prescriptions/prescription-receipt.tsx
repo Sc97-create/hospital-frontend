@@ -16,39 +16,25 @@ import {
     PrinterOutlined,
 } from '@ant-design/icons';
 
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 import Sidebar from '../sidebar';
-import { GetDispenseCheckoutLines, GetInvoiceByPrescriptionID, parseInvoiceByPrescriptionResponse } from './api/prescription';
-import type { InvoiceByPrescription } from './types/prescriptionmodel';
-import {
-    isItemFullyDispensed,
-    mapMedicineInfoLines,
-    type PrescriptionRow,
-} from './prescription-preview';
-import {
-    fetchPatientById,
-    formatPrescriptionStatusLabel,
-    getPrescriptionStatusTagColor,
-    prescriptionPath,
-    recallPrescriptionPatientId,
-    rememberPrescriptionPatientId,
-    resolvePrescriptionPatientId,
-    toTitleCase,
-    type PrescriptionLocationState,
-} from './prescription-patient';
+import { GetBillDetailsByPrescriptionID } from './api/prescription';
+import type { BillDetails, BillDetailsLine } from './types/prescriptionmodel';
+import { isPaidInvoiceStatus, prescriptionPath, toTitleCase } from './prescription-patient';
 import { StatusTag } from '../components/status-tag';
-import { STATUS_INFO, STATUS_SUCCESS, STATUS_WARNING } from '../constants/status-colors';
-import type { patientlist } from '../patientmangement/types/patients';
+import {
+    STATUS_DANGER,
+    STATUS_SUCCESS,
+    STATUS_WARNING,
+    type StatusType,
+} from '../constants/status-colors';
 
 import './prescription-receipt.css';
 
 const { Content } = Layout;
 const { Text } = Typography;
-
-/** Matches the flat 5% tax already applied at checkout (see prescription-checkout.tsx TAX_RATE). */
-const RECEIPT_TAX_RATE = 0.05;
 
 function formatInr(amount: number): string {
     return `₹${amount.toLocaleString('en-IN', {
@@ -69,44 +55,73 @@ function formatReceiptDate(value: string | undefined, withTime = true): string {
     });
 }
 
-function formatAgeGender(patient: patientlist | null): string {
+function formatAgeGender(patient: BillDetails['patientDetail'] | undefined): string {
     if (!patient) return '—';
     return (
-        [
-            patient.patient_age != null ? `${patient.patient_age}y` : null,
-            patient.patient_gender || null,
-        ]
+        [patient.age != null ? `${patient.age}y` : null, patient.gender || null]
             .filter(Boolean)
             .join(', ') || '—'
     );
 }
 
-function scheduleLabel(row: PrescriptionRow): string {
-    const parts = [
-        row.morning > 0 ? `MOR${row.morning > 1 ? ` ×${row.morning}` : ''}` : null,
-        row.afternoon > 0 ? `AFT${row.afternoon > 1 ? ` ×${row.afternoon}` : ''}` : null,
-        row.night > 0 ? `NIT${row.night > 1 ? ` ×${row.night}` : ''}` : null,
-    ].filter(Boolean);
-    return parts.length ? parts.join(' · ') : '—';
+function selectVisitType(value: string | undefined): string {
+    switch (value) {
+        case 'follow_up':
+            return 'Follow Up';
+        case 'new_patient':
+            return 'New Patient';
+        case 'opd':
+            return 'OPD';
+        default:
+            return value ? toTitleCase(value) : '—';
+    }
+}
+
+function getInvoiceStatusType(status: string | undefined | null): StatusType {
+    if (isPaidInvoiceStatus(status)) return STATUS_SUCCESS;
+    if (!status) return STATUS_WARNING;
+    return status.trim().toLowerCase().includes('cancel') ? STATUS_DANGER : STATUS_WARNING;
+}
+
+interface ReceiptLineRow {
+    key: string;
+    label: string;
+    sub: string;
+    category: string;
+    line: BillDetailsLine;
+}
+
+function buildLineRows(payment: BillDetails['paymentDetails'] | undefined): ReceiptLineRow[] {
+    if (!payment) return [];
+    const rows: ReceiptLineRow[] = [];
+    if (payment.consultation) {
+        rows.push({
+            key: 'consultation',
+            label: 'Consultation Fee',
+            sub: payment.consultation.code || '',
+            category: selectVisitType(payment.consultation.category),
+            line: payment.consultation,
+        });
+    }
+    if (payment.prescription) {
+        rows.push({
+            key: 'prescription',
+            label: 'Prescription / Pharmacy Bill',
+            sub: payment.prescription.code || '',
+            category: toTitleCase(payment.prescription.category),
+            line: payment.prescription,
+        });
+    }
+    return rows;
 }
 
 function PrescriptionReceipt() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const location = useLocation();
-    const [searchParams] = useSearchParams();
-    const locationState = (location.state as PrescriptionLocationState | null) ?? null;
     const [messageApi, contextHolder] = message.useMessage();
 
     const [loading, setLoading] = useState(true);
-    const [rows, setRows] = useState<PrescriptionRow[]>([]);
-    const [totalCount, setTotalCount] = useState(0);
-    const [patient, setPatient] = useState<patientlist | null>(null);
-    const [resolvedPatientId, setResolvedPatientId] = useState<string | undefined>();
-    const [prescriptionStatus, setPrescriptionStatus] = useState('');
-    const [prescriptionCreatedAt, setPrescriptionCreatedAt] = useState('');
-    const [prescriptionCode, setPrescriptionCode] = useState('');
-    const [invoice, setInvoice] = useState<InvoiceByPrescription | null>(null);
+    const [bill, setBill] = useState<BillDetails | null>(null);
 
     useEffect(() => {
         if (!id) {
@@ -118,49 +133,16 @@ function PrescriptionReceipt() {
 
         const load = async () => {
             setLoading(true);
-            setPatient(null);
             try {
-                const medicineInfo = await GetDispenseCheckoutLines(id);
-                if (cancelled) return;
-
-                const lines = Array.isArray(medicineInfo.data) ? medicineInfo.data : [];
-                setRows(mapMedicineInfoLines(lines));
-                setTotalCount(medicineInfo.total ?? lines.length);
-
-                const first = lines[0];
-                setPrescriptionStatus(first?.prescription_status || locationState?.status || '');
-                setPrescriptionCode(first?.prescription_code ?? '');
-                if (first?.prescription_created_at) {
-                    setPrescriptionCreatedAt(first.prescription_created_at);
-                }
-
-                const patientId = resolvePrescriptionPatientId({
-                    locationPatientId: locationState?.patientId,
-                    queryPatientId: searchParams.get('patientId'),
-                    cachedPatientId: recallPrescriptionPatientId(id),
-                    apiPatientId:
-                        medicineInfo.patient_id || lines.find((item) => item.patient_id)?.patient_id,
-                });
-                setResolvedPatientId(patientId);
-                rememberPrescriptionPatientId(id, patientId);
-
-                if (patientId) {
-                    const patientData = await fetchPatientById(patientId);
-                    if (!cancelled) setPatient(patientData);
-                }
+                const response = await GetBillDetailsByPrescriptionID(id);
+                if (!cancelled) setBill(response?.data ?? null);
             } catch (error) {
-                if (cancelled) return;
-                console.error('Failed to load prescription:', error);
-                messageApi.error('Failed to load prescription details');
+                if (!cancelled) {
+                    console.error('Failed to load bill details:', error);
+                    messageApi.error('Failed to load receipt details');
+                }
             } finally {
                 if (!cancelled) setLoading(false);
-            }
-
-            try {
-                const invoiceResponse = await GetInvoiceByPrescriptionID(id);
-                if (!cancelled) setInvoice(parseInvoiceByPrescriptionResponse(invoiceResponse));
-            } catch (error) {
-                if (!cancelled) console.error('Failed to load invoice:', error);
             }
         };
 
@@ -180,18 +162,16 @@ function PrescriptionReceipt() {
 
     const handleBack = () => {
         if (id) {
-            navigate(prescriptionPath(id, { patientId: resolvedPatientId }));
+            navigate(prescriptionPath(id, { patientId: bill?.patientDetail.id }));
             return;
         }
         navigate(-1);
     };
 
-    const computedSubtotal = rows.reduce((sum, row) => sum + row.qty * row.unit_price, 0);
-    const computedTax = computedSubtotal * RECEIPT_TAX_RATE;
-    const subtotal = invoice?.sub_total_amount ?? computedSubtotal;
-    const discount = invoice?.discount_amount ?? 0;
-    const tax = invoice?.tax_amount ?? computedTax;
-    const grandTotal = invoice?.total_amount ?? subtotal - discount + tax;
+    const lineRows = buildLineRows(bill?.paymentDetails);
+    const totalTax = lineRows.reduce((sum, row) => sum + (row.line.tax || 0), 0);
+    const totalDiscount = lineRows.reduce((sum, row) => sum + (row.line.discount || 0), 0);
+    const grandTotal = lineRows.reduce((sum, row) => sum + (row.line.total_amount || 0), 0);
 
     return (
         <Layout>
@@ -205,7 +185,13 @@ function PrescriptionReceipt() {
                         <Link to='/prescription'>Prescriptions</Link>
                     </Breadcrumb.Item>
                     <Breadcrumb.Item>
-                        <Link to={id ? prescriptionPath(id, { patientId: resolvedPatientId }) : '/prescription'}>
+                        <Link
+                            to={
+                                id
+                                    ? prescriptionPath(id, { patientId: bill?.patientDetail.id })
+                                    : '/prescription'
+                            }
+                        >
                             Prescription Detail
                         </Link>
                     </Breadcrumb.Item>
@@ -241,82 +227,78 @@ function PrescriptionReceipt() {
                                     </div>
                                     <div>
                                         <Text className='receipt-brand-name'>Hospital Management System</Text>
-                                        <Text className='receipt-brand-sub'>Pharmacy · Prescription billing</Text>
+                                        <Text className='receipt-brand-sub'>Consultation &amp; Pharmacy billing</Text>
                                     </div>
                                 </div>
 
                                 <div className='receipt-meta'>
                                     <Text className='receipt-meta-title'>RECEIPT</Text>
-                                    {prescriptionCode ? (
+                                    {bill?.invoice_code ? (
                                         <Text strong className='receipt-meta-code'>
-                                            {prescriptionCode}
+                                            {bill.invoice_code}
                                         </Text>
                                     ) : null}
                                     <Text className='receipt-meta-date'>
-                                        Date: {formatReceiptDate(prescriptionCreatedAt, false)}
+                                        Date: {formatReceiptDate(bill?.created_at, false)}
                                     </Text>
                                     <div className='receipt-meta-status'>
-                                        <StatusTag type={getPrescriptionStatusTagColor(prescriptionStatus)} bordered>
-                                            {formatPrescriptionStatusLabel(prescriptionStatus)}
+                                        <StatusTag type={getInvoiceStatusType(bill?.invoice_status)} bordered>
+                                            {bill ? toTitleCase(bill.invoice_status) : '—'}
                                         </StatusTag>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Patient / Prescription details */}
+                            {/* Patient / Appointment details */}
                             <div className='receipt-info-row'>
                                 <div className='receipt-info-card'>
                                     <Text className='info-label'>PATIENT DETAILS</Text>
                                     <div className='receipt-kv-grid'>
                                         <div>
                                             <Text className='info-label'>Name</Text>
-                                            <Text strong>{patient?.patient_name ?? '—'}</Text>
+                                            <Text strong>{bill?.patientDetail.name ?? '—'}</Text>
                                         </div>
                                         <div>
                                             <Text className='info-label'>UHID</Text>
-                                            <Text>{patient?.patient_code || '—'}</Text>
+                                            <Text>{bill?.patientDetail.uhid || '—'}</Text>
                                         </div>
                                         <div>
                                             <Text className='info-label'>Age / Gender</Text>
-                                            <Text>{formatAgeGender(patient)}</Text>
+                                            <Text>{formatAgeGender(bill?.patientDetail)}</Text>
                                         </div>
                                         <div>
                                             <Text className='info-label'>Contact</Text>
-                                            <Text>{patient?.patient_phone || '—'}</Text>
+                                            <Text>{bill?.patientDetail.phone || '—'}</Text>
                                         </div>
-                                        {patient?.patient_email ? (
+                                        {bill?.patientDetail.email ? (
                                             <div className='receipt-kv-span2'>
                                                 <Text className='info-label'>Email</Text>
-                                                <Text>{patient.patient_email}</Text>
+                                                <Text>{bill.patientDetail.email}</Text>
                                             </div>
                                         ) : null}
                                     </div>
                                 </div>
 
                                 <div className='receipt-info-card'>
-                                    <Text className='info-label'>PRESCRIPTION DETAILS</Text>
+                                    <Text className='info-label'>APPOINTMENT DETAILS</Text>
                                     <div className='receipt-kv-grid'>
                                         <div>
-                                            <Text className='info-label'>Rx Code</Text>
-                                            <Text strong>{prescriptionCode || '—'}</Text>
+                                            <Text className='info-label'>Appointment Code</Text>
+                                            <Text strong>{bill?.appointmentDetail.appointment_code || '—'}</Text>
+                                        </div>
+                                        <div>
+                                            <Text className='info-label'>Visit Type</Text>
+                                            <Text>{selectVisitType(bill?.appointmentDetail.visit_type)}</Text>
                                         </div>
                                         <div>
                                             <Text className='info-label'>Status</Text>
-                                            <Text>{formatPrescriptionStatusLabel(prescriptionStatus)}</Text>
-                                        </div>
-                                        <div>
-                                            <Text className='info-label'>Items</Text>
-                                            <Text>{totalCount}</Text>
-                                        </div>
-                                        <div>
-                                            <Text className='info-label'>Created</Text>
-                                            <Text>{formatReceiptDate(prescriptionCreatedAt)}</Text>
+                                            <Text>{toTitleCase(bill?.appointmentDetail.status)}</Text>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Line items */}
+                            {/* Line items — consultation + prescription for this encounter */}
                             <div className='receipt-table-card'>
                                 <table className='receipt-items-table'>
                                     <thead>
@@ -324,54 +306,49 @@ function PrescriptionReceipt() {
                                             <th className='align-left'>Description</th>
                                             <th className='align-left'>Category</th>
                                             <th className='align-center'>Qty</th>
-                                            <th className='align-right'>Unit Price</th>
                                             <th className='align-right'>Tax</th>
+                                            <th className='align-right'>Discount</th>
                                             <th className='align-right'>Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {rows.length === 0 ? (
+                                        {lineRows.length === 0 ? (
                                             <tr>
                                                 <td colSpan={6} className='receipt-empty-row'>
-                                                    No medicines on this prescription
+                                                    No billed items for this prescription
                                                 </td>
                                             </tr>
                                         ) : (
-                                            rows.map((row) => {
-                                                const lineAmount = row.qty * row.unit_price * (1 + RECEIPT_TAX_RATE);
-                                                return (
-                                                    <tr key={row.key}>
-                                                        <td className='align-left'>
-                                                            <div className='receipt-item-desc'>
-                                                                <Text strong>{row.medicine}</Text>
-                                                                {row.composition ? (
-                                                                    <Text className='receipt-item-sub'>{row.composition}</Text>
-                                                                ) : null}
-                                                                <Space size={4} wrap className='receipt-item-tags'>
-                                                                    <StatusTag type={STATUS_INFO} className='schedule-tag'>
-                                                                        {scheduleLabel(row)}
-                                                                    </StatusTag>
-                                                                    <StatusTag
-                                                                        type={isItemFullyDispensed(row) ? STATUS_SUCCESS : STATUS_WARNING}
-                                                                        className='schedule-tag'
-                                                                    >
-                                                                        {toTitleCase(row.item_status.replace(/_/g, ' '))}
-                                                                    </StatusTag>
-                                                                </Space>
-                                                            </div>
-                                                        </td>
-                                                        <td className='align-left'>
-                                                            <Text type='secondary'>Medicine</Text>
-                                                        </td>
-                                                        <td className='align-center'>{row.qty}</td>
-                                                        <td className='align-right'>{formatInr(row.unit_price)}</td>
-                                                        <td className='align-right'>{Math.round(RECEIPT_TAX_RATE * 100)}%</td>
-                                                        <td className='align-right'>
-                                                            <Text strong>{formatInr(lineAmount)}</Text>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })
+                                            lineRows.map((row) => (
+                                                <tr key={row.key}>
+                                                    <td className='align-left'>
+                                                        <div className='receipt-item-desc'>
+                                                            <Text strong>{row.label}</Text>
+                                                            {row.sub ? (
+                                                                <Text className='receipt-item-sub'>{row.sub}</Text>
+                                                            ) : null}
+                                                            <Space size={4} wrap className='receipt-item-tags'>
+                                                                <StatusTag
+                                                                    type={getInvoiceStatusType(row.line.invoice_status)}
+                                                                    className='schedule-tag'
+                                                                >
+                                                                    {toTitleCase(row.line.invoice_status)} ·{' '}
+                                                                    {row.line.payment_mode?.toUpperCase() || '—'}
+                                                                </StatusTag>
+                                                            </Space>
+                                                        </div>
+                                                    </td>
+                                                    <td className='align-left'>
+                                                        <Text type='secondary'>{row.category}</Text>
+                                                    </td>
+                                                    <td className='align-center'>{row.line.qty}</td>
+                                                    <td className='align-right'>{formatInr(row.line.tax || 0)}</td>
+                                                    <td className='align-right'>{formatInr(row.line.discount || 0)}</td>
+                                                    <td className='align-right'>
+                                                        <Text strong>{formatInr(row.line.total_amount || 0)}</Text>
+                                                    </td>
+                                                </tr>
+                                            ))
                                         )}
                                     </tbody>
                                 </table>
@@ -384,47 +361,29 @@ function PrescriptionReceipt() {
                                     <div className='receipt-kv-grid'>
                                         <div>
                                             <Text className='info-label'>Status</Text>
-                                            <StatusTag
-                                                type={
-                                                    invoice
-                                                        ? getPrescriptionStatusTagColor(invoice.status)
-                                                        : getPrescriptionStatusTagColor(prescriptionStatus)
-                                                }
-                                            >
-                                                {invoice
-                                                    ? toTitleCase(invoice.status)
-                                                    : formatPrescriptionStatusLabel(prescriptionStatus)}
+                                            <StatusTag type={getInvoiceStatusType(bill?.invoice_status)}>
+                                                {bill ? toTitleCase(bill.invoice_status) : '—'}
                                             </StatusTag>
                                         </div>
-                                        {invoice?.invoice_code ? (
+                                        {bill?.invoice_code ? (
                                             <div>
                                                 <Text className='info-label'>Invoice ID</Text>
-                                                <Text>{invoice.invoice_code}</Text>
-                                            </div>
-                                        ) : null}
-                                        {invoice?.cashier_id ? (
-                                            <div>
-                                                <Text className='info-label'>Collected By</Text>
-                                                <Text>{invoice.cashier_id}</Text>
+                                                <Text>{bill.invoice_code}</Text>
                                             </div>
                                         ) : null}
                                     </div>
                                 </div>
 
                                 <div className='receipt-summary-totals'>
-                                    <div className='summary-row'>
-                                        <span>Subtotal</span>
-                                        <span>{formatInr(subtotal)}</span>
-                                    </div>
-                                    {discount > 0 ? (
+                                    {totalDiscount > 0 ? (
                                         <div className='summary-row'>
                                             <span>Discount</span>
-                                            <span>-{formatInr(discount)}</span>
+                                            <span>-{formatInr(totalDiscount)}</span>
                                         </div>
                                     ) : null}
                                     <div className='summary-row'>
                                         <span>Tax</span>
-                                        <span>{formatInr(tax)}</span>
+                                        <span>{formatInr(totalTax)}</span>
                                     </div>
                                     <div className='summary-row total'>
                                         <Text strong>Grand Total</Text>
@@ -432,7 +391,7 @@ function PrescriptionReceipt() {
                                             {formatInr(grandTotal)}
                                         </Text>
                                     </div>
-                                    {!invoice ? (
+                                    {!bill ? (
                                         <Text type='secondary' className='receipt-summary-note'>
                                             Estimated — invoice not generated yet.
                                         </Text>

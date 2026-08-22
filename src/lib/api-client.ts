@@ -108,6 +108,8 @@ apiClient.interceptors.response.use(
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("user_id");
                 localStorage.removeItem("organisation_id");
+                localStorage.removeItem("is_admin");
+                localStorage.removeItem("user_permissions");
                 window.location.href = "/login";
 
                 return Promise.reject(refreshError);

@@ -1,150 +1,143 @@
-import { Breadcrumb, Button, Input, Layout, Pagination, Table } from "antd"
+import { Breadcrumb, Button, Input, Layout, Pagination, Table, message } from "antd"
 import type { TableColumnsType } from "antd"
 import Sidebar from "./sidebar"
 import './employees.css'
 import { useNavigate } from "react-router-dom"
 import { HomeOutlined, PlusCircleOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons'
 import { Content } from "antd/es/layout/layout"
-import { useMemo, useState } from "react"
-import dayjs from "dayjs"
+import { useEffect, useRef, useState } from "react"
 import { StatusTag } from "./components/status-tag"
-import { getEmployeeStatusType } from "./constants/status-colors"
+import { getEmployeeStatusType, STATUS_INFO } from "./constants/status-colors"
+import { GetEmployees } from "./employees/api/employee"
+import type { EmployeeListItem } from "./employees/types/employee"
+import { usePermissions } from "./auth/permissions-context"
 
-interface Employee {
-    id: string;
-    name: string;
-    role: string;
-    department: string;
-    mobile: string;
-    joining_date: string;
-    status: "active" | "on_leave" | "inactive";
+const SEARCH_DEBOUNCE_MS = 400;
+
+function formatStatusLabel(status: string): string {
+    if (!status) return "—";
+    return status
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
 }
-
-interface EmployeeRow extends Employee {
-    key: string;
-    code: string;
-}
-
-const employees: Employee[] = [
-    {
-        id: "emp-001",
-        name: "Dr. Rajesh Sangolli",
-        role: "Doctor",
-        department: "Cardiology",
-        mobile: "9876543210",
-        joining_date: "2022-03-15",
-        status: "active",
-    },
-    {
-        id: "emp-002",
-        name: "Priya Sharma",
-        role: "Nurse",
-        department: "ICU",
-        mobile: "9876543211",
-        joining_date: "2023-01-10",
-        status: "active",
-    },
-    {
-        id: "emp-003",
-        name: "Amit Patel",
-        role: "Pharmacist",
-        department: "Pharmacy",
-        mobile: "9876543212",
-        joining_date: "2021-08-22",
-        status: "active",
-    },
-    {
-        id: "emp-004",
-        name: "Sneha Reddy",
-        role: "Receptionist",
-        department: "Reception",
-        mobile: "9876543213",
-        joining_date: "2024-02-01",
-        status: "on_leave",
-    },
-    {
-        id: "emp-005",
-        name: "Vikram Singh",
-        role: "Attendant",
-        department: "Emergency",
-        mobile: "9876543214",
-        joining_date: "2023-06-18",
-        status: "active",
-    },
-    {
-        id: "emp-006",
-        name: "Anita Desai",
-        role: "Admin",
-        department: "Reception",
-        mobile: "9876543215",
-        joining_date: "2020-11-05",
-        status: "inactive",
-    },
-];
-
-const statusLabelMap: Record<Employee["status"], string> = {
-    active: "Active",
-    on_leave: "On Leave",
-    inactive: "Inactive",
-};
 
 function Employees() {
     const navigate = useNavigate()
+    const { canCreate } = usePermissions()
+    const [messageApi, contextHolder] = message.useMessage()
     const [page, setPage] = useState(1)
     const pageSize = 10
+    const [employees, setEmployees] = useState<EmployeeListItem[]>([])
+    const [totalEmployees, setTotalEmployees] = useState(0)
+    const [loading, setLoading] = useState(false)
+    const [searchInput, setSearchInput] = useState("")
+    const [debouncedSearch, setDebouncedSearch] = useState("")
+    const organisationId = localStorage.getItem("organisation_id") || ""
+    const requestIdRef = useRef(0)
 
-    const dataSource: EmployeeRow[] = useMemo(
-        () =>
-            employees.map((employee, index) => ({
-                ...employee,
-                key: employee.id,
-                code: `HMS-2024-${String(index + 1).padStart(3, "0")}`,
-            })),
-        []
-    )
+    useEffect(() => {
+        const nextSearch = searchInput.trim()
+        if (nextSearch === debouncedSearch) return
+        const timer = window.setTimeout(() => {
+            setDebouncedSearch(nextSearch)
+            setPage(1)
+        }, SEARCH_DEBOUNCE_MS)
+        return () => window.clearTimeout(timer)
+    }, [searchInput, debouncedSearch])
 
-    const columns: TableColumnsType<EmployeeRow> = [
+    const fetchEmployees = async (pageNo: number, search: string) => {
+        if (!organisationId) {
+            messageApi.error("Missing organisation — please log in again")
+            return
+        }
+
+        const requestId = ++requestIdRef.current
+        setLoading(true)
+        try {
+            const trimmedSearch = search.trim()
+            const response = await GetEmployees({
+                organisation_id: organisationId,
+                limit: pageSize,
+                page_no: pageNo,
+                ...(trimmedSearch ? { search: trimmedSearch } : {}),
+            })
+            if (requestId !== requestIdRef.current) return
+
+            const rows = Array.isArray(response?.data) ? response.data : []
+            const total = Number(response?.total ?? response?.total_count)
+            setEmployees(rows)
+            setTotalEmployees(Number.isFinite(total) ? total : 0)
+
+            const maxPage = Math.max(1, Math.ceil((Number.isFinite(total) ? total : 0) / pageSize) || 1)
+            if (pageNo > maxPage) {
+                setPage(maxPage)
+            }
+        } catch (error) {
+            if (requestId !== requestIdRef.current) return
+            console.error("Failed to load employees:", error)
+            messageApi.error("Failed to load employees")
+            setEmployees([])
+            setTotalEmployees(0)
+        } finally {
+            if (requestId === requestIdRef.current) {
+                setLoading(false)
+            }
+        }
+    }
+
+    useEffect(() => {
+        fetchEmployees(page, debouncedSearch)
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when page / search changes
+    }, [page, debouncedSearch, organisationId])
+
+    const columns: TableColumnsType<EmployeeListItem> = [
         {
             title: "Code",
-            dataIndex: "code",
+            dataIndex: "employee_code",
             className: "column-layout",
-            render: (code: string) => <span className="code-badge">{code}</span>,
+            render: (code: string) => (
+                <StatusTag type={STATUS_INFO} className="code-badge">
+                    {code || "—"}
+                </StatusTag>
+            ),
         },
         {
             title: "Employee Name",
-            dataIndex: "name",
+            dataIndex: "employee_name",
             className: "other-layout",
+            render: (name: string) => name || "—",
         },
         {
             title: "Role",
-            dataIndex: "role",
+            dataIndex: "role_name",
             className: "other-layout",
+            render: (role: string) => role || "—",
         },
         {
             title: "Department",
-            dataIndex: "department",
+            dataIndex: "department_name",
             className: "other-layout",
+            render: (department: string) => department || "—",
         },
         {
             title: "Mobile",
-            dataIndex: "mobile",
+            dataIndex: "employee_phone",
             className: "other-layout",
+            render: (phone: string) => phone || "—",
         },
         {
-            title: "Joining Date",
-            dataIndex: "joining_date",
+            title: "Email",
+            dataIndex: "employee_email",
             className: "other-layout",
-            sorter: (a, b) =>
-                new Date(a.joining_date).getTime() - new Date(b.joining_date).getTime(),
-            render: (date: string) => dayjs(date).format("DD MMMM YYYY"),
+            render: (email: string) => email || "—",
         },
         {
             title: "Status",
-            dataIndex: "status",
+            dataIndex: "employee_status",
             align: "center",
-            render: (status: Employee["status"]) => (
+            render: (status: string) => (
                 <StatusTag type={getEmployeeStatusType(status)} bordered>
-                    {statusLabelMap[status]}
+                    {formatStatusLabel(status)}
                 </StatusTag>
             ),
         },
@@ -152,6 +145,7 @@ function Employees() {
 
     return (
         <Layout>
+            {contextHolder}
             <Sidebar />
             <Layout>
                 <Breadcrumb
@@ -174,19 +168,24 @@ function Employees() {
 
                 <Content className="main-layout">
                     <div className="button-layout">
-                        <Button
-                            icon={<PlusCircleOutlined />}
-                            className="appointment-button"
-                            onClick={() => navigate("/employees/add-employee")}
-                        >
-                            Add Employee
-                        </Button>
+                        {canCreate("employee") ? (
+                            <Button
+                                icon={<PlusCircleOutlined />}
+                                className="appointment-button"
+                                onClick={() => navigate("/employees/add-employee")}
+                            >
+                                Add Employee
+                            </Button>
+                        ) : null}
                     </div>
 
                     <div className="search-layout">
                         <Input
+                            allowClear
                             className="search-input1"
-                            placeholder="Search employees"
+                            placeholder="Search by name, code, phone, or email"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                             suffix={
                                 <SearchOutlined
                                     style={{ cursor: "pointer", width: "14px", height: "14px" }}
@@ -196,23 +195,26 @@ function Employees() {
                     </div>
 
                     <div className="table-data">
-                        <Table<EmployeeRow>
+                        <Table<EmployeeListItem>
                             columns={columns}
-                            dataSource={dataSource}
+                            dataSource={employees}
+                            rowKey="employee_id"
+                            loading={loading}
                             pagination={false}
-                            scroll={{ x: "max-content", y: 400 }}
+                            size="small"
+                            locale={{ emptyText: "No employees yet" }}
                             showSorterTooltip={{ target: "sorter-icon" }}
                         />
                     </div>
 
                     <div className="pagination-tab">
                         <span className="count-label">
-                            Total Employees ({dataSource.length})
+                            Total Employees ({totalEmployees})
                         </span>
                         <Pagination
                             current={page}
                             pageSize={pageSize}
-                            total={dataSource.length}
+                            total={totalEmployees}
                             onChange={(nextPage) => setPage(nextPage)}
                             showSizeChanger={false}
                         />

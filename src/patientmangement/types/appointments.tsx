@@ -81,6 +81,8 @@ export interface statusUpdate{
 export interface CreateAppointmentResponse {
     data?: string | { patient_id?: string; id?: string; appointment_id?: string };
     patient_id?: string;
+    id?: string;
+    appointment_id?: string;
     message?: string;
     code?: string | number;
 }

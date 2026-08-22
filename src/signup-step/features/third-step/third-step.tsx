@@ -87,10 +87,10 @@ function ThirdStep({ onSuccess, organisationID, onNext, onBack, data }: ThirdSte
         if (data) {
             console.log(data)
             form.setFieldsValue({
-                first_name: data?.first_name ?? '',
-                last_name: data?.last_name ?? '',
-                email_id: data?.email_id ? data.email_id : '',
-                mob_no: data?.phone_number ? data.phone_number : '',
+                first_name: data?.employee_first_name ?? '',
+                last_name: data?.employee_last_name ?? '',
+                email_id: data?.employee_email ? data.employee_email : '',
+                mob_no: data?.employee_phone ? data.employee_phone : '',
 
             })
         }

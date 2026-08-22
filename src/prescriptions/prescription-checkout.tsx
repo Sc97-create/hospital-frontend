@@ -1373,7 +1373,7 @@ function PrescriptionCheckout() {
                                         <div className="patient-meta">
                                             <div className="patient-meta__item">
                                                 <Text className="info-label">RX CODE</Text>
-                                                <StatusTag type={STATUS_INFO}>{rxCode || '—'}</StatusTag>
+                                                <StatusTag type={STATUS_INFO} className="code-badge">{rxCode || '—'}</StatusTag>
                                             </div>
                                             <div className="patient-meta__item">
                                                 <Text className="info-label">RX STATUS</Text>

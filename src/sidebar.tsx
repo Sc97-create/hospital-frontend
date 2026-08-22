@@ -11,14 +11,77 @@ import {
     UserOutlined,
 
 } from '@ant-design/icons';
-import { useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import './sidebar.css';
-const { Sider } = Layout
+import { usePermissions } from './auth/permissions-context';
+import type { ModuleName } from './authentication/types/auth';
+
+const { Sider } = Layout;
+
+type SidebarItem = {
+    key: string;
+    icon: ReactNode;
+    label: string;
+    module?: ModuleName;
+};
+
+const ALL_MENU_ITEMS: SidebarItem[] = [
+    {
+        key: '/dashboard',
+        icon: <AppstoreOutlined />,
+        label: 'Overview',
+    },
+    {
+        key: '/patients',
+        icon: <TeamOutlined />,
+        label: 'Patients',
+        module: 'patient',
+    },
+    {
+        key: '/appointments',
+        icon: <CalendarOutlined />,
+        label: 'Appointmets',
+        module: 'appointment',
+    },
+    {
+        key: '/suppliers',
+        icon: <ShopOutlined />,
+        label: 'Suppliers',
+        module: 'medicine',
+    },
+    {
+        key: '/employees',
+        icon: <UserOutlined />,
+        label: 'Employees',
+        module: 'employee',
+    },
+    {
+        key: '/prescription',
+        icon: <MedicineBoxOutlined />,
+        label: 'Prescription',
+        module: 'prescription',
+    },
+];
+
 function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
+    const { canView } = usePermissions();
     const [collapse, setCollapse] = useState(false);
     const [hover, setHover] = useState(false);
+
+    const menuItems = useMemo(
+        () =>
+            ALL_MENU_ITEMS.filter(
+                // Overview / dashboard stays visible regardless of permissions payload
+                (item) =>
+                    item.key === "/dashboard" ||
+                    !item.module ||
+                    canView(item.module),
+            ).map(({ key, icon, label }) => ({ key, icon, label })),
+        [canView],
+    );
+
     const routeMap: Record<'/patients' | '/appointment' | '/suppliers' | '/employees' | '/prescription', string> = {
         '/patients': '/patients',
         '/suppliers': '/suppliers',
@@ -71,40 +134,7 @@ function Sidebar() {
                         mode='inline'
                         selectedKeys={selectedKey}
                         onClick={({ key }) => navigate(key)}
-
-                        items={[
-                            {
-                                key: '/dashboard',
-                                icon: <AppstoreOutlined />,
-                                label: 'Overview',
-                            },
-                            {
-                                key: '/patients',
-                                icon: <TeamOutlined />,
-                                label: 'Patients',
-                            },
-                            {
-                                key:'/appointments',
-                                icon:<CalendarOutlined/>,
-                                label:'Appointmets'
-                            },
-                            {
-                                key: '/suppliers',
-                                icon: <ShopOutlined />,
-                                label: 'Suppliers',
-                            },
-                            {
-                                key: '/employees',
-                                icon: <UserOutlined />,
-                                label: 'Employees'
-                            },
-                            {
-                                key: '/prescription',
-                                icon: <MedicineBoxOutlined />,
-                                label: 'Prescription'
-                            },
-                            
-                        ]}
+                        items={menuItems}
                     />
 
                 </Sider>

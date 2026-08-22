@@ -1,0 +1,104 @@
+.consultation-pay-modal .ant-modal-content {
+    border-radius: 14px;
+}
+
+.consultation-pay-body {
+    width: 100%;
+    padding-top: 4px;
+}
+
+.consultation-pay-label {
+    display: block;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #8c8c8c;
+    margin-bottom: 6px;
+}
+
+.consultation-pay-segmented {
+    width: 100%;
+}
+
+.consultation-pay-amount-input {
+    width: 100%;
+}
+
+.consultation-pay-amount-due {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0 4px;
+    width: 100%;
+}
+
+.consultation-pay-amount-due-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.consultation-pay-amount-due-value {
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+    color: #262626;
+}
+
+.consultation-pay-qr-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 180px;
+    padding: 20px 16px;
+    border: 1px dashed #d9d9d9;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.consultation-pay-qr-mock-square {
+    width: 110px;
+    height: 110px;
+    border-radius: 8px;
+    background: repeating-linear-gradient(0deg, #bfbfbf 0 4px, transparent 4px 8px),
+        repeating-linear-gradient(90deg, #bfbfbf 0 4px, transparent 4px 8px);
+    opacity: 0.5;
+}
+
+.consultation-pay-qr-amount {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: #262626;
+}
+
+.consultation-pay-cash-callout {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #f6ffed;
+    border: 1px solid #b7eb8f;
+    text-align: center;
+    width: 100%;
+}
+
+.consultation-pay-txn-ref {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.consultation-pay-done {
+    padding: 16px 0 4px;
+    text-align: center;
+}
+
+.consultation-pay-done-icon {
+    font-size: 56px;
+    color: #52c41a;
+}
+
+.consultation-pay-done-title {
+    font-size: var(--text-lg);
+}

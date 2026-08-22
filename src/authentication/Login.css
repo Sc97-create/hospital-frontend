@@ -236,3 +236,29 @@
         padding-top: var(--space-12);
     }
 }
+
+.login-password-modal-copy {
+    margin: 0 0 16px;
+    color: #6b7280;
+}
+
+.login-page--locked {
+    pointer-events: none;
+    user-select: none;
+}
+
+body.password-reset-lock {
+    overflow: hidden;
+}
+
+body.password-reset-lock #root {
+    pointer-events: none;
+    user-select: none;
+}
+
+body.password-reset-lock .login-password-modal-root,
+body.password-reset-lock .login-password-modal-root .ant-modal-wrap,
+body.password-reset-lock .login-password-modal-root .ant-modal-mask,
+body.password-reset-lock .ant-message {
+    pointer-events: auto;
+}

@@ -5,12 +5,17 @@ import type {
     BillingPaymentInfo,
     ConfirmPaymentPayload,
     ConfirmPaymentResponse,
+    ConsultationBillingCreatePayload,
     createPrescResponse,
     CreatePrescription,
     DispenseCheckoutResponse,
     FindManyResponse,
     findOneResponse,
+    GetBillDetailsByPrescriptionResponse,
+    GetInvoiceByAppointmentResponse,
     GetInvoiceByPrescriptionResponse,
+    GetPrescriptionsPayload,
+    InvoiceByAppointment,
     InvoiceByPrescription,
     PrescriptionByPatientIdResponse,
     SearchMedicineResponse,
@@ -58,41 +63,24 @@ export const GetPrescriptionByPatientID = async (
     return response.data;
 }
 export const FindAllPrescription = async (
-    limit: number = 10,
-    offset: number = 0,
-    organisation_id: string,
-    search?: string,
+    payload: GetPrescriptionsPayload,
 ): Promise<FindManyResponse> => {
-    const trimmedSearch = search?.trim();
-    const response = await apiClient.get(`/prescription/get`, {
-        params: {
-            limit,
-            offset,
-            organisation_id,
-            ...(trimmedSearch ? { search: trimmedSearch } : {}),
-        },
-    })
-    return response.data
-}
+    const trimmedSearch = payload.search?.trim();
+    const response = await apiClient.post(`/prescription/get`, {
+        organisation_id: payload.organisation_id,
+        limit: payload.limit,
+        page_no: payload.page_no,
+        ...(trimmedSearch ? { search: trimmedSearch } : {}),
+        ...(payload.status ? { status: payload.status } : {}),
+    });
+    return response.data;
+};
+
 export const GetByStatus = async (
-    limit: number = 10,
-    offset: number = 0,
-    organisation_id: string,
-    status: string,
-    search?: string,
+    payload: GetPrescriptionsPayload & { status: Exclude<GetPrescriptionsPayload["status"], undefined> },
 ): Promise<FindManyResponse> => {
-    const trimmedSearch = search?.trim();
-    const response = await apiClient.get(`/prescription/getByStatus`, {
-        params: {
-            limit,
-            offset,
-            organisation_id,
-            status,
-            ...(trimmedSearch ? { search: trimmedSearch } : {}),
-        },
-    })
-    return response.data
-}
+    return FindAllPrescription(payload);
+};
 export const UpdateStatus = async (updateprescription: UpdatePrescriptionStatus): Promise<UpdateStatusResponse> => {
     const response = await apiClient.patch(`/prescription/updateStatus`, updateprescription)
     return response.data
@@ -108,7 +96,7 @@ export const GetDispenseCheckoutLines = async (
 
 /** Confirm & Pay — create bill; cash/qr then confirm via /payment/confirm on swipe. */
 export const CreateBilling = async (
-    payload: BillingCreatePayload,
+    payload: BillingCreatePayload | ConsultationBillingCreatePayload,
 ): Promise<BillingCreateResponse> => {
     const response = await apiClient.post(`/billing/create`, payload, {
         headers: {
@@ -149,6 +137,55 @@ export const GetInvoiceByPrescriptionID = async (
 ): Promise<GetInvoiceByPrescriptionResponse> => {
     const response = await apiClient.get(
         `/billing/getInvoiceByPrescriptionID/${prescription_id}`,
+    );
+    return response.data;
+};
+
+/** Resume / dedupe consultation payment — existing invoice for this appointment, if any. */
+export const GetInvoiceByAppointmentID = async (
+    appointment_id: string,
+): Promise<GetInvoiceByAppointmentResponse> => {
+    const response = await apiClient.get(
+        `/billing/getInvoiceByAppointmentID/${appointment_id}`,
+    );
+    return response.data;
+};
+
+export function parseInvoiceByAppointmentResponse(
+    response: GetInvoiceByAppointmentResponse,
+): InvoiceByAppointment | null {
+    const body = response.data ?? response;
+    const id = body.id;
+
+    if (!id || typeof id !== 'string') {
+        return null;
+    }
+
+    return {
+        id,
+        invoice_code: body.invoice_code ?? '',
+        payment_type: body.payment_type ?? 'consultation',
+        appointment_id: body.appointment_id ?? '',
+        patient_id: body.patient_id ?? '',
+        status: body.status ?? '',
+        cashier_id: body.cashier_id ?? '',
+        organisation_id: body.organisation_id ?? '',
+        payment_mode: body.payment_mode ?? '',
+        sub_total_amount: body.sub_total_amount ?? 0,
+        tax_amount: body.tax_amount ?? 0,
+        total_amount: body.total_amount ?? 0,
+        discount_amount: body.discount_amount ?? 0,
+        created_at: body.created_at ?? '',
+        updated_at: body.updated_at ?? '',
+    };
+}
+
+/** Combined receipt data — consultation fee + prescription bill for the same encounter. */
+export const GetBillDetailsByPrescriptionID = async (
+    prescription_id: string,
+): Promise<GetBillDetailsByPrescriptionResponse> => {
+    const response = await apiClient.get(
+        `/billing/getBillDetailsByPrescriptionID/${prescription_id}`,
     );
     return response.data;
 };

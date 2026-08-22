@@ -2,6 +2,7 @@ import apiClient from "../../lib/api-client";
 import type {
     CreateSupplierPayload,
     CreateSupplierResponse,
+    GetSuppliersByOrgPayload,
     GetSuppliersByOrgResponse,
 } from "../types/supplier";
 
@@ -13,12 +14,8 @@ export const CreateSupplier = async (
 };
 
 export const GetSuppliersByOrgID = async (
-    organisation_id: string,
-    limit: number,
-    page_no: number,
+    payload: GetSuppliersByOrgPayload,
 ): Promise<GetSuppliersByOrgResponse> => {
-    const response = await apiClient.get("/supplier/getSupplierByOrgID", {
-        params: { organisation_id, limit, page_no },
-    });
+    const response = await apiClient.post("/supplier/getSupplierByOrgID", payload);
     return response.data;
 };

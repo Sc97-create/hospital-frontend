@@ -48,6 +48,7 @@ import {
   STATUS_WARNING,
 } from "./constants/status-colors";
 import { logoutAndRedirect } from "./authentication/logout";
+import { usePermissions } from "./auth/permissions-context";
 import "./dashboard.css";
 
 const { Content, Header } = Layout;
@@ -107,6 +108,7 @@ const kpiAccentClass = (key: string, isZero: boolean): string => {
 function Dashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { clearAccess, canCreate, canView } = usePermissions();
   // Preview loading: /dashboard?loading=1
   const forceLoading = searchParams.get("loading") === "1";
 
@@ -265,7 +267,7 @@ function Dashboard() {
       className: "dash-queue__actions-col",
       render: (_, row) => {
         if (row.status === "waiting" || row.status === "scheduled") {
-          if (row.status === "waiting") {
+          if (row.status === "waiting" && canCreate("prescription")) {
             return (
               <div className="dash-queue__actions">
                 <Button
@@ -308,12 +310,21 @@ function Dashboard() {
   ];
 
   const userMenuItems = [
-    { key: "settings", label: "Settings" },
+    {
+      key: "my-profile",
+      label: "My Profile",
+      onClick: () => navigate("/profile"),
+    },
+    {
+      key: "update-password",
+      label: "Update Password",
+      onClick: () => navigate("/update-password"),
+    },
     {
       key: "logout",
       label: "Logout",
       onClick: () => {
-        void logoutAndRedirect(navigate);
+        void logoutAndRedirect(navigate, clearAccess);
       },
     },
   ];
@@ -503,31 +514,37 @@ function Dashboard() {
                 <Col xs={24} lg={8} className="dash-rail-col">
                   <Card className="dash-card" title="Quick Actions">
                     <Space direction="vertical" size={12} className="dash-quick-actions">
-                      <Button
-                        type="primary"
-                        block
-                        size="large"
-                        icon={<UserAddOutlined />}
-                        onClick={() => navigate("/patients/add-patient")}
-                      >
-                        Add New Patient
-                      </Button>
-                      <Button
-                        block
-                        size="large"
-                        icon={<CalendarOutlined />}
-                        onClick={() => navigate("/patients")}
-                      >
-                        Book Appointment
-                      </Button>
-                      <Button
-                        block
-                        size="large"
-                        icon={<ClockCircleOutlined />}
-                        onClick={() => navigate("/appointments")}
-                      >
-                        Today&apos;s Schedule
-                      </Button>
+                      {canCreate("patient") ? (
+                        <Button
+                          type="primary"
+                          block
+                          size="large"
+                          icon={<UserAddOutlined />}
+                          onClick={() => navigate("/patients/add-patient")}
+                        >
+                          Add New Patient
+                        </Button>
+                      ) : null}
+                      {canView("patient") ? (
+                        <Button
+                          block
+                          size="large"
+                          icon={<CalendarOutlined />}
+                          onClick={() => navigate("/patients")}
+                        >
+                          Book Appointment
+                        </Button>
+                      ) : null}
+                      {canView("appointment") ? (
+                        <Button
+                          block
+                          size="large"
+                          icon={<ClockCircleOutlined />}
+                          onClick={() => navigate("/appointments")}
+                        >
+                          Today&apos;s Schedule
+                        </Button>
+                      ) : null}
                     </Space>
                   </Card>
 

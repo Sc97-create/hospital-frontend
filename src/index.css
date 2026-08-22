@@ -230,6 +230,24 @@ body,
     height: 28px !important;
 }
 
+/* Entity codes (APT / SUPP / patient / RX / employee) — one size everywhere */
+.code-badge.ant-tag.app-tag,
+.ant-tag.app-tag.code-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    padding: 0 8px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    text-transform: none !important;
+    margin-inline-end: 0;
+}
+
 /* Global status tags — only info | success | warning | danger (STATUS-COLORS.md) */
 .status-tag--info {
   background: var(--status-info-lighter) !important;

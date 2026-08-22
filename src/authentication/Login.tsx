@@ -1,29 +1,118 @@
 import './Login.css'
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button, message, Modal } from "antd";
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
-import type { loginPayload } from './types/auth';
-import { LoginReq } from './api/login-api';
+import { useEffect, useState } from 'react';
+import type { loginPayload, loginResponse, UpdatePasswordPayload } from './types/auth';
+import { LoginReq, UpdatePassword } from './api/login-api';
+import { usePermissions } from '../auth/permissions-context';
+
+function isPasswordCleared(data: loginResponse): boolean {
+    const flag = data.passwordcleared ?? data.password_cleared;
+    return flag === true || flag === "true";
+}
+
+function getApiErrorMessage(error: unknown, fallback: string): string {
+    if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
+        "message" in error.response.data &&
+        typeof error.response.data.message === "string"
+    ) {
+        return error.response.data.message;
+    }
+    if (error instanceof Error && error.message) {
+        return error.message;
+    }
+    return fallback;
+}
 
 function Login() {
     const [form] = Form.useForm<loginPayload>();
+    const [passwordForm] = Form.useForm<UpdatePasswordPayload>();
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+    const [updatingPassword, setUpdatingPassword] = useState(false);
+    const [loggingIn, setLoggingIn] = useState(false);
+    const { setAccess } = usePermissions();
+
+    useEffect(() => {
+        const root = document.getElementById("root");
+        if (!passwordModalOpen) {
+            document.body.classList.remove("password-reset-lock");
+            root?.removeAttribute("inert");
+            return;
+        }
+
+        document.body.classList.add("password-reset-lock");
+        root?.setAttribute("inert", "");
+
+        return () => {
+            document.body.classList.remove("password-reset-lock");
+            root?.removeAttribute("inert");
+        };
+    }, [passwordModalOpen]);
+
+    const storeSession = (data: loginResponse) => {
+        localStorage.setItem("access_token", data.token);
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("organisation_id", data.organisation_id);
+        setAccess(Boolean(data.is_admin), data.permissions);
+    };
 
     const login = async (values: loginPayload) => {
+        setLoggingIn(true);
         try {
             const data = await LoginReq(values);
-            localStorage.setItem("access_token", data.token);
-            localStorage.setItem("user_id", data.user_id);
-            localStorage.setItem("organisation_id", data.organisation_id);
+            storeSession(data);
+            if (isPasswordCleared(data)) {
+                passwordForm.resetFields();
+                setPasswordModalOpen(true);
+                return;
+            }
             navigate('/dashboard');
         } catch {
             messageApi.error("Invalid email or password. Please try again.");
+        } finally {
+            setLoggingIn(false);
+        }
+    };
+
+    const submitNewPassword = async (values: UpdatePasswordPayload) => {
+        setUpdatingPassword(true);
+        try {
+            const response = await UpdatePassword({
+                password: values.password,
+                confirm_password: values.confirm_password,
+            });
+            const code = response.code != null ? String(response.code) : "200";
+            if (code !== "200") {
+                throw new Error(response.message || "Failed to update password");
+            }
+            messageApi.success(response.message || "Password updated successfully");
+            setPasswordModalOpen(false);
+            passwordForm.resetFields();
+            navigate("/dashboard");
+        } catch (error) {
+            if (error && typeof error === "object" && "errorFields" in error) {
+                return;
+            }
+            console.error("Update password failed:", error);
+            messageApi.error(getApiErrorMessage(error, "Failed to update password. Try again."));
+        } finally {
+            setUpdatingPassword(false);
         }
     };
 
     return (
-        <div className="login-page">
+        <div className={`login-page${passwordModalOpen ? " login-page--locked" : ""}`}>
             {contextHolder}
             <aside className="login-brand">
                 <div className="login-brand-logo">
@@ -61,6 +150,7 @@ function Login() {
                         autoComplete="on"
                         form={form}
                         requiredMark={false}
+                        disabled={passwordModalOpen}
                     >
                         <Form.Item
                             label="Email"
@@ -96,6 +186,7 @@ function Login() {
                                 className="login-submit-button"
                                 block
                                 size="large"
+                                loading={loggingIn}
                             >
                                 Login
                             </Button>
@@ -112,6 +203,80 @@ function Login() {
                     </Form>
                 </div>
             </main>
+
+            <Modal
+                open={passwordModalOpen}
+                title="Set a new password"
+                closable={false}
+                maskClosable={false}
+                keyboard={false}
+                footer={null}
+                centered
+                destroyOnClose
+                zIndex={4000}
+                getContainer={() => document.body}
+                rootClassName="login-password-modal-root"
+                className="login-password-modal"
+            >
+                <p className="login-password-modal-copy">
+                    Your previous password was cleared. Choose a new password to continue.
+                </p>
+                <Form
+                    form={passwordForm}
+                    layout="vertical"
+                    onFinish={submitNewPassword}
+                    autoComplete="off"
+                    requiredMark={false}
+                >
+                    <Form.Item
+                        label="New Password"
+                        name="password"
+                        rules={[
+                            { required: true, message: "Please enter a new password" },
+                            { min: 8, message: "Password must be at least 8 characters" },
+                        ]}
+                    >
+                        <Input.Password
+                            prefix={<LockOutlined />}
+                            placeholder="New password"
+                            autoComplete="new-password"
+                            size="large"
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label="Confirm Password"
+                        name="confirm_password"
+                        dependencies={["password"]}
+                        rules={[
+                            { required: true, message: "Please confirm your password" },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (!value || getFieldValue("password") === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error("Passwords do not match"));
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input.Password
+                            prefix={<LockOutlined />}
+                            placeholder="Re-enter password"
+                            autoComplete="new-password"
+                            size="large"
+                        />
+                    </Form.Item>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        block
+                        size="large"
+                        loading={updatingPassword}
+                    >
+                        Update Password
+                    </Button>
+                </Form>
+            </Modal>
         </div>
     );
 }

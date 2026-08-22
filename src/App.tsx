@@ -27,6 +27,8 @@ import GeneralInfo from './patientmangement/singlepatientdetail/patient-profile'
 import AddAppointment from './patientmangement/patient-appointment/addAppointment'
 import AppointmentsPage from './patientmangement/patient-appointment/appointment-list'
 import AppointmentDetails from './patientmangement/patient-appointment/appointment-details'
+import UpdatePasswordPage from './authentication/update-password'
+import MyProfilePage from './profile/my-profile'
 
 function App() {
 
@@ -54,29 +56,45 @@ function App() {
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path='/signup' element={<Signup />} />
           <Route path='/dashboard' element={<AuthGuard><Dashboard /></AuthGuard>} />
-          <Route path='/patients' element={<AuthGuard><PatientList /> </AuthGuard>} />
-          <Route path='/patients/add-patient' element={<AuthGuard><Appointment /></AuthGuard>}>
+          <Route path='/update-password' element={<AuthGuard><UpdatePasswordPage /></AuthGuard>} />
+          <Route path='/profile' element={<AuthGuard><MyProfilePage /></AuthGuard>} />
+
+          {/* Patient — view */}
+          <Route path='/patients' element={<AuthGuard module="patient" action="view"><PatientList /></AuthGuard>} />
+          <Route path='/patients/patient-overview/:patientID' element={<AuthGuard module="patient" action="view"><GeneralInfo/></AuthGuard>} />
+          <Route path='/patients/prescription-preview/:patientID' element={<AuthGuard module="patient" action="view"><PrescPreview /></AuthGuard>} />
+          {/* Patient — create */}
+          <Route path='/patients/add-patient' element={<AuthGuard module="patient" action="create"><Appointment /></AuthGuard>}>
             <Route index element={<FirstStep />} />
             <Route path=':patientID/step2' element={<SecondStep />} />
           </Route>
-          <Route path='/patients/patient-overview/:patientID' element={<AuthGuard><GeneralInfo/></AuthGuard>} />
-          <Route path='/patients/prescription-preview/:patientID' element={<AuthGuard> <PrescPreview /> </AuthGuard>} />
-          <Route path='/suppliers' element={<AuthGuard><Pharmacy /> </AuthGuard>}></Route>
-          <Route path='/suppliers/add' element={<AuthGuard><AddManualForm /></AuthGuard>} />
-          <Route path='/suppliers/:supplierId/fill-stock' element={<AuthGuard><FillStockPage /></AuthGuard>} />
-          <Route path='/employees' element={<AuthGuard> <Employees /> </AuthGuard>} />
-          <Route path='/employees/add-employee' element={<AuthGuard><AddEmployee /></AuthGuard>} />
-          <Route path='/prescription' element={<AuthGuard><PrescriptionDetails /> </AuthGuard>} />
-          <Route path='/prescription/add-prescription/:appointmentID' element={<AuthGuard><AddPrescription /></AuthGuard>} />
-          <Route path='/prescription/:id/checkout' element={<AuthGuard><PrescriptionCheckout /></AuthGuard>} />
-          <Route path='/prescription/:id/receipt' element={<AuthGuard><PrescriptionReceipt /></AuthGuard>} />
-          <Route path='/prescription/:id' element={<AuthGuard><PrescPreview /></AuthGuard>} />
+
+          {/* Appointment — view */}
+          <Route path='/appointments' element={<AuthGuard module="appointment" action="view"><AppointmentsPage/></AuthGuard>} />
+          <Route path='/appointment/preview/:appointmentID' element={<AuthGuard module="appointment" action="view"><AppointmentDetails /></AuthGuard>} />
+          {/* Appointment — create */}
+          <Route path='/patients/addappointment/:patientID' element={<AuthGuard module="appointment" action="create"><AddAppointment /></AuthGuard>} />
+
+          {/* Medicine / suppliers — view */}
+          <Route path='/suppliers' element={<AuthGuard module="medicine" action="view"><Pharmacy /></AuthGuard>} />
+          <Route path='/suppliers/:supplierId/fill-stock' element={<AuthGuard module="medicine" action="update"><FillStockPage /></AuthGuard>} />
+          {/* Medicine — create */}
+          <Route path='/suppliers/add' element={<AuthGuard module="medicine" action="create"><AddManualForm /></AuthGuard>} />
+
+          {/* Employee — view / create */}
+          <Route path='/employees' element={<AuthGuard module="employee" action="view"><Employees /></AuthGuard>} />
+          <Route path='/employees/add-employee' element={<AuthGuard module="employee" action="create"><AddEmployee /></AuthGuard>} />
+
+          {/* Prescription — view / create */}
+          <Route path='/prescription' element={<AuthGuard module="prescription" action="view"><PrescriptionDetails /></AuthGuard>} />
+          <Route path='/prescription/add-prescription/:appointmentID' element={<AuthGuard module="prescription" action="create"><AddPrescription /></AuthGuard>} />
+          <Route path='/prescription/:id/checkout' element={<AuthGuard module="prescription" action="view"><PrescriptionCheckout /></AuthGuard>} />
+          <Route path='/prescription/:id/receipt' element={<AuthGuard module="prescription" action="view"><PrescriptionReceipt /></AuthGuard>} />
+          <Route path='/prescription/:id' element={<AuthGuard module="prescription" action="view"><PrescPreview /></AuthGuard>} />
+
           <Route path='/bed-arrangement' element={<CreateBed />} />
           <Route path='/bed-arrangement/step-2' element={<CreateRooms />} />
           <Route path='/bed-arrangement/step-3' element={<BedStep3 />} />
-          <Route path ='/patients/addappointment/:patientID' element={<AuthGuard><AddAppointment /></AuthGuard>} />
-          <Route path='/appointment/preview/:appointmentID' element={<AuthGuard><AppointmentDetails /></AuthGuard>} />
-          <Route path='/appointments'element={<AppointmentsPage/>}/>
         </Routes>
       </div>
     </ConfigProvider>

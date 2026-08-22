@@ -11,6 +11,7 @@ import PatientAppointmentHistory from "./patient-appointment-history";
 import PatientPrescriptions from "./patient-prescriptions";
 import { StatusTag } from "../../components/status-tag";
 import { getPatientStatusType, STATUS_WARNING } from "../../constants/status-colors";
+import { usePermissions } from "../../auth/permissions-context";
 
 function displayValue(value: string | number | null | undefined): string {
     if (value === null || value === undefined) return "—";
@@ -50,7 +51,7 @@ function GeneralInfo() {
     const [patient, setPatient] = useState<patientlist | null>(null);
     const [activeTab, setActiveTab] = useState('appointments');
     const navigate =useNavigate();
-
+    const { canCreate } = usePermissions();
 
     useEffect(() => {
         if (patientID) {
@@ -122,7 +123,9 @@ function GeneralInfo() {
 
                                     {/* Actions */}
                                     <div className="patient-action-buttons">
-                                        <Button type="primary" onClick={()=>navigate(`/patients/addappointment/${patientID}`)}>Add Appointment</Button>
+                                        {canCreate("appointment") ? (
+                                            <Button type="primary" onClick={()=>navigate(`/patients/addappointment/${patientID}`)}>Add Appointment</Button>
+                                        ) : null}
                                     </div>
                                 </div>
                             </Card>

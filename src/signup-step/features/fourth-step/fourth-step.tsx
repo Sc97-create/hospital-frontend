@@ -161,7 +161,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                     <Col>
                         <Text type="secondary" className="review-label">FULL NAME</Text>
                         <div>
-                            <Text strong>{Userdata?.username}</Text>
+                            <Text strong>{Userdata?.employee_name}</Text>
                         </div>
                         <div>
                             <StatusTag type={STATUS_SUCCESS} className="root-admin-tag">
@@ -174,7 +174,7 @@ const ReviewAndCreate = ({ Userdata, OrgData, onBack }: FourthProps) => {
                         <Text type="secondary">PROFESSIONAL EMAIL</Text>
                         <div>
                             <Text strong>
-                                {Userdata?.email_id}
+                                {Userdata?.employee_email}
                             </Text>
                         </div>
                     </Col>
