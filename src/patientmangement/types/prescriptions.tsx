@@ -4,6 +4,3 @@ export interface PrescriptionReq{
     limit:number;
     pageno:number;
 }
-export interface PrescResponse{
-    
-}

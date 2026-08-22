@@ -10,7 +10,6 @@ const handleChange = (value: string) => {
 import { Button } from 'antd';
 import { CreateAppointment } from "../api/first-step-appointment";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 
 export interface FirstStepRef {
     validate: () => Promise<PersonalInfo>;
@@ -22,7 +21,6 @@ function FirstStep() {
 
     const [form] = Form.useForm<PersonalInfo>();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
 
     
     const handleSubmit = async () => {

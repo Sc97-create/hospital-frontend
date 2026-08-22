@@ -11,3 +11,14 @@ export interface Department {
     deleted_at: string;
     id: string;
 }
+
+export interface Doctor {
+    id: string;
+    username: string;
+}
+
+export interface GetDoctorsResponse {
+    data: Doctor[];
+    message?: string;
+    code?: string | number;
+}

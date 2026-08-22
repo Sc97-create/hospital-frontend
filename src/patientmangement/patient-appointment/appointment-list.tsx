@@ -97,7 +97,7 @@ const AppointmentsPage: React.FC = () => {
     const [searchInput, setSearchInput] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize] = useState<number>(10);
+    const pageSize = 10;
     const [loading, setLoading] = useState(false);
     const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
     const navigate = useNavigate();
