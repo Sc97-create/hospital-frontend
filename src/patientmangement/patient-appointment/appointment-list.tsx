@@ -4,14 +4,10 @@ import {
     Input,
     Select,
     Tag,
-    Space,
     Typography,
     Pagination,
-    Dropdown,
-    Tabs,
     Layout,
     Breadcrumb,
-    DatePicker,
     Button,
 } from "antd";
 import {
@@ -25,10 +21,10 @@ import dayjs from "dayjs";
 import "./appointment-list.css";
 import Sidebar from "../../sidebar";
 import { Content } from "antd/es/layout/layout";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GetDoctors } from "../../shared/api/shared-api";
 import { GetAppointmentsByOrganisationID } from "../api/appointments";
-import type { AppointmentOrg, appointmentPayload } from "../types/appointments";
+import type { AppointmentOrg } from "../types/appointments";
 
 const { Title, Text } = Typography;
 interface Doctor {
@@ -79,14 +75,13 @@ const getStatusTag = (status: string) => {
 //add appointment code
 //send appointmentid
 const AppointmentsPage: React.FC = () => {
-    const { RangePicker } = DatePicker;
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [selectedDoctor, setSelectedDoctor] = useState<number | undefined>();
     const [selectedDate, setSelectedDate] = useState<string | undefined>();
     const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
     const [selectedVisitType, setSelectedVisitType] = useState<string | undefined>();
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(10);
+    const pageSize = 10;
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     //const [totalAppointments, setTotalAppointments] = useState<number>(42);

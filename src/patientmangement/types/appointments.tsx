@@ -77,8 +77,15 @@ export interface statusUpdate{
     appointment_id:string;
     status:string;
 }
+export interface CreateAppointmentResponse {
+    data?: string | { patient_id?: string; id?: string; appointment_id?: string };
+    patient_id?: string;
+    message?: string;
+    code?: string | number;
+}
+
 export interface commonresponse{
-    data:any;
+    data: unknown;
     code:string;
     message:string;
 }
