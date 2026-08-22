@@ -1,5 +1,5 @@
 import apiClient from "../../lib/api-client"
-import type { GetDepartmentsResponse } from "../types/share-type"
+import type { GetDepartmentsResponse, GetDoctorsResponse } from "../types/share-type"
 
 export const GetDepartments = async (organisationID: string, page: number, limit: number): Promise<GetDepartmentsResponse> => {
     const response = await apiClient.get(`/department/getDepartments`, {
@@ -12,7 +12,7 @@ export const GetDepartments = async (organisationID: string, page: number, limit
     return response.data
 }
 
-export const GetDoctors = async (search: string, organisationID: string): Promise<unknown> => {
+export const GetDoctors = async (search: string, organisationID: string): Promise<GetDoctorsResponse> => {
     const response = await apiClient.get(`/employee/getDoctors`,
         {
             params: {
