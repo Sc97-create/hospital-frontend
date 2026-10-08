@@ -13,6 +13,13 @@ export const MODULE_HOME_ROUTES: { module: ModuleName | string; path: string }[]
     { module: "prescription", path: "/prescription" },
 ];
 
+const emptyPermissions = () => ({
+    create: false,
+    update: false,
+    view: false,
+    delete: false,
+});
+
 const toPermissionsMap = (
     entries: ModulePermissionEntry[] | undefined,
 ): PermissionsByModule => {
@@ -23,10 +30,7 @@ const toPermissionsMap = (
         const name = entry.module_name?.trim();
         if (!name) continue;
         map[name] = {
-            create: false,
-            update: false,
-            view: false,
-            delete: false,
+            ...emptyPermissions(),
             ...entry.permissions,
         };
     }
