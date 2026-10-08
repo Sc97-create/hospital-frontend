@@ -11,14 +11,18 @@ import {
 } from '@ant-design/icons'
 import { Content } from "antd/es/layout/layout"
 import { useNavigate } from "react-router-dom"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { GetSuppliersByOrgID } from "./api/supplier"
 import type { SupplierListItem } from "./types/supplier"
 import { StatusTag } from "../components/status-tag"
 import {
     getSupplierStatusType,
     statusTagClassName,
+    STATUS_INFO,
 } from "../constants/status-colors"
+import { usePermissions } from "../auth/permissions-context"
+
+const SEARCH_DEBOUNCE_MS = 400;
 
 const SUPPLIER_STATUS_OPTIONS = [
     { value: "Active", label: "Active" },
@@ -44,40 +48,71 @@ function getStatusMeta(status: string) {
 
 function Pharmacy() {
     const navigate = useNavigate()
+    const { canCreate, can } = usePermissions()
     const [messageApi, contextHolder] = message.useMessage()
     const [page, setPage] = useState(1)
     const pageSize = 10
     const [suppliers, setSuppliers] = useState<SupplierListItem[]>([])
     const [totalSuppliers, setTotalSuppliers] = useState(0)
     const [loading, setLoading] = useState(false)
+    const [searchInput, setSearchInput] = useState("")
+    const [debouncedSearch, setDebouncedSearch] = useState("")
     const organisationId = localStorage.getItem("organisation_id") || ""
+    const requestIdRef = useRef(0)
 
-    const fetchSuppliers = async (pageNo: number) => {
+    useEffect(() => {
+        const nextSearch = searchInput.trim()
+        if (nextSearch === debouncedSearch) return
+        const timer = window.setTimeout(() => {
+            setDebouncedSearch(nextSearch)
+            setPage(1)
+        }, SEARCH_DEBOUNCE_MS)
+        return () => window.clearTimeout(timer)
+    }, [searchInput, debouncedSearch])
+
+    const fetchSuppliers = async (pageNo: number, search: string) => {
         if (!organisationId) {
             messageApi.error("Missing organisation — please log in again")
             return
         }
+        const requestId = ++requestIdRef.current
         setLoading(true)
         try {
-            const response = await GetSuppliersByOrgID(organisationId, pageSize, pageNo)
+            const trimmedSearch = search.trim()
+            const response = await GetSuppliersByOrgID({
+                organisation_id: organisationId,
+                limit: pageSize,
+                page_no: pageNo,
+                ...(trimmedSearch ? { search: trimmedSearch } : {}),
+            })
+            if (requestId !== requestIdRef.current) return
+
             const rows = Array.isArray(response?.data) ? response.data : []
             const total = Number(response?.total)
             setSuppliers(rows)
             setTotalSuppliers(Number.isFinite(total) ? total : 0)
+
+            const maxPage = Math.max(1, Math.ceil((Number.isFinite(total) ? total : 0) / pageSize) || 1)
+            if (pageNo > maxPage) {
+                setPage(maxPage)
+            }
         } catch (error) {
+            if (requestId !== requestIdRef.current) return
             console.error("Failed to load suppliers:", error)
             messageApi.error("Failed to load suppliers")
             setSuppliers([])
             setTotalSuppliers(0)
         } finally {
-            setLoading(false)
+            if (requestId === requestIdRef.current) {
+                setLoading(false)
+            }
         }
     }
 
     useEffect(() => {
-        fetchSuppliers(page)
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when page changes
-    }, [page, organisationId])
+        fetchSuppliers(page, debouncedSearch)
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when page / search changes
+    }, [page, debouncedSearch, organisationId])
 
     const handleStatusChange = (supplierId: string, nextStatus: string) => {
         setSuppliers((rows) =>
@@ -92,42 +127,55 @@ function Pharmacy() {
             title: "Code",
             dataIndex: "supplier_code",
             className: "column-layout",
-            render: (code: string) => <span className="code-badge">{code || "—"}</span>,
+            width: 110,
+            render: (code: string) => (
+                <StatusTag type={STATUS_INFO} className="code-badge">
+                    {code || "—"}
+                </StatusTag>
+            ),
         },
         {
             title: "Supplier Name",
             dataIndex: "name",
             className: "other-layout",
+            width: 140,
+            ellipsis: true,
         },
         {
             title: "Contact",
             dataIndex: "contact_number",
             className: "other-layout",
+            width: 110,
             render: (value?: string) => value || "—",
         },
         {
             title: "Email",
             dataIndex: "email",
             className: "other-layout",
+            width: 160,
+            ellipsis: true,
             render: (value?: string) => value || "—",
         },
         {
             title: "Payment Terms",
             dataIndex: "payment_terms",
             className: "other-layout",
+            width: 110,
+            ellipsis: true,
             render: (value?: string) => value || "—",
         },
         {
             title: "Created",
             dataIndex: "created_at",
             className: "other-layout",
+            width: 100,
             render: (value?: string) => value || "—",
         },
         {
             title: "Status",
             dataIndex: "supplier_status",
             align: "center",
-            width: 140,
+            width: 110,
             render: (status: string, record) => {
                 const meta = getStatusMeta(status);
                 return (
@@ -168,23 +216,27 @@ function Pharmacy() {
             title: "Action",
             key: "action",
             align: "center",
+            width: 100,
+            fixed: "right",
             render: (_, record) => (
-                <Button
-                    type="primary"
-                    size="small"
-                    className="fill-stock-btn"
-                    onClick={() =>
-                        navigate(`/suppliers/${record.id}/fill-stock`, {
-                            state: {
-                                supplierName: record.name,
-                                supplierCode: record.supplier_code,
-                                supplierStatus: record.supplier_status,
-                            },
-                        })
-                    }
-                >
-                    Fill Stock
-                </Button>
+                can("medicine", "update") ? (
+                    <Button
+                        type="primary"
+                        size="small"
+                        className="fill-stock-btn"
+                        onClick={() =>
+                            navigate(`/suppliers/${record.id}/fill-stock`, {
+                                state: {
+                                    supplierName: record.name,
+                                    supplierCode: record.supplier_code,
+                                    supplierStatus: record.supplier_status,
+                                },
+                            })
+                        }
+                    >
+                        Fill Stock
+                    </Button>
+                ) : null
             ),
         },
     ]
@@ -214,19 +266,24 @@ function Pharmacy() {
 
                 <Content className="main-layout">
                     <div className="button-layout">
-                        <Button
-                            className="appointment-button"
-                            icon={<PlusCircleOutlined />}
-                            onClick={() => navigate("/suppliers/add")}
-                        >
-                            Add New Supplier
-                        </Button>
+                        {canCreate("medicine") ? (
+                            <Button
+                                className="appointment-button"
+                                icon={<PlusCircleOutlined />}
+                                onClick={() => navigate("/suppliers/add")}
+                            >
+                                Add New Supplier
+                            </Button>
+                        ) : null}
                     </div>
 
                     <div className="search-layout">
                         <Input
+                            allowClear
                             placeholder="Search by supplier name, license, or city..."
                             className="search-input1"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                             suffix={
                                 <SearchOutlined
                                     style={{ cursor: "pointer", width: "14px", height: "14px" }}
@@ -242,9 +299,9 @@ function Pharmacy() {
                             rowKey="id"
                             loading={loading}
                             pagination={false}
-                            scroll={{ x: "max-content", y: 400 }}
+                            size="small"
+                            scroll={{ x: 940 }}
                             locale={{ emptyText: "No suppliers yet" }}
-                            showSorterTooltip={{ target: "sorter-icon" }}
                         />
                     </div>
 

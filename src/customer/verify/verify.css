@@ -1,0 +1,148 @@
+/* Customer verify step — scoped under .cv-verify */
+
+.cv-verify {
+  font-family: var(--font-family) !important;
+}
+
+.cv-verify,
+.cv-verify *,
+.cv-verify *::before,
+.cv-verify *::after {
+  font-family: var(--font-family) !important;
+}
+
+.cv-verify__header {
+  margin-bottom: var(--space-8);
+}
+
+.cv-verify__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: #111827;
+}
+
+.cv-verify__subtitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-muted-text);
+}
+
+.cv-verify__email-wrap {
+  white-space: nowrap;
+}
+
+.cv-verify__email {
+  display: inline;
+  padding: 0.15em 0.45em;
+  border-radius: 4px;
+  background: #eef0f7;
+  color: #111827;
+  font-size: inherit;
+  font-weight: var(--weight-medium);
+}
+
+.cv-verify-form.ant-form-vertical .ant-form-item .ant-form-item-label {
+  padding-bottom: 2px !important;
+  margin-bottom: 0 !important;
+}
+
+.cv-verify-form .ant-form-item {
+  margin-bottom: var(--space-4) !important;
+}
+
+.cv-verify-form .ant-form-item-label > label {
+  margin-bottom: 0 !important;
+  color: #374151;
+  font-weight: var(--weight-medium);
+  font-size: var(--text-xs) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cv-verify-form .ant-otp {
+  width: 100%;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cv-verify-form .ant-otp .ant-otp-input {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 8px;
+  font-size: var(--text-md) !important;
+  font-weight: var(--weight-semibold);
+}
+
+.cv-verify__submit-item {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4) !important;
+}
+
+.cv-verify__submit {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #f9fafb !important;
+  font-weight: var(--weight-bold);
+  height: 48px;
+  border-radius: 8px;
+}
+
+.cv-verify__submit:hover,
+.cv-verify__submit:focus {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #f9fafb !important;
+}
+
+.cv-verify__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.cv-verify__timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
+.cv-verify__link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--status-info-default);
+  cursor: pointer;
+}
+
+.cv-verify__link-btn:hover:not(:disabled) {
+  color: var(--status-info-darker);
+}
+
+.cv-verify__link-btn:disabled {
+  color: var(--color-muted-text);
+  cursor: default;
+}
+
+@media (max-width: 420px) {
+  .cv-verify-form .ant-otp .ant-otp-input {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .cv-verify__actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

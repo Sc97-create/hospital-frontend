@@ -1,4 +1,4 @@
-/* Layout — mirrors patient-list.css */
+/* Layout — aligned with appointment-list spacing */
 
 .breadcrumb-layout {
     margin-left: 12px;
@@ -10,9 +10,11 @@
     color: #6B7280;
 }
 
-.main-layout {
-    margin: 16px;
-    width: 100%;
+.main-layout.prescriptions-page {
+    margin: 16px 24px 24px;
+    width: auto;
+    max-width: 100%;
+    padding: 4px 0 20px;
 }
 
 .appointment-button {
@@ -43,9 +45,9 @@
 
 .search-layout {
     display: flex;
-    margin-top: 20px;
+    margin-top: 8px;
+    margin-bottom: 16px;
     justify-content: space-between;
-    margin-right: 24px;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
@@ -83,61 +85,65 @@
     box-shadow: none !important;
 }
 
-.table-data {
-    margin-top: 18px;
-    margin-right: 24px;
+.prescriptions-page .table-wrapper {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
-.column-layout {
-    color: #1F2937;
-    font-size: 12px;
-    font-weight: 600;
+.prescriptions-page .ant-table-thead > tr > th {
+    background: #fafafa !important;
+    color: #6b7280 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 18px 16px !important;
 }
 
-
-.other-layout {
-    color: #6B7280;
+.prescriptions-page .ant-table-tbody > tr > td {
+    border-bottom: 1px solid #f3f4f6 !important;
+    padding: 16px !important;
 }
 
-.ant-table-thead > tr > th.other-layout {
-    color: #6B7280;
-    font-weight: 600;
-}
-
-.pagination-tab {
-    margin-top: 12px;
+.prescriptions-page .table-footer {
     display: flex;
     justify-content: space-between;
-    margin-right: 24px;
     align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 18px 20px;
+    background: #fafafa;
+    border-top: 1px solid #e5e7eb;
 }
 
-.pagination-tab,
-.ant-pagination .ant-pagination-total-text {
-    font-weight: 600;
-    color: #6B7280;
-}
-
-.pagination-tab .count-label {
+.prescriptions-page .table-footer .count-label {
     width: auto;
-    min-width: 150px;
-    height: 30px;
-    background-color: #6B7280;
-    font-size: var(--text-sm);
-    text-align: center;
-    padding: 8px 12px 0;
-    border-radius: 8px;
-    color: #F5F5F5;
-    font-weight: var(--weight-semibold);
+    min-width: 0;
+    height: auto;
+    background: transparent;
+    font-size: 14px;
+    text-align: left;
+    padding: 0;
+    border-radius: 0;
+    color: #6B7280;
+    font-weight: 500;
     margin: 0;
+}
+
+.prescriptions-page .ant-pagination-item {
+    border-radius: 10px;
 }
 
 /* Prescription-specific */
 
 .view-prescription-btn {
-    height: 28px !important;
-    padding: 0 10px !important;
-    font-size: var(--text-xs) !important;
+    height: 32px !important;
+    padding: 0 12px !important;
+    font-size: var(--text-sm) !important;
     font-weight: 500;
     line-height: 1;
     background-color: var(--color-primary) !important;
@@ -156,19 +162,10 @@
     box-shadow: none !important;
 }
 
-.code-badge {
-    background-color: #FFF9C4;
-    color: #000;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
 .medicine-cell {
     display: flex;
     align-items: center;
-    justify-content: center; /* <- likely culprit */
+    justify-content: center;
 }
 
 .medicine-name {

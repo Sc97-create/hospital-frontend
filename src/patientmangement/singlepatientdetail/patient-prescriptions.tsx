@@ -60,7 +60,9 @@ function PatientPrescriptions({ patient }: Props) {
             title: "Code",
             dataIndex: "code",
             key: "code",
-            render: (text: string) => <StatusTag type={STATUS_INFO}>{text}</StatusTag>,
+            render: (text: string) => (
+                <StatusTag type={STATUS_INFO} className="code-badge">{text}</StatusTag>
+            ),
         },
         {
             title: "Patient",

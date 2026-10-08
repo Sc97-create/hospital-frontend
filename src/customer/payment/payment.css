@@ -1,0 +1,95 @@
+/* Payment step — scoped under .cpay-payment */
+
+.cpay-payment {
+  font-family: var(--font-family) !important;
+}
+
+.cpay-payment,
+.cpay-payment *,
+.cpay-payment *::before,
+.cpay-payment *::after {
+  font-family: var(--font-family) !important;
+}
+
+.cpay-payment__header {
+  margin-bottom: var(--space-6);
+}
+
+.cpay-payment__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: #111827;
+}
+
+.cpay-payment__subtitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-muted-text);
+}
+
+.cpay-payment__alert {
+  margin-bottom: var(--space-4);
+}
+
+.cpay-payment__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: var(--text-sm);
+  color: #374151;
+}
+
+.cpay-payment__hint {
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-muted-text);
+}
+
+.cpay-payment__submit {
+  margin-top: var(--space-2);
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #f9fafb !important;
+  font-weight: var(--weight-bold);
+  height: 48px;
+  border-radius: 8px;
+}
+
+.cpay-payment__submit:hover,
+.cpay-payment__submit:focus {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #f9fafb !important;
+}
+
+.cpay-payment__back {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-4);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #374151;
+  cursor: pointer;
+}
+
+.cpay-payment__back:hover:not(:disabled) {
+  color: var(--status-info-default);
+}
+
+.cpay-payment__back:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

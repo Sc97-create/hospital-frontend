@@ -1,15 +1,32 @@
-export interface GetDepartmentsResponse {
-    data: Department[];
-    message: string;
-    code: number;
-}
-export interface Department {
-    organisation_id: string;
-    name: string;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string;
+export interface Role {
     id: string;
+    name: string;
+}
+
+export interface GetRolesResponse {
+    code: number;
+    data: Role[];
+    message: string;
+    total: number;
+}
+
+export interface Department {
+    id: string;
+    name: string;
+    description: string;
+    is_active: boolean;
+    organisation_id: string;
+    created_at: string;
+    created_by: string;
+    updated_at: string;
+    updated_by: string;
+}
+
+export interface GetDepartmentsResponse {
+    code: number;
+    data: Department[];
+    total: number;
+    message?: string;
 }
 
 export interface Doctor {

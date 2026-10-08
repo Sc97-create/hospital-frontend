@@ -16,7 +16,7 @@ import {
 import {
     HomeOutlined,
     UserOutlined,
-    PrinterOutlined,
+    EyeOutlined,
     FileTextOutlined,
     CheckCircleOutlined,
 } from '@ant-design/icons';
@@ -28,7 +28,6 @@ import Sidebar from '../sidebar';
 import { GetDispenseCheckoutLines, UpdateStatus } from './api/prescription';
 import type { DispenseLineResponse } from './types/prescriptionmodel';
 import {
-    fetchPatientById,
     formatPatientSubtext,
     formatPrescriptionStatusLabel,
     getPrescriptionStatusTagColor,
@@ -37,8 +36,10 @@ import {
     isFullyDispensedPrescriptionStatus,
     isPartiallyDispensedPrescriptionStatus,
     isPaymentPendingPrescriptionStatus,
+    mapPrescriptionPatientData,
     PARTIAL_DISPENSE_BLOCK_MESSAGE,
     prescriptionPath,
+    prescriptionReceiptPath,
     recallPrescriptionPatientId,
     rememberPrescriptionPatientId,
     resolvePrescriptionPatientId,
@@ -61,7 +62,7 @@ import './prescription-preview.css';
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-interface PrescriptionRow {
+export interface PrescriptionRow {
     key: string;
     prescription_item_id: string;
     medicine: string;
@@ -75,6 +76,8 @@ interface PrescriptionRow {
     remaining_quantity: number | null;
     item_status: string;
     out_of_stock: boolean;
+    /** Best-effort per-unit price from the earliest-expiry batch (FEFO), for receipts. */
+    unit_price: number;
 }
 
 function formatFoodInstruction(value: string | undefined): string {
@@ -94,6 +97,27 @@ function lineRemainingQuantity(line: DispenseLineResponse): number | null {
     if (typeof line.remaining_quantity === 'number') return line.remaining_quantity;
     if (typeof line.remaining_qty === 'number') return line.remaining_qty;
     return null;
+}
+
+/** Prefer unit_selling_price when set; otherwise unit_price, then selling_price/box (mirrors checkout). */
+function resolveBatchUnitPrice(batch: DispenseLineResponse['medicine_batches'][number]): number {
+    const { pricing } = batch;
+    if (pricing.unit_selling_price > 0) return pricing.unit_selling_price;
+    if (pricing.unit_price > 0) return pricing.unit_price;
+    if (pricing.selling_price > 0 && batch.units_per_box > 0) {
+        return pricing.selling_price / batch.units_per_box;
+    }
+    return 0;
+}
+
+/** Earliest-expiry (FEFO) batch's price — same default checkout would allocate first. */
+function resolveLineUnitPrice(line: DispenseLineResponse): number {
+    const batches = line.medicine_batches ?? [];
+    if (!batches.length) return 0;
+    const earliest = [...batches].sort(
+        (a, b) => new Date(a.expires_at).getTime() - new Date(b.expires_at).getTime(),
+    )[0];
+    return resolveBatchUnitPrice(earliest);
 }
 
 function isItemFullyDispensed(row: PrescriptionRow): boolean {
@@ -123,6 +147,7 @@ function mapMedicineInfoLines(lines: DispenseLineResponse[]): PrescriptionRow[] 
             remaining_quantity: lineRemainingQuantity(item),
             item_status: item.prescription_item_status ?? '',
             out_of_stock: Boolean(item.out_of_stock),
+            unit_price: resolveLineUnitPrice(item),
         };
     });
 }
@@ -301,15 +326,15 @@ function PharmacistPrescriptionDetail() {
                     queryPatientId: searchParams.get('patientId'),
                     cachedPatientId: recallPrescriptionPatientId(id),
                     apiPatientId:
+                        medicineInfo.patientData?.patient_id ||
                         medicineInfo.patient_id ||
                         lines.find((item) => item.patient_id)?.patient_id,
                 });
                 setResolvedPatientId(patientId);
                 rememberPrescriptionPatientId(id, patientId);
 
-                if (patientId) {
-                    const patientData = await fetchPatientById(patientId);
-                    if (!cancelled) setPatient(patientData);
+                if (!cancelled) {
+                    setPatient(mapPrescriptionPatientData(medicineInfo.patientData));
                 }
             } catch (error) {
                 if (cancelled) return;
@@ -326,9 +351,14 @@ function PharmacistPrescriptionDetail() {
         };
     }, [id, locationState?.patientId, locationState?.status, messageApi, searchParams]);
 
-    const handlePrint = () => {
-        messageApi.info('Sending to printer…');
-        window.print();
+    const handlePreviewReceipt = () => {
+        if (!id) {
+            messageApi.error('Missing prescription id');
+            return;
+        }
+        navigate(prescriptionReceiptPath(id, { patientId: resolvedPatientId }), {
+            state: { patientId: resolvedPatientId },
+        });
     };
 
     const handleGenerateLabels = () => {
@@ -461,7 +491,7 @@ function PharmacistPrescriptionDetail() {
                                                 <Text className='info-label'>RX STATUS</Text>
                                                 <Space size={4} wrap>
                                                     {prescriptionCode ? (
-                                                        <StatusTag type={STATUS_INFO} bordered>
+                                                        <StatusTag type={STATUS_INFO} bordered className="code-badge">
                                                             {prescriptionCode}
                                                         </StatusTag>
                                                     ) : null}
@@ -529,8 +559,8 @@ function PharmacistPrescriptionDetail() {
                             {!isCancelledPrescriptionStatus(prescriptionStatus) && (
                                 <div className='sticky-footer'>
                                     <Space wrap>
-                                        <Button icon={<PrinterOutlined />} onClick={handlePrint}>
-                                            Print Bill
+                                        <Button icon={<EyeOutlined />} onClick={handlePreviewReceipt}>
+                                            Preview Receipt
                                         </Button>
                                         <Button icon={<FileTextOutlined />} onClick={handleGenerateLabels}>
                                             Generate Labels

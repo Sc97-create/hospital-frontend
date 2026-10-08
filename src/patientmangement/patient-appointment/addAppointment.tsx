@@ -27,9 +27,10 @@ import "./addAppointment.css";
 import { Content } from "antd/es/layout/layout";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../sidebar";
-import type { appointmentPayload, slots } from "../types/appointments";
+import type { appointmentFormValues, appointmentPayload, slots } from "../types/appointments";
 import { CreateAppointment, GetSlots } from "../api/appointments";
 import { GetDoctors } from "../../shared/api/shared-api";
+import ConsultationPaymentModal from "./components/consultation-payment-modal";
 
 
 interface doctors {
@@ -45,6 +46,8 @@ const AddAppointment: React.FC = () => {
   const [selectedSlot, setSelectedSlot] = useState<slots | null>(null);
   const [openSlotModal, setOpenSlotModal] = useState(false);
   const [slots, addSlots] = useState<slots[] | null>()
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [bookedAppointmentId, setBookedAppointmentId] = useState<string | null>(null);
   const [form] = Form.useForm();
   //const visibleSlots = slots?.slice(0, 5) ?? [];
   //const remainingSlots = slots?.slice(5) ?? []
@@ -128,11 +131,10 @@ const AddAppointment: React.FC = () => {
     }
   }, [slots]);
 
-  const createAppointment = async (values: appointmentPayload) => {
+  const createAppointment = async (values: appointmentFormValues) => {
     if (!selectedSlot) {
       console.log("slot not selected")
     }
-    console.log("days", values.daysjs_appointment_date)
     const payload: appointmentPayload = {
       start_time: selectedSlot?.start_time ?? "",
       end_time: selectedSlot?.end_time ?? "",
@@ -142,15 +144,29 @@ const AddAppointment: React.FC = () => {
       visit_type: values.visit_type,
       organisation_id: organisation_id,
       user_id: localStorage.getItem("user_id") || "",
-      daysjs_appointment_date: values.daysjs_appointment_date
-
     }
     try {
       const resp = await CreateAppointment(payload)
       message.success("Appointment created successfully");
-
-      navigate("/appointments")
       console.log(resp)
+
+      const respData = resp?.data;
+      const newAppointmentId =
+        (typeof respData === "object" && respData
+          ? respData.id || respData.appointment_id
+          : typeof respData === "string"
+            ? respData
+            : undefined) ||
+        resp?.id ||
+        resp?.appointment_id ||
+        "";
+
+      if (newAppointmentId) {
+        setBookedAppointmentId(newAppointmentId);
+        setPaymentModalOpen(true);
+      } else {
+        navigate("/appointments")
+      }
     } catch (err) {
       console.log(err)
     }
@@ -365,6 +381,15 @@ const AddAppointment: React.FC = () => {
           </Card>
         </div>
 
+        <ConsultationPaymentModal
+          open={paymentModalOpen}
+          appointmentId={bookedAppointmentId ?? ""}
+          patientId={patientID ?? ""}
+          onClose={() => {
+            setPaymentModalOpen(false);
+            navigate("/appointments");
+          }}
+        />
       </Content>
     </Layout>
 

@@ -17,6 +17,7 @@ export interface DashboardKpis {
 
 export interface QueueAppointment {
   appointment_id: string;
+  appointment_code?: string;
   start_time: string;
   end_time: string;
   patient_id: string;
@@ -29,21 +30,15 @@ export interface QueueAppointment {
   mobile_no: string;
 }
 
-export interface UpNextAppointment {
-  appointment_id: string;
-  start_time: string;
-  patient_id: string;
-  patient_name: string;
-  doctor_name: string;
-  visit_type: VisitType;
-}
-
 export interface PrescriptionAttentionItem {
   id: string;
   code: string;
   prescribed_by: string;
   prescription_date: string;
-  status: PrescriptionAttentionStatus;
+  status: string;
+  patient_id?: string;
+  patient_name?: string;
+  appointment_id?: string;
 }
 
 export interface SearchPatientItem {
@@ -55,15 +50,38 @@ export interface SearchPatientItem {
   patient_gender: string;
 }
 
+export type PaymentMethodType = "cash" | "qr" | "payment_link";
+
+export interface DashboardPaymentMethodBreakdown {
+  method: PaymentMethodType;
+  count: number;
+  amount: number;
+}
+
+export interface DashboardPaymentsSummary {
+  invoice_count: number;
+  collected_total: number;
+  pending_count: number;
+  by_method: DashboardPaymentMethodBreakdown[];
+}
+
+export interface DashboardEmployeesSummary {
+  active: number;
+  inactive: number;
+  total: number;
+}
+
 export interface DashboardOverview {
   clinic_name: string;
   branch_label: string;
   date_label: string;
   kpis: DashboardKpis;
   queue: QueueAppointment[];
-  up_next: UpNextAppointment[];
   prescriptions_attention: PrescriptionAttentionItem[];
+  prescriptions_total: number;
   patients: SearchPatientItem[];
+  payments: DashboardPaymentsSummary;
+  employees: DashboardEmployeesSummary;
 }
 
 const EMPTY_OVERVIEW: DashboardOverview = {
@@ -83,9 +101,24 @@ const EMPTY_OVERVIEW: DashboardOverview = {
     waiting: 0,
   },
   queue: [],
-  up_next: [],
   prescriptions_attention: [],
+  prescriptions_total: 0,
   patients: [],
+  payments: {
+    invoice_count: 0,
+    collected_total: 0,
+    pending_count: 0,
+    by_method: [
+      { method: "cash", count: 0, amount: 0 },
+      { method: "qr", count: 0, amount: 0 },
+      { method: "payment_link", count: 0, amount: 0 },
+    ],
+  },
+  employees: {
+    active: 0,
+    inactive: 0,
+    total: 0,
+  },
 };
 
 /** Swap this for an API fetch later. */

@@ -1,25 +1,50 @@
 import apiClient from "../../lib/api-client"
-import type { GetDepartmentsResponse, GetDoctorsResponse } from "../types/share-type"
+import type {
+    GetDepartmentsResponse,
+    GetDoctorsResponse,
+    GetRolesResponse,
+} from "../types/share-type"
 
-export const GetDepartments = async (organisationID: string, page: number, limit: number): Promise<GetDepartmentsResponse> => {
+export const GetDepartments = async (
+    organisationID: string,
+    page: number,
+    limit: number,
+): Promise<GetDepartmentsResponse> => {
     const response = await apiClient.get(`/department/getDepartments`, {
         params: {
             organisation_id: organisationID,
-            page_no: page,
-            limit: limit
-        }
+            page,
+            limit,
+        },
     })
     return response.data
 }
 
-export const GetDoctors = async (search: string, organisationID: string): Promise<GetDoctorsResponse> => {
-    const response = await apiClient.get(`/employee/getDoctors`,
-        {
-            params: {
-                organisation_id: organisationID,
-                name: search,
-            }
-        })
+export const GetRoles = async (
+    organisationID: string,
+    page: number,
+    limit: number,
+): Promise<GetRolesResponse> => {
+    const response = await apiClient.get(`/role/getRoles`, {
+        params: {
+            organisation_id: organisationID,
+            page,
+            limit,
+        },
+    })
+    return response.data
+}
+
+export const GetDoctors = async (
+    search: string,
+    organisationID: string,
+): Promise<GetDoctorsResponse> => {
+    const response = await apiClient.get(`/employee/getDoctors`, {
+        params: {
+            organisation_id: organisationID,
+            name: search,
+        },
+    })
 
     return response.data
 }

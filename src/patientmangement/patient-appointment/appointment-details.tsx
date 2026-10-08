@@ -6,16 +6,13 @@ import {
     Button,
     Avatar,
     Typography,
-    Divider,
     Layout,
     Breadcrumb,
 } from "antd";
 import {
     CalendarOutlined,
-    HistoryOutlined,
     ClockCircleOutlined,
     PlayCircleOutlined,
-    FileTextOutlined,
     HomeOutlined,
 } from "@ant-design/icons";
 import "./appointment-details.css";
@@ -26,15 +23,14 @@ import { GetAppointmentPreview, updateStatus } from "../api/appointments";
 import type { previewAppointmentData, statusUpdate } from "../types/appointments";
 import dayjs from "dayjs";
 import { StatusTag } from "../../components/status-tag";
-import {
-    getAppointmentStatusType,
-    STATUS_INFO,
-} from "../../constants/status-colors";
+import { getAppointmentStatusType, canStartConsultation } from "../../constants/status-colors";
+import { usePermissions } from "../../auth/permissions-context";
 
 const { Text } = Typography;
 
 const AppointmentDetails: React.FC = () => {
     const navigate = useNavigate()
+    const { canCreate } = usePermissions()
     const { appointmentID } = useParams<{ appointmentID: string }>();
     const organisationID = localStorage.getItem("organisation_id") || ""
     const [previewData, setPreviewData] = useState<previewAppointmentData>()
@@ -125,27 +121,12 @@ const AppointmentDetails: React.FC = () => {
                                 <span>{dayjs(previewData?.appointment_date).format("DD MMM YYYY")} • {previewData?.start_time ?? ""}</span>
                             </div>
                         </div>
-
-                        <Button
-                            icon={<HistoryOutlined />}
-                            className="history-button"
-                        >
-                            View History
-                        </Button>
                     </div>
 
-                    <Row gutter={16}>
-                        <Col xs={24} lg={16}>
+                    <div className="appointment-details-main">
                             <Card className="custom-card">
                                 <div className="section-header">
                                     <span>PATIENT INFORMATION</span>
-
-                                    <Button
-                                        type="link"
-                                        className="link-button"
-                                    >
-                                        View History
-                                    </Button>
                                 </div>
 
                                 <div className="patient-info">
@@ -284,57 +265,7 @@ const AppointmentDetails: React.FC = () => {
                                     </div>
                                 </div>
                             </Card>
-                        </Col>
-
-                        <Col xs={24} lg={8}>
-                            <Card className="custom-card summary-card">
-                                <div className="summary-header">
-                                    <span>Quick Summary</span>
-
-                                    <FileTextOutlined />
-                                </div>
-
-                                <div className="summary-item">
-                                    <div className="label-text">
-                                        LATEST CONSULTATION
-                                    </div>
-
-                                    <div className="value-text">
-                                        15 May 2026
-                                    </div>
-                                </div>
-
-                                <div className="summary-item">
-                                    <div className="label-text">
-                                        DIAGNOSIS
-                                    </div>
-
-                                    <StatusTag type={STATUS_INFO}>
-                                        Type 2 Diabetes
-                                    </StatusTag>
-                                </div>
-
-                                <div className="summary-item">
-                                    <div className="label-text">
-                                        PRESCRIPTION
-                                    </div>
-
-                                    <div className="value-text">
-                                        2 Medicines Prescribed
-                                    </div>
-                                </div>
-
-                                <Divider />
-
-                                <Button
-                                    type="link"
-                                    className="link-button"
-                                >
-                                    View Details
-                                </Button>
-                            </Card>
-                        </Col>
-                    </Row>
+                    </div>
 
                     <div className="footer-actions">
                         <Button className="cancel-btn">
@@ -347,15 +278,16 @@ const AppointmentDetails: React.FC = () => {
                             </Button>
                         )}
 
-                        <Button
-                            type="primary"
-                            icon={<PlayCircleOutlined />}
-                            className="start-btn"
-                            onClick={updatestatus}
-                            disabled={previewData?.status === "missed" || previewData?.status === "reschedule_required"}
-                        >
-                            Start Consultation
-                        </Button>
+                        {canCreate("prescription") && canStartConsultation(previewData?.status) ? (
+                            <Button
+                                type="primary"
+                                icon={<PlayCircleOutlined />}
+                                className="start-btn"
+                                onClick={updatestatus}
+                            >
+                                Start Consultation
+                            </Button>
+                        ) : null}
                     </div>
                 </div>
             </Content>

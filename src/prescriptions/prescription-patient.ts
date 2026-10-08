@@ -1,6 +1,6 @@
-import { findOne as findPatientById } from '../patientmangement/api/patients';
 import type { patientlist } from '../patientmangement/types/patients';
 import type { StatusType } from '../constants/status-colors';
+import type { PrescriptionPatientData } from './types/prescriptionmodel';
 import { getPrescriptionStatusType } from '../constants/status-colors';
 
 export type PrescriptionLocationState = {
@@ -45,6 +45,18 @@ export function prescriptionPath(
     const patientId = options?.patientId?.trim();
     return {
         pathname,
+        search: patientId ? `?patientId=${encodeURIComponent(patientId)}` : undefined,
+    };
+}
+
+/** Build printable receipt/invoice preview path while keeping patientId in the query string. */
+export function prescriptionReceiptPath(
+    prescriptionId: string,
+    options?: { patientId?: string | null },
+): { pathname: string; search?: string } {
+    const patientId = options?.patientId?.trim();
+    return {
+        pathname: `/prescription/${prescriptionId}/receipt`,
         search: patientId ? `?patientId=${encodeURIComponent(patientId)}` : undefined,
     };
 }
@@ -186,12 +198,27 @@ export function getPrescriptionStatusTagColor(status: string | undefined | null)
     return getPrescriptionStatusType(status);
 }
 
-export async function fetchPatientById(patientId: string): Promise<patientlist | null> {
-    try {
-        const res = await findPatientById(patientId);
-        return res?.data ?? null;
-    } catch (error) {
-        console.error('getpatientByID failed:', error);
-        return null;
-    }
+/** Map getMedicineInfo patientData → patientlist for shared UI helpers. */
+export function mapPrescriptionPatientData(
+    data: PrescriptionPatientData | null | undefined,
+): patientlist | null {
+    if (!data?.patient_id?.trim()) return null;
+
+    return {
+        patient_id: data.patient_id,
+        patient_code: data.patient_code ?? '',
+        patient_name: data.patient_name ?? '',
+        patient_age: data.patient_age ?? 0,
+        patient_gender: data.patient_gender ?? '',
+        patient_phone: data.patient_phone ?? '',
+        patient_email: data.patient_email ?? '',
+        patient_weight: data.patient_weight ?? 0,
+        patient_status: data.patient_status ?? '',
+        patient_address: data.patient_address ?? '',
+        patient_bg: data.patient_bg ?? '',
+        waiting_time: data.waiting_time ?? '',
+        patient_lvd: data.patient_lvd ? new Date(data.patient_lvd) : new Date(0),
+        patient_created_at: data.patient_created_at ?? '',
+        admission_date: new Date(0),
+    };
 }

@@ -1,0 +1,53 @@
+/* Subscription active — scoped under .csa-active */
+
+.csa-active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-family: var(--font-family) !important;
+}
+
+.csa-active,
+.csa-active *,
+.csa-active *::before,
+.csa-active *::after {
+  font-family: var(--font-family) !important;
+}
+
+.csa-active__icon {
+  margin-bottom: var(--space-5);
+  font-size: 56px;
+  color: var(--color-primary);
+}
+
+.csa-active__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: #111827;
+}
+
+.csa-active__subtitle {
+  margin: 0 0 var(--space-8);
+  max-width: 32ch;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-muted-text);
+}
+
+.csa-active__submit {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #f9fafb !important;
+  font-weight: var(--weight-bold);
+  height: 48px;
+  border-radius: 8px;
+}
+
+.csa-active__submit:hover,
+.csa-active__submit:focus {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #f9fafb !important;
+}

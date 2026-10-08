@@ -147,9 +147,12 @@ const AppointmentsPage: React.FC = () => {
             dataIndex: "code",
             key: "code",
             color: "#6B7280",
-            width: 180,
+            width: 150,
+            ellipsis: true,
             render: (_: string, record: AppointmentOrg) => (
-                <StatusTag type={STATUS_INFO}>{record.appointment_code}</StatusTag>
+                <StatusTag type={STATUS_INFO} className="code-badge">
+                    {record.appointment_code}
+                </StatusTag>
             ),
         },
         {
@@ -157,9 +160,12 @@ const AppointmentsPage: React.FC = () => {
             dataIndex: "time",
             key: "time",
             color: "#6B7280",
-            width: 220,
+            width: 110,
             render: (_: string, record: AppointmentOrg) => (
-                <div className="time-text">{record.start_time} - {record.end_time}</div>
+                <div className="time-text">
+                    <span>{record.start_time}</span>
+                    <span>{record.end_time}</span>
+                </div>
             ),
         },
         {
@@ -167,7 +173,8 @@ const AppointmentsPage: React.FC = () => {
             dataIndex: "patient",
             key: "patient",
             color: "#6B7280",
-            width: 280,
+            width: 140,
+            ellipsis: true,
             render: (_: string, record: AppointmentOrg) => (
                 <div>
                     <div
@@ -198,7 +205,8 @@ const AppointmentsPage: React.FC = () => {
             dataIndex: "doctor",
             color: "#6B7280",
             key: "doctor",
-            width: 280,
+            width: 130,
+            ellipsis: true,
             render: (_: string, record: AppointmentOrg) => (
                 <div className="doctor-name">{record.doctor_name}</div>
             ),
@@ -207,7 +215,7 @@ const AppointmentsPage: React.FC = () => {
             title: "VISIT TYPE",
             dataIndex: "visitType",
             color: "#6B7280",
-            width: 180,
+            width: 100,
             key: "visitType",
             render: (_: string, record: AppointmentOrg) => getVisitTag(record.visit_type),
         },
@@ -216,7 +224,7 @@ const AppointmentsPage: React.FC = () => {
             dataIndex: "status",
             color: "#6B7280",
             key: "status",
-            width: 200,
+            width: 130,
             render: (_: string, record: AppointmentOrg) => {
                 const meta = getStatusMeta(record.status);
                 const isUpdating = updatingStatusId === record.appointment_id;
@@ -257,12 +265,16 @@ const AppointmentsPage: React.FC = () => {
             },
         },
         {
-            title: "APPOINTMENT DATE",
+            title: "DATE",
             dataIndex: "appointment_date",
             color: "#6B7280",
             key: "appointment_date",
-            width: 180,
-            render: (_: string, record: AppointmentOrg) => <div className="doctor-name">{dayjs(record.appointment_date).format("DD MMM YYYY")}</div>,
+            width: 100,
+            render: (_: string, record: AppointmentOrg) => (
+                <div className="doctor-name">
+                    {dayjs(record.appointment_date).format("DD MMM YYYY")}
+                </div>
+            ),
         },
     ];
 
@@ -457,6 +469,7 @@ const AppointmentsPage: React.FC = () => {
                             options={[
                                 { value: "new_patient", label: "New Patient" },
                                 { value: "follow_up", label: "Follow Up" },
+                                { value: "opd", label: "OPD" },
                                 { value: "procedure", label: "Procedure" },
                             ]}
                             onChange={(value) => {
@@ -474,6 +487,7 @@ const AppointmentsPage: React.FC = () => {
                             rowKey="appointment_id"
                             pagination={false}
                             loading={loading}
+                            scroll={{ x: 860 }}
                             rowClassName={(record) =>
                                 record.next ? "next-row" : ""
                             }

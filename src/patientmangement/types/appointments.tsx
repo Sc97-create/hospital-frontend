@@ -2,13 +2,20 @@ import dayjs from "dayjs"
 export interface appointmentPayload {
     start_time: string;
     end_time: string;
-    daysjs_appointment_date: dayjs.Dayjs;
     organisation_id: string;
     patient_id: string;
     doctor_id: string;
     visit_type: string;
     user_id: string;
     appointment_date: string;
+}
+
+/** Form values for the book-appointment screen (DatePicker needs a Dayjs). */
+export interface appointmentFormValues {
+    doctor_id: string;
+    visit_type: string;
+    daysjs_appointment_date: dayjs.Dayjs;
+    time_slot?: string;
 }
 export interface slotResponse {
     message: string;
@@ -81,6 +88,8 @@ export interface statusUpdate{
 export interface CreateAppointmentResponse {
     data?: string | { patient_id?: string; id?: string; appointment_id?: string };
     patient_id?: string;
+    id?: string;
+    appointment_id?: string;
     message?: string;
     code?: string | number;
 }

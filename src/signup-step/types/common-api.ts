@@ -13,13 +13,22 @@ export interface OrganisationData {
     address?: OrganisationAddress;
 }
 
+/** Logged-in user / findbyID employee payload */
 export interface UserData {
     id?: string;
-    username?: string;
-    first_name?: string;
-    last_name?: string;
-    email_id?: string;
-    phone_number?: string;
+    employee_id?: string;
+    employee_code?: string;
+    employee_name?: string;
+    employee_first_name?: string;
+    employee_last_name?: string;
+    employee_email?: string;
+    employee_phone?: string;
+    employee_role_id?: string;
+    role_name?: string;
+    employee_department_id?: string;
+    department_name?: string;
+    employee_status?: string;
+    employee_organisation_id?: string;
 }
 
 export interface OrganisationResponse {
@@ -29,5 +38,6 @@ export interface OrganisationResponse {
 
 export interface UserResponse {
     data: UserData;
-    code: string;
+    message?: string;
+    code?: string | number;
 }

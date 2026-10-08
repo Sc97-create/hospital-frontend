@@ -1,6 +1,12 @@
 import { LogoutReq } from "./api/login-api";
 
-const AUTH_STORAGE_KEYS = ["access_token", "user_id", "organisation_id"] as const;
+const AUTH_STORAGE_KEYS = [
+    "access_token",
+    "user_id",
+    "organisation_id",
+    "is_admin",
+    "user_permissions",
+] as const;
 
 /** Clear local session tokens (used after logout API or failed refresh). */
 export function clearAuthSession(): void {
@@ -15,6 +21,7 @@ export function clearAuthSession(): void {
  */
 export async function logoutAndRedirect(
     navigate: (path: string, options?: { replace?: boolean }) => void,
+    clearAccess?: () => void,
 ): Promise<void> {
     try {
         await LogoutReq();
@@ -22,6 +29,7 @@ export async function logoutAndRedirect(
         console.error("Logout API failed:", error);
     } finally {
         clearAuthSession();
+        clearAccess?.();
         navigate("/login", { replace: true });
     }
 }

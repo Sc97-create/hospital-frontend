@@ -17,6 +17,13 @@ export interface CreateSupplierResponse {
     message?: string;
 }
 
+export interface GetSuppliersByOrgPayload {
+    organisation_id: string;
+    search?: string;
+    limit: number;
+    page_no: number;
+}
+
 export interface SupplierListItem {
     id: string;
     supplier_code: string;

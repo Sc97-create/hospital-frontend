@@ -1,0 +1,191 @@
+/* Plan & billing — scoped under .cpb-plan */
+
+.cpb-plan {
+  font-family: var(--font-family) !important;
+}
+
+.cpb-plan,
+.cpb-plan *,
+.cpb-plan *::before,
+.cpb-plan *::after {
+  font-family: var(--font-family) !important;
+}
+
+.cpb-plan__header {
+  margin-bottom: var(--space-8);
+}
+
+.cpb-plan__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: #111827;
+}
+
+.cpb-plan__subtitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-muted-text);
+}
+
+.cpb-plan__card.ant-card {
+  margin-bottom: var(--space-6);
+  border-radius: 12px;
+  background: #f8fafc;
+  box-shadow: none;
+}
+
+.cpb-plan__card .ant-card-body {
+  padding: var(--space-5);
+}
+
+.cpb-plan__card-top {
+  margin-bottom: var(--space-4);
+}
+
+.cpb-plan__badge {
+  display: inline-flex;
+  margin-bottom: var(--space-2);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--color-primary-light);
+  color: var(--status-success-darker);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cpb-plan__price {
+  margin: 0;
+  font-size: 28px;
+  font-weight: var(--weight-bold);
+  color: #111827;
+}
+
+.cpb-plan__price span {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-muted-text);
+}
+
+.cpb-plan__price-original {
+  margin: 6px 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
+.cpb-plan__price-original span {
+  text-decoration: line-through;
+  margin-right: 8px;
+}
+
+.cpb-plan__price-original em {
+  font-style: normal;
+  font-weight: var(--weight-semibold);
+  color: var(--status-success-darker);
+}
+
+.cpb-plan__loading {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  margin-bottom: var(--space-5);
+}
+
+.cpb-plan__alert {
+  margin-bottom: var(--space-5);
+}
+
+.cpb-plan__plans {
+  display: flex;
+  width: 100%;
+  margin-bottom: var(--space-4);
+}
+
+.cpb-plan__plans .ant-radio-button-wrapper {
+  flex: 1;
+  text-align: center;
+  height: 40px;
+  line-height: 38px;
+  text-transform: capitalize;
+}
+
+.cpb-plan__cycle {
+  display: flex;
+  width: 100%;
+  margin-bottom: var(--space-3);
+}
+
+.cpb-plan__cycle .ant-radio-button-wrapper {
+  flex: 1;
+  text-align: center;
+  height: 40px;
+  line-height: 38px;
+}
+
+.cpb-plan__cycle-note {
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-muted-text);
+}
+
+.cpb-plan__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.cpb-plan__list li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: var(--text-sm);
+  color: #374151;
+}
+
+.cpb-plan__list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+  font-weight: var(--weight-bold);
+}
+
+.cpb-plan__submit {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #f9fafb !important;
+  font-weight: var(--weight-bold);
+  height: 48px;
+  border-radius: 8px;
+}
+
+.cpb-plan__submit:hover,
+.cpb-plan__submit:focus {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #f9fafb !important;
+}
+
+.cpb-plan__back {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-4);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #374151;
+  cursor: pointer;
+}
+
+.cpb-plan__back:hover {
+  color: var(--status-info-default);
+}

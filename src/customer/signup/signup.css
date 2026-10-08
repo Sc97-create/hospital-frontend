@@ -1,0 +1,291 @@
+/* Customer signup — scoped under .customer-signup */
+
+.customer-signup {
+  --cs-bg: #ffffff;
+  --cs-brand-bg: #eaf6f1;
+  --cs-primary: #25d366;
+  --cs-primary-hover: #20b858;
+  --cs-primary-deep: #1b806a;
+  --cs-text: #111827;
+  --cs-muted: #6b7280;
+
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--cs-bg);
+  color: var(--cs-text);
+  font-family: var(--font-family) !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+.customer-signup,
+.customer-signup *,
+.customer-signup *::before,
+.customer-signup *::after {
+  box-sizing: border-box;
+  font-family: var(--font-family) !important;
+}
+
+.customer-signup a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* —— Left brand panel —— */
+.cs-brand {
+  position: relative;
+  flex: 0 0 40%;
+  max-width: 40%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 2.5rem 2.25rem;
+  background: var(--cs-brand-bg);
+}
+
+.cs-brand__logo {
+  position: absolute;
+  top: 2rem;
+  left: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cs-logo__mark {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.cs-brand__name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--cs-text);
+}
+
+.cs-brand__tag {
+  margin-top: 0.1rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cs-muted);
+}
+
+.cs-brand__copy {
+  max-width: 20rem;
+}
+
+.cs-brand__headline {
+  margin: 0 0 0.85rem;
+  font-size: clamp(1.75rem, 2.6vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--cs-text);
+}
+
+.cs-brand__support {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--cs-muted);
+}
+
+/* —— Right form panel —— */
+.cs-panel {
+  flex: 1 1 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  background: var(--cs-bg);
+}
+
+.cs-panel__inner {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* —— Form —— */
+.cs-form__header {
+  margin-bottom: var(--space-8);
+}
+
+.cs-form__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: #111827;
+}
+
+.cs-form__subtitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-muted-text);
+}
+
+/* Match login Ant Design input chrome */
+.cs-ant-form.ant-form-vertical .ant-form-item .ant-form-item-label {
+  padding-bottom: 2px !important;
+  margin-bottom: 0 !important;
+  overflow: visible;
+}
+
+.cs-ant-form .ant-form-item {
+  margin-bottom: var(--space-4) !important;
+}
+
+.cs-ant-form .ant-form-item-label > label {
+  margin-bottom: 0 !important;
+  color: #374151;
+  font-weight: var(--weight-medium);
+  width: 100%;
+}
+
+.cs-ant-form .ant-form-item-control {
+  margin-top: 0 !important;
+}
+
+.cs-ant-form .ant-form-item-control-input {
+  min-height: unset !important;
+}
+
+.cs-ant-form .ant-form-item-row {
+  row-gap: 0;
+  gap: 0;
+}
+
+.cs-ant-form .ant-input-affix-wrapper,
+.cs-ant-form .ant-input-password {
+  border-radius: 8px;
+  min-height: 48px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background: #fff;
+}
+
+.cs-ant-form .ant-input-affix-wrapper .ant-input,
+.cs-ant-form .ant-input-password .ant-input {
+  font-size: var(--text-base);
+}
+
+.cs-password-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-3);
+}
+
+.cs-field__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted-text);
+  font-weight: var(--weight-regular);
+}
+
+.cs-strength {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin: -4px 0 var(--space-4);
+}
+
+.cs-strength__bar {
+  height: 4px;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+.cs-strength__bar--1 {
+  background: #f59e0b;
+}
+
+.cs-strength__bar--2 {
+  background: #84cc16;
+}
+
+.cs-strength__bar--3 {
+  background: var(--color-primary);
+}
+
+.cs-submit-item {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-4) !important;
+}
+
+.cs-submit-button {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #f9fafb !important;
+  font-weight: var(--weight-bold);
+  height: 48px;
+  border-radius: 8px;
+}
+
+.cs-submit-button:hover,
+.cs-submit-button:focus {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: #f9fafb !important;
+}
+
+.cs-submit-button--secondary {
+  background: transparent !important;
+  border: 1.5px solid var(--cs-primary-deep) !important;
+  color: var(--cs-primary-deep) !important;
+}
+
+.cs-submit-button--secondary:hover,
+.cs-submit-button--secondary:focus {
+  background: var(--cs-brand-bg) !important;
+  border-color: var(--cs-primary-deep) !important;
+  color: var(--cs-primary-deep) !important;
+}
+
+.cs-signin {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+}
+
+.cs-signin a {
+  color: var(--status-info-default) !important;
+  font-weight: var(--weight-medium);
+}
+
+.cs-signin a:hover {
+  color: var(--status-info-darker) !important;
+}
+
+.cs-placeholder {
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 960px) {
+  .customer-signup {
+    flex-direction: column;
+  }
+
+  .cs-brand {
+    flex: none;
+    max-width: none;
+    min-height: auto;
+    gap: 1.75rem;
+    padding: 1.5rem 1.35rem;
+  }
+
+  .cs-brand__copy {
+    max-width: none;
+  }
+
+  .cs-panel {
+    padding: 1.75rem 1.25rem 2.5rem;
+  }
+}

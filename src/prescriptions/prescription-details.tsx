@@ -17,7 +17,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { FindAllPrescription, GetByStatus } from "./api/prescription";
+import { FindAllPrescription } from "./api/prescription";
 import type { PrescriptionListItem, PrescriptionStatusFilter } from "./types/prescriptionmodel";
 import {
     formatPrescriptionStatusLabel,
@@ -55,20 +55,18 @@ function PrescriptionList() {
         setLoading(true);
         try {
             const organisation_id = localStorage.getItem("organisation_id") || "";
-            const response = status === "all"
-                ? await FindAllPrescription(
-                    pageSize,
-                    currentPage,
-                    organisation_id,
-                    search || undefined,
-                )
-                : await GetByStatus(
-                    pageSize,
-                    currentPage,
-                    organisation_id,
-                    status,
-                    search || undefined,
-                );
+            const trimmedSearch = search.trim();
+            // Keep status when filtering Tentative (including during search).
+            // For other tabs, ignore status while searching so matches outside that tab still appear.
+            const shouldPassStatus =
+                status === "tentative" || (!trimmedSearch && status !== "all");
+            const response = await FindAllPrescription({
+                organisation_id,
+                limit: pageSize,
+                page_no: currentPage,
+                ...(trimmedSearch ? { search: trimmedSearch } : {}),
+                ...(shouldPassStatus ? { status } : {}),
+            });
             // Ignore stale responses from earlier keystrokes / remounts
             if (requestId !== requestIdRef.current) return;
             if (response.code === "200") {
@@ -113,7 +111,7 @@ function PrescriptionList() {
             dataIndex: "code",
             key: "code",
             render: (text: string) => (
-                <StatusTag type={STATUS_INFO}>{text}</StatusTag>
+                <StatusTag type={STATUS_INFO} className="code-badge">{text}</StatusTag>
             ),
         },
         {
@@ -205,7 +203,7 @@ function PrescriptionList() {
                     ]}
                 />
 
-                <Content className="main-layout">
+                <Content className="main-layout prescriptions-page">
                     <div className="search-layout">
                         <Input
                             placeholder="Search prescriptions"
@@ -228,41 +226,50 @@ function PrescriptionList() {
                                 All
                             </Button>
                             <Button
-                                type={statusFilter === "draft" ? "primary" : "default"}
-                                onClick={() => handleStatusFilterChange("draft")}
-                            >
-                                Draft
-                            </Button>
-                            <Button
                                 type={statusFilter === "sent" ? "primary" : "default"}
                                 onClick={() => handleStatusFilterChange("sent")}
                             >
                                 Sent
                             </Button>
+                            <Button
+                                type={statusFilter === "completed" ? "primary" : "default"}
+                                onClick={() => handleStatusFilterChange("completed")}
+                            >
+                                Completed
+                            </Button>
+                            <Button
+                                type={statusFilter === "tentative" ? "primary" : "default"}
+                                onClick={() => handleStatusFilterChange("tentative")}
+                            >
+                                Tentative
+                            </Button>
                         </Space.Compact>
                     </div>
 
-                    <div className="table-data">
+                    <div className="table-wrapper">
                         <Table
                             columns={columns}
                             dataSource={prescriptions}
                             loading={loading}
                             rowKey="id"
                             pagination={false}
-                            scroll={{ x: "max-content", y: 400 }}
-                            showSorterTooltip={{ target: "sorter-icon" }}
+                            size="small"
                         />
-                    </div>
 
-                    <div className="pagination-tab">
-                        <span className="count-label">Total Prescriptions ({total})</span>
-                        <Pagination
-                            current={page}
-                            total={total}
-                            pageSize={pageSize}
-                            onChange={(p) => setPage(p)}
-                            showSizeChanger={false}
-                        />
+                        <div className="table-footer">
+                            <span className="count-label">
+                                {total === 0
+                                    ? "No prescriptions"
+                                    : `Total Prescriptions (${total})`}
+                            </span>
+                            <Pagination
+                                current={page}
+                                total={total}
+                                pageSize={pageSize}
+                                onChange={(p) => setPage(p)}
+                                showSizeChanger={false}
+                            />
+                        </div>
                     </div>
                 </Content>
             </Layout>

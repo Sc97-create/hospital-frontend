@@ -31,10 +31,6 @@
     margin-top: 8px;
 }
 
-.history-button {
-    height: 40px;
-}
-
 .custom-card {
     border-radius: 12px;
     margin-bottom: 16px;
@@ -112,31 +108,6 @@
     font-size: 20px;
     font-weight: 600;
     color: #0f3cc9;
-}
-
-.summary-card {
-    height: 100%;
-}
-
-.summary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.summary-header span {
-    font-size: 20px;
-    color: #000000;
-    font-weight: 600;
-}
-
-.summary-item {
-    margin-bottom: 20px;
-}
-
-.link-button {
-    padding: 0;
 }
 
 .footer-actions {
