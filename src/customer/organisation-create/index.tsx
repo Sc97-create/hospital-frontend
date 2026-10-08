@@ -110,9 +110,6 @@ export default function OrganisationCreateStep({
   const [form] = Form.useForm<OrganisationCreateForm>()
   const [messageApi, contextHolder] = message.useMessage()
   const [tenantId] = useState(() => localStorage.getItem('tenant_id'))
-  const [organisationId, setOrganisationId] = useState(
-    () => localStorage.getItem('organisation_id'),
-  )
 
   const { data: tenantResponse, isLoading: isLoadingTenant, isError: isTenantError, error: tenantError } =
     useGetTenantById(tenantId)
@@ -133,7 +130,6 @@ export default function OrganisationCreateStep({
 
     localStorage.setItem('organisation_id', primaryOrg.organisation_id)
     localStorage.setItem('tenant_id', primaryOrg.tenant_id)
-    setOrganisationId(primaryOrg.organisation_id)
 
     form.setFieldsValue(tenantResponseToForm(primaryOrg))
   }, [primaryOrg, form])
@@ -166,7 +162,6 @@ export default function OrganisationCreateStep({
           }
           if (data.organisation_id) {
             localStorage.setItem('organisation_id', String(data.organisation_id))
-            setOrganisationId(String(data.organisation_id))
           }
           messageApi.success(data.message || 'Organisation updated successfully')
           onContinue(values)
@@ -185,7 +180,6 @@ export default function OrganisationCreateStep({
         }
         if (data.organisation_id) {
           localStorage.setItem('organisation_id', String(data.organisation_id))
-          setOrganisationId(String(data.organisation_id))
         }
         messageApi.success(data.message || 'Organisation created successfully')
         onContinue(values)

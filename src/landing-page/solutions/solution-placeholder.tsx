@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import ImageSlot from '../components/ImageSlot'
-import LandingNav, { SOLUTION_NAV_ITEMS } from '../components/LandingNav'
+import LandingNav from '../components/LandingNav'
+import { SOLUTION_NAV_ITEMS } from '../components/nav-items'
 import '../landing-page.css'
 import './solution-page.css'
 

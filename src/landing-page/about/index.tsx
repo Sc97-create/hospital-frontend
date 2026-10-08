@@ -1,4 +1,5 @@
-import LandingNav, { SOLUTION_NAV_ITEMS } from '../components/LandingNav'
+import LandingNav from '../components/LandingNav'
+import { SOLUTION_NAV_ITEMS } from '../components/nav-items'
 import '../landing-page.css'
 import './about.css'
 

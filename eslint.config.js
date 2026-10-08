@@ -19,5 +19,15 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Context modules commonly export the provider component plus hooks.
+      'react-refresh/only-export-components': [
+        'error',
+        {
+          allowConstantExport: true,
+          allowExportNames: ['usePermissions', 'useOptionalPermissions'],
+        },
+      ],
+    },
   },
 ])

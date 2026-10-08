@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import LandingNav, { PRICING_NAV_ITEMS } from '../components/LandingNav'
+import LandingNav from '../components/LandingNav'
+import { PRICING_NAV_ITEMS } from '../components/nav-items'
 import './pricing.css'
 
 const FREE_FEATURES = [

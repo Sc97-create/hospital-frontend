@@ -120,7 +120,7 @@ function resolveLineUnitPrice(line: DispenseLineResponse): number {
     return resolveBatchUnitPrice(earliest);
 }
 
-export function isItemFullyDispensed(row: PrescriptionRow): boolean {
+function isItemFullyDispensed(row: PrescriptionRow): boolean {
     const status = row.item_status.trim().toLowerCase().replace(/[\s-]+/g, '_');
     if (status === 'fully_dispensed' || status === 'full_dispensed' || status === 'dispensed') {
         return true;
@@ -128,7 +128,7 @@ export function isItemFullyDispensed(row: PrescriptionRow): boolean {
     return row.remaining_quantity === 0;
 }
 
-export function mapMedicineInfoLines(lines: DispenseLineResponse[]): PrescriptionRow[] {
+function mapMedicineInfoLines(lines: DispenseLineResponse[]): PrescriptionRow[] {
     return lines.map((item) => {
         const strength = item.medicine_strength?.trim() || '';
         const food = formatFoodInstruction(item.food_instruction);
