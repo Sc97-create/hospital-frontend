@@ -28,7 +28,6 @@ import Sidebar from '../sidebar';
 import { GetDispenseCheckoutLines, UpdateStatus } from './api/prescription';
 import type { DispenseLineResponse } from './types/prescriptionmodel';
 import {
-    fetchPatientById,
     formatPatientSubtext,
     formatPrescriptionStatusLabel,
     getPrescriptionStatusTagColor,
@@ -37,6 +36,7 @@ import {
     isFullyDispensedPrescriptionStatus,
     isPartiallyDispensedPrescriptionStatus,
     isPaymentPendingPrescriptionStatus,
+    mapPrescriptionPatientData,
     PARTIAL_DISPENSE_BLOCK_MESSAGE,
     prescriptionPath,
     prescriptionReceiptPath,
@@ -326,15 +326,15 @@ function PharmacistPrescriptionDetail() {
                     queryPatientId: searchParams.get('patientId'),
                     cachedPatientId: recallPrescriptionPatientId(id),
                     apiPatientId:
+                        medicineInfo.patientData?.patient_id ||
                         medicineInfo.patient_id ||
                         lines.find((item) => item.patient_id)?.patient_id,
                 });
                 setResolvedPatientId(patientId);
                 rememberPrescriptionPatientId(id, patientId);
 
-                if (patientId) {
-                    const patientData = await fetchPatientById(patientId);
-                    if (!cancelled) setPatient(patientData);
+                if (!cancelled) {
+                    setPatient(mapPrescriptionPatientData(medicineInfo.patientData));
                 }
             } catch (error) {
                 if (cancelled) return;

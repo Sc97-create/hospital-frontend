@@ -5,7 +5,7 @@ import type { ModuleName, PermissionAction } from "../authentication/types/auth"
 
 type AuthGuardProps = {
     children: ReactNode;
-    /** Backend module this route belongs to. Omit for auth-only pages (dashboard, update-password). */
+    /** Backend module this route belongs to. Omit for auth-only pages (profile, update-password). */
     module?: ModuleName | string;
     /** Required action. Defaults to view. Use create for add flows. */
     action?: PermissionAction;
@@ -21,14 +21,14 @@ const AuthGuard = ({
     action = "view",
 }: AuthGuardProps) => {
     const token = localStorage.getItem("access_token");
-    const { can } = usePermissions();
+    const { can, getDefaultRoute } = usePermissions();
 
     if (!token) {
         return <Navigate to="/login" replace />;
     }
 
     if (module && !can(module, action)) {
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to={getDefaultRoute()} replace />;
     }
 
     return children;

@@ -1,6 +1,7 @@
 export type PermissionAction = "create" | "update" | "view" | "delete";
 
 export type ModuleName =
+    | "dashboard"
     | "employee"
     | "patient"
     | "prescription"
@@ -38,10 +39,20 @@ export interface logoutResponse {
 export interface UpdatePasswordPayload {
     password: string;
     confirm_password: string;
+    token?: string;
 }
 
 export interface UpdatePasswordResponse {
     code?: number | string;
     message?: string;
     data?: unknown;
+}
+
+export interface ForgotPasswordRequestPayload {
+    email_id: string;
+}
+
+export interface ForgotPasswordRequestResponse {
+    code?: number | string;
+    message?: string;
 }

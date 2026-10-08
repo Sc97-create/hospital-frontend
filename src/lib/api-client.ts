@@ -3,7 +3,21 @@ import axios from "axios";
 // URLs that should NOT include the Authorization header
 const PUBLIC_ENDPOINTS: string[] = [
     "/authentication/login",
+    "/authentication/requestPasswordReset",
+    "/central/customer/signup",
 ];
+
+/** Central signup APIs use a customer JWT — hospital refresh cookies do not apply. */
+function isCentralSignupRequest(url: string | undefined): boolean {
+    return Boolean(url?.includes("/central/"));
+}
+
+declare module "axios" {
+    export interface AxiosRequestConfig {
+        skipAuthRefresh?: boolean;
+        skipAuthHeader?: boolean;
+    }
+}
 
 // Shared Axios instance with base URL and auth header
 const apiClient = axios.create({
@@ -17,9 +31,10 @@ apiClient.interceptors.request.use(
         const isPublic = PUBLIC_ENDPOINTS.some(
             (url) => config.url?.includes(url)
         );
-        if (!isPublic) {
+        if (!isPublic && !config.skipAuthHeader) {
+            const hasAuthHeader = Boolean(config.headers?.Authorization);
             const token = localStorage.getItem("access_token");
-            if (token) {
+            if (token && !hasAuthHeader) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
         }
@@ -58,8 +73,23 @@ apiClient.interceptors.response.use(
         const originalRequest = error.config;
 
         // Check if the error is 401, we haven't retried this request yet, and it's not a public endpoint
-        const isPublic = PUBLIC_ENDPOINTS.some(url => originalRequest.url?.includes(url));
-        if (error.response?.status === 401 && !originalRequest._retry && !isPublic) {
+        const isPublic = PUBLIC_ENDPOINTS.some(url => originalRequest?.url?.includes(url));
+        const isCentralSignup = isCentralSignupRequest(originalRequest?.url);
+
+        // Signup JWT flow: never attempt hospital refresh / hard-redirect to login
+        if (
+            error.response?.status === 401 &&
+            (isCentralSignup || originalRequest?.skipAuthRefresh)
+        ) {
+            return Promise.reject(error);
+        }
+
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !isPublic &&
+            !originalRequest.skipAuthRefresh
+        ) {
 
             // If already refreshing, add to queue
             if (isRefreshing) {

@@ -451,6 +451,105 @@
   width: 100%;
 }
 
+.dash-payments-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.dash-payments-summary--three {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 0;
+}
+
+.dash-card--employees .dash-payments-summary--three {
+  margin-bottom: 0;
+}
+
+.dash-card--employees .dash-payments-summary {
+  margin-bottom: 0;
+}
+
+.dash-payments-summary__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3);
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+}
+
+.dash-payments-summary__label {
+  font-size: var(--text-xs);
+  color: var(--color-muted-text);
+}
+
+.dash-payments-summary__value {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-payments-summary__value--success {
+  color: #16A34A;
+}
+
+.dash-payments-summary__value--danger {
+  color: #DC2626;
+}
+
+.dash-payments-breakdown {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dash-payments-breakdown__row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 8px;
+  background: #fafafa;
+  border: 1px solid #f3f4f6;
+}
+
+.dash-payments-breakdown__method {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #111827;
+}
+
+.dash-payments-breakdown__count {
+  font-size: var(--text-sm);
+  color: var(--color-muted-text);
+  font-variant-numeric: tabular-nums;
+  min-width: 24px;
+  text-align: right;
+}
+
+.dash-payments-breakdown__amount {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+  min-width: 72px;
+  text-align: right;
+}
+
+.dash-payments-pending {
+  display: block;
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+
 .dash-quick-actions .ant-btn-primary {
   background: var(--color-primary);
   border-color: var(--color-primary);

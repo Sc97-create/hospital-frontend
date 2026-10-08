@@ -4,8 +4,9 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { loginPayload, loginResponse, UpdatePasswordPayload } from './types/auth';
-import { LoginReq, UpdatePassword } from './api/login-api';
+import { LoginReq, UpdatePasswordFirstLogin } from './api/login-api';
 import { usePermissions } from '../auth/permissions-context';
+import { resolveDefaultRouteFromEntries } from '../auth/default-route';
 
 function isPasswordCleared(data: loginResponse): boolean {
     const flag = data.passwordcleared ?? data.password_cleared;
@@ -41,7 +42,7 @@ function Login() {
     const [passwordModalOpen, setPasswordModalOpen] = useState(false);
     const [updatingPassword, setUpdatingPassword] = useState(false);
     const [loggingIn, setLoggingIn] = useState(false);
-    const { setAccess } = usePermissions();
+    const { setAccess, getDefaultRoute } = usePermissions();
 
     useEffect(() => {
         const root = document.getElementById("root");
@@ -77,7 +78,7 @@ function Login() {
                 setPasswordModalOpen(true);
                 return;
             }
-            navigate('/dashboard');
+            navigate(resolveDefaultRouteFromEntries(Boolean(data.is_admin), data.permissions));
         } catch {
             messageApi.error("Invalid email or password. Please try again.");
         } finally {
@@ -88,7 +89,7 @@ function Login() {
     const submitNewPassword = async (values: UpdatePasswordPayload) => {
         setUpdatingPassword(true);
         try {
-            const response = await UpdatePassword({
+            const response = await UpdatePasswordFirstLogin({
                 password: values.password,
                 confirm_password: values.confirm_password,
             });
@@ -99,7 +100,7 @@ function Login() {
             messageApi.success(response.message || "Password updated successfully");
             setPasswordModalOpen(false);
             passwordForm.resetFields();
-            navigate("/dashboard");
+            navigate(getDefaultRoute());
         } catch (error) {
             if (error && typeof error === "object" && "errorFields" in error) {
                 return;

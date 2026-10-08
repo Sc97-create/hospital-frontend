@@ -45,13 +45,13 @@ import type {
     MedicineBatch,
 } from './types/prescriptionmodel';
 import {
-    fetchPatientById,
     formatPatientSubtext,
     formatPrescriptionStatusLabel,
     getPrescriptionStatusTagColor,
     isPartiallyDispensedPrescriptionStatus,
     isPaidInvoiceStatus,
     isPaymentPendingPrescriptionStatus,
+    mapPrescriptionPatientData,
     PARTIAL_DISPENSE_BLOCK_MESSAGE,
     prescriptionPath,
     recallPrescriptionPatientId,
@@ -491,15 +491,15 @@ function PrescriptionCheckout() {
                     queryPatientId: searchParams.get('patientId'),
                     cachedPatientId: recallPrescriptionPatientId(id),
                     apiPatientId:
+                        response.patientData?.patient_id ||
                         response.patient_id ||
                         items.find((item) => item.patient_id)?.patient_id,
                 });
                 setResolvedPatientId(patientId);
                 rememberPrescriptionPatientId(id, patientId);
 
-                if (patientId) {
-                    const patientData = await fetchPatientById(patientId);
-                    if (!cancelled) setPatient(patientData);
+                if (!cancelled) {
+                    setPatient(mapPrescriptionPatientData(response.patientData));
                 }
 
                 if (isPartiallyDispensedPrescriptionStatus(resolvedStatus)) {
@@ -534,11 +534,6 @@ function PrescriptionCheckout() {
                 });
                 setResolvedPatientId(patientId);
                 rememberPrescriptionPatientId(id, patientId);
-
-                if (patientId) {
-                    const patientData = await fetchPatientById(patientId);
-                    if (!cancelled) setPatient(patientData);
-                }
             } finally {
                 if (!cancelled) setLoading(false);
             }

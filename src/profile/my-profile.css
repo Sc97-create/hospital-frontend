@@ -117,6 +117,13 @@
     line-height: var(--leading-normal);
 }
 
+.my-profile-value-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
 .my-profile-value {
     display: block;
     font-size: var(--text-base);
@@ -124,6 +131,17 @@
     color: #111827;
     line-height: var(--leading-snug);
     word-break: break-word;
+    min-width: 0;
+}
+
+.my-profile-copy-btn {
+    flex-shrink: 0;
+    color: var(--color-muted-text) !important;
+}
+
+.my-profile-copy-btn:hover {
+    color: var(--color-primary-text) !important;
+    background: var(--color-primary-light) !important;
 }
 
 .my-profile-loading,

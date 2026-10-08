@@ -1,5 +1,5 @@
-import { Avatar, Breadcrumb, Card, Layout, Spin, Typography, message } from "antd";
-import { HomeOutlined, UserOutlined } from "@ant-design/icons";
+import { Avatar, Breadcrumb, Button, Card, Layout, Spin, Typography, message } from "antd";
+import { CopyOutlined, HomeOutlined, UserOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Content } from "antd/es/layout/layout";
@@ -62,11 +62,35 @@ function getDisplayName(user: UserData): string {
     return full;
 }
 
-function ProfileField({ label, value }: { label: string; value: string }) {
+function ProfileField({
+    label,
+    value,
+    copyable,
+    onCopy,
+}: {
+    label: string;
+    value: string;
+    copyable?: boolean;
+    onCopy?: (text: string) => void;
+}) {
+    const canCopy = copyable && value !== "—";
+
     return (
         <div className="my-profile-field">
             <span className="my-profile-label">{label}</span>
-            <span className="my-profile-value">{value}</span>
+            <div className="my-profile-value-row">
+                <span className="my-profile-value">{value}</span>
+                {canCopy ? (
+                    <Button
+                        type="text"
+                        size="small"
+                        className="my-profile-copy-btn"
+                        icon={<CopyOutlined />}
+                        aria-label={`Copy ${label}`}
+                        onClick={() => onCopy?.(value)}
+                    />
+                ) : null}
+            </div>
         </div>
     );
 }
@@ -118,6 +142,16 @@ function MyProfilePage() {
     }, [messageApi]);
 
     const status = user?.employee_status || "active";
+
+    const handleCopyEmail = async (email: string) => {
+        try {
+            await navigator.clipboard.writeText(email);
+            messageApi.success("Email copied");
+        } catch (error) {
+            console.error("Failed to copy email:", error);
+            messageApi.error("Could not copy email");
+        }
+    };
 
     return (
         <Layout>
@@ -197,6 +231,8 @@ function MyProfilePage() {
                                     <ProfileField
                                         label="Email Address"
                                         value={displayValue(user?.employee_email)}
+                                        copyable
+                                        onCopy={handleCopyEmail}
                                     />
                                     <ProfileField
                                         label="Mobile Number"

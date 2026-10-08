@@ -2,6 +2,7 @@ import './App.css'
 import { ConfigProvider } from 'antd'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Signup from './Signup'
+import CustomerSignup from './customer/signup'
 import Login from './authentication/Login'
 import Dashboard from './dashboard'
 import PatientList from './patientmangement/patientlist/patient-list'
@@ -28,7 +29,15 @@ import AddAppointment from './patientmangement/patient-appointment/addAppointmen
 import AppointmentsPage from './patientmangement/patient-appointment/appointment-list'
 import AppointmentDetails from './patientmangement/patient-appointment/appointment-details'
 import UpdatePasswordPage from './authentication/update-password'
+import ForgotPasswordPage from './authentication/forgot-password'
+import ResetPasswordPage from './authentication/reset-password'
 import MyProfilePage from './profile/my-profile'
+import LandingPage from './landing-page'
+import PricingPage from './landing-page/pricing'
+import AboutPage from './landing-page/about'
+import ProductsPage from './landing-page/products'
+import ClinicManagementPage from './landing-page/solutions/clinic-management'
+import PatientManagementPage from './landing-page/solutions/patient-management'
 
 function App() {
 
@@ -52,10 +61,25 @@ function App() {
 
         </nav>
         <Routes>
+          <Route path='/landing-page' element={<LandingPage />} />
+          <Route path='/landing-page/pricing' element={<PricingPage />} />
+          <Route path='/landing-page/about' element={<AboutPage />} />
+          <Route path='/landing-page/products' element={<ProductsPage />} />
+          <Route path='/landing-page/solutions/clinic-management' element={<ClinicManagementPage />} />
+          <Route path='/landing-page/solutions/patient-management' element={<PatientManagementPage />} />
           <Route path='/login' element={<Login />} />
           <Route path="/" element={<Navigate to="/login" />} />
-          <Route path='/signup' element={<Signup />} />
-          <Route path='/dashboard' element={<AuthGuard><Dashboard /></AuthGuard>} />
+          <Route path='/signup' element={<CustomerSignup />} />
+          <Route path='/signup/verify' element={<CustomerSignup initialStepName="verify" />} />
+          <Route path='/signup/organisation' element={<CustomerSignup initialStepName="organisation" />} />
+          <Route path='/signup/plan' element={<CustomerSignup initialStepName="plan" />} />
+          <Route path='/signup/payment' element={<CustomerSignup initialStepName="payment" />} />
+          <Route path='/signup/active' element={<CustomerSignup initialStepName="active" />} />
+          <Route path='/signup/ready' element={<CustomerSignup initialStepName="ready" />} />
+          <Route path='/org-signup' element={<Signup />} />
+          <Route path='/forgot-password' element={<ForgotPasswordPage />} />
+          <Route path='/forgot-password/reset' element={<ResetPasswordPage />} />
+          <Route path='/dashboard' element={<AuthGuard module="dashboard" action="view"><Dashboard /></AuthGuard>} />
           <Route path='/update-password' element={<AuthGuard><UpdatePasswordPage /></AuthGuard>} />
           <Route path='/profile' element={<AuthGuard><MyProfilePage /></AuthGuard>} />
 

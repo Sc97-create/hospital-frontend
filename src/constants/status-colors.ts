@@ -53,6 +53,18 @@ export function getAppointmentStatusType(status: string | undefined | null): Sta
     }
 }
 
+export function canStartConsultation(status: string | undefined | null): boolean {
+    switch (normalizeKey(status)) {
+        case 'scheduled':
+        case 'upcoming':
+        case 'waiting':
+        case 'ongoing':
+            return true;
+        default:
+            return false;
+    }
+}
+
 export function getPrescriptionStatusType(status: string | undefined | null): StatusType {
     switch (normalizeKey(status)) {
         case 'sent':

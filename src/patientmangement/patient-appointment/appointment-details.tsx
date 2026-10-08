@@ -23,7 +23,7 @@ import { GetAppointmentPreview, updateStatus } from "../api/appointments";
 import type { previewAppointmentData, statusUpdate } from "../types/appointments";
 import dayjs from "dayjs";
 import { StatusTag } from "../../components/status-tag";
-import { getAppointmentStatusType } from "../../constants/status-colors";
+import { getAppointmentStatusType, canStartConsultation } from "../../constants/status-colors";
 import { usePermissions } from "../../auth/permissions-context";
 
 const { Text } = Typography;
@@ -278,13 +278,12 @@ const AppointmentDetails: React.FC = () => {
                             </Button>
                         )}
 
-                        {canCreate("prescription") ? (
+                        {canCreate("prescription") && canStartConsultation(previewData?.status) ? (
                             <Button
                                 type="primary"
                                 icon={<PlayCircleOutlined />}
                                 className="start-btn"
                                 onClick={updatestatus}
-                                disabled={previewData?.status === "missed" || previewData?.status === "reschedule_required"}
                             >
                                 Start Consultation
                             </Button>

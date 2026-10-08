@@ -42,26 +42,17 @@ function DashboardSkeleton() {
             </div>
           </Card>
 
-          <Card className="dash-card" title="Up Next">
+          <Card className="dash-card" title="Employees">
             <div className="dash-skel-list">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <Skeleton
-                  key={`upnext-skel-${index}`}
-                  active
-                  title={{ width: "70%" }}
-                  paragraph={false}
-                />
-              ))}
+              <Skeleton active title={{ width: "100%" }} paragraph={{ rows: 1, width: ["80%"] }} />
             </div>
           </Card>
         </Col>
 
         <Col xs={24} lg={8} className="dash-rail-col">
-          <Card className="dash-card" title="Quick Actions">
-            <div className="dash-skel-actions">
-              <Skeleton.Button active block size="large" />
-              <Skeleton.Button active block size="large" />
-              <Skeleton.Button active block size="large" />
+          <Card className="dash-card" title="Payments today">
+            <div className="dash-skel-list">
+              <Skeleton active title={{ width: "100%" }} paragraph={{ rows: 3, width: ["100%", "90%", "80%"] }} />
             </div>
           </Card>
 

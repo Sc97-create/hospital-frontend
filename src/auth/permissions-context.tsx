@@ -12,6 +12,7 @@ import type {
     ModulePermissions,
     PermissionAction,
 } from "../authentication/types/auth";
+import { resolveDefaultRoute } from "./default-route";
 
 const IS_ADMIN_KEY = "is_admin";
 const PERMISSIONS_KEY = "user_permissions";
@@ -28,6 +29,7 @@ type PermissionsContextValue = {
     can: (module: ModuleName | string, action: PermissionAction) => boolean;
     canView: (module: ModuleName | string) => boolean;
     canCreate: (module: ModuleName | string) => boolean;
+    getDefaultRoute: () => string;
 };
 
 const emptyPermissions = (): ModulePermissions => ({
@@ -128,6 +130,11 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
         [can],
     );
 
+    const getDefaultRoute = useCallback(
+        (): string => resolveDefaultRoute(isAdmin, permissions),
+        [isAdmin, permissions],
+    );
+
     const value = useMemo(
         () => ({
             isAdmin,
@@ -138,6 +145,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
             can,
             canView,
             canCreate,
+            getDefaultRoute,
         }),
         [
             isAdmin,
@@ -148,6 +156,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
             can,
             canView,
             canCreate,
+            getDefaultRoute,
         ],
     );
 

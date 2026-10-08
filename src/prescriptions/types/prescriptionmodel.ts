@@ -196,10 +196,31 @@ export interface DispenseLineResponse {
 
 export interface DispenseCheckoutResponse {
     data: DispenseLineResponse[];
+    patientData?: PrescriptionPatientData;
     code: string;
     message: string;
     total: number;
+    /** @deprecated prefer patientData.patient_id */
     patient_id?: string;
+}
+
+/** Patient block returned with getMedicineInfo (same shape as patient list/detail). */
+export interface PrescriptionPatientData {
+    patient_id: string;
+    patient_code: string;
+    patient_name: string;
+    patient_weight?: number;
+    patient_gender: string;
+    patient_phone: string;
+    patient_address?: string;
+    patient_email?: string;
+    patient_image?: string;
+    patient_status?: string;
+    patient_age: number;
+    patient_bg?: string;
+    patient_lvd?: string;
+    waiting_time?: string;
+    patient_created_at?: string;
 }
 
 export interface CheckoutBatchAllocationPayload {
