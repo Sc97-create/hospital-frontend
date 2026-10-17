@@ -6,6 +6,7 @@ import type {
     ConfirmPaymentPayload,
     ConfirmPaymentResponse,
     ConsultationBillingCreatePayload,
+    LabOrderBillingCreatePayload,
     createPrescResponse,
     CreatePrescription,
     DispenseCheckoutResponse,
@@ -96,7 +97,10 @@ export const GetDispenseCheckoutLines = async (
 
 /** Confirm & Pay — create bill; cash/qr then confirm via /payment/confirm on swipe. */
 export const CreateBilling = async (
-    payload: BillingCreatePayload | ConsultationBillingCreatePayload,
+    payload:
+        | BillingCreatePayload
+        | ConsultationBillingCreatePayload
+        | LabOrderBillingCreatePayload,
 ): Promise<BillingCreateResponse> => {
     const response = await apiClient.post(`/billing/create`, payload, {
         headers: {

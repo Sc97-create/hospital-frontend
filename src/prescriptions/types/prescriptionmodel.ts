@@ -231,7 +231,7 @@ export interface CheckoutBatchAllocationPayload {
 export type CheckoutPaymentMethod = "cash" | "qr" | "link";
 
 /** `consultation` = reception collecting the visit fee, `prescription` = pharmacy dispense billing. */
-export type PaymentType = "consultation" | "prescription";
+export type PaymentType = "consultation" | "prescription" | "lab_order";
 
 export interface PrescriptionCheckoutPayload {
     prescription_id: string;
@@ -300,6 +300,18 @@ export interface ConsultationBillingCreatePayload {
     cashier_id: string;
     organisation_id: string;
     payment_mode: "cash" | "qr";
+    idempotency_key: string;
+    financials: BillingCreateFinancials;
+}
+
+/** Lab order billing — uses billing_id as the lab order UUID. */
+export interface LabOrderBillingCreatePayload {
+    payment_type: "lab_order";
+    billing_id: string;
+    organisation_id: string;
+    patient_id: string;
+    cashier_id: string;
+    payment_mode: CheckoutPaymentMethod;
     idempotency_key: string;
     financials: BillingCreateFinancials;
 }

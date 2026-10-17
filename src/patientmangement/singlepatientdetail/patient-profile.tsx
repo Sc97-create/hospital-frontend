@@ -9,6 +9,7 @@ import Sidebar from "../../sidebar";
 import { Content } from "antd/es/layout/layout";
 import PatientAppointmentHistory from "./patient-appointment-history";
 import PatientPrescriptions from "./patient-prescriptions";
+import PatientLabOrders from "./patient-lab-orders";
 import { StatusTag } from "../../components/status-tag";
 import { getPatientStatusType, STATUS_WARNING } from "../../constants/status-colors";
 import { usePermissions } from "../../auth/permissions-context";
@@ -66,6 +67,7 @@ function GeneralInfo() {
     const tabs = [
         { key: 'appointments', label: 'Appointments' },
         { key: 'prescriptions', label: 'Prescriptions' },
+        { key: 'lab-orders', label: 'Lab Tests' },
     ];
     return (
         <>
@@ -126,6 +128,12 @@ function GeneralInfo() {
                                         {canCreate("appointment") ? (
                                             <Button type="primary" onClick={()=>navigate(`/patients/addappointment/${patientID}`)}>Add Appointment</Button>
                                         ) : null}
+                                        <Button
+                                            type="default"
+                                            onClick={() => navigate(`/patients/${patientID}/add-lab-test`)}
+                                        >
+                                            Add Lab Test
+                                        </Button>
                                     </div>
                                 </div>
                             </Card>
@@ -149,6 +157,10 @@ function GeneralInfo() {
 
                                 {activeTab === 'prescriptions' && (
                                     <PatientPrescriptions patient={patient} />
+                                )}
+
+                                {activeTab === 'lab-orders' && (
+                                    <PatientLabOrders patient={patient} />
                                 )}
                             </div>
                         </div>
