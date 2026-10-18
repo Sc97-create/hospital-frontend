@@ -751,7 +751,7 @@ function PrescriptionCheckout() {
     };
 
     const buildBillingPayload = (): BillingCreatePayload | null => {
-        const prescription_id = id || FALLBACK_DISPENSE_LINES[0]?.prescription_id || '';
+        const billing_id = id || FALLBACK_DISPENSE_LINES[0]?.prescription_id || '';
         const patient_id = resolvedPatientId || '';
         const cashier_id = localStorage.getItem('user_id') || '';
         const organisation_id = localStorage.getItem('organisation_id') || '';
@@ -786,7 +786,7 @@ function PrescriptionCheckout() {
             resolvedSupplierId ||
             '';
 
-        if (!prescription_id) {
+        if (!billing_id) {
             messageApi.error('Missing prescription id for billing');
             return null;
         }
@@ -819,7 +819,8 @@ function PrescriptionCheckout() {
         }
 
         return {
-            prescription_id,
+            payment_type: 'prescription',
+            billing_id,
             patient_id,
             cashier_id,
             supplier_id,

@@ -39,6 +39,7 @@ import {
     parseBillingCreateResponse,
 } from "../prescriptions/api/prescription";
 import type { CheckoutPaymentMethod } from "../prescriptions/types/prescriptionmodel";
+import { usePermissions } from "../auth/permissions-context";
 import {
     BulkUpdateLabOrderStatus,
     CheckBillingByBillingId,
@@ -81,6 +82,39 @@ function extractApiErrorMessage(error: unknown, fallback: string): string {
         return error.message;
     }
     return fallback;
+}
+
+function getErrorResponseData(error: unknown): Record<string, unknown> | null {
+    if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object"
+    ) {
+        return error.response.data as Record<string, unknown>;
+    }
+    return null;
+}
+
+/** billing/create `{ code: 400, error: "invalid request" }` — close quietly, no toast. */
+function isBillingInvalidRequest(payload: unknown): boolean {
+    if (!payload || typeof payload !== "object") return false;
+    const body = payload as Record<string, unknown>;
+    const code = body.code;
+    const errorText =
+        typeof body.error === "string"
+            ? body.error
+            : typeof body.message === "string"
+              ? body.message
+              : "";
+    return (
+        (code === 400 || code === "400") &&
+        errorText.trim().toLowerCase() === "invalid request"
+    );
 }
 
 const ITEM_STATUS_OPTIONS = ["pending", "completed", "cancelled"] as const;
@@ -130,6 +164,9 @@ function getOrderTestTitle(tests: LabOrderDetailTest[]) {
 function LabOrderDetails() {
     const { labId = "" } = useParams<{ labId: string }>();
     const navigate = useNavigate();
+    const { canUpdate, canCreate } = usePermissions();
+    const canUpdateLabOrder = canUpdate("lab_order");
+    const canCreateBilling = canCreate("billing");
     const [messageApi, contextHolder] = message.useMessage();
     const [order, setOrder] = useState<LabOrderDetail | null>(null);
     const [loading, setLoading] = useState(true);
@@ -244,7 +281,8 @@ function LabOrderDetails() {
         });
     /** count === 0 → no bill yet (enable); count > 0 → already billed (disable). */
     const billingAllowsComplete = billingCount === 0;
-    const canCompleteOrder = testsReadyToComplete && billingAllowsComplete;
+    const canCompleteOrder =
+        canCreateBilling && testsReadyToComplete && billingAllowsComplete;
 
     const amountDue = useMemo(() => {
         const subtotal = tests
@@ -303,11 +341,19 @@ function LabOrderDetails() {
     };
 
     const updateItemStatus = async (testId: string, status: string) => {
+        if (!canUpdateLabOrder) {
+            messageApi.warning("You do not have permission to update lab orders");
+            return;
+        }
         const ok = await bulkUpdateStatus([testId], status);
         if (ok) messageApi.success("Status updated");
     };
 
     const markAllCompleted = async () => {
+        if (!canUpdateLabOrder) {
+            messageApi.warning("You do not have permission to update lab orders");
+            return;
+        }
         const testIds = tests
             .filter((test) => normalizeStatus(test.status) !== "cancelled")
             .map((test) => test.id)
@@ -367,9 +413,12 @@ function LabOrderDetails() {
                 <Dropdown
                     menu={statusMenu(record.id)}
                     trigger={["click"]}
-                    disabled={updatingStatus}
+                    disabled={updatingStatus || !canUpdateLabOrder}
                 >
-                    <Button className="lab-detail-status-btn" disabled={updatingStatus}>
+                    <Button
+                        className="lab-detail-status-btn"
+                        disabled={updatingStatus || !canUpdateLabOrder}
+                    >
                         Status: {formatStatusLabel(record.status)}
                         <DownOutlined />
                     </Button>
@@ -434,6 +483,14 @@ function LabOrderDetails() {
             billingKeyRef.current = createIdempotencyKey();
         }
 
+        const dismissCheckoutQuietly = () => {
+            setCheckoutOpen(false);
+            setPaymentUrl(null);
+            billingKeyRef.current = null;
+            confirmKeyRef.current = null;
+            void refreshBillingCheck(billingId);
+        };
+
         inFlightRef.current = true;
         setPaying(true);
         try {
@@ -452,6 +509,11 @@ function LabOrderDetails() {
                     total_amount: totalAmount,
                 },
             });
+
+            if (isBillingInvalidRequest(billingResponse)) {
+                dismissCheckoutQuietly();
+                return;
+            }
 
             const { invoice_id, payment_url } = parseBillingCreateResponse(billingResponse);
             if (payment_url) {
@@ -492,6 +554,12 @@ function LabOrderDetails() {
             setBillingCount((prev) => Math.max(prev ?? 0, 1));
             navigate("/lab/tests");
         } catch (error) {
+            const responseData = getErrorResponseData(error);
+            if (isBillingInvalidRequest(responseData)) {
+                dismissCheckoutQuietly();
+                return;
+            }
+
             console.error("Lab order checkout failed:", error);
             messageApi.error(
                 extractApiErrorMessage(error, "Failed to complete lab order payment"),
@@ -627,6 +695,7 @@ function LabOrderDetails() {
                                             loading={updatingStatus}
                                             disabled={
                                                 updatingStatus ||
+                                                !canUpdateLabOrder ||
                                                 !tests.length ||
                                                 allNonCancelledCompleted
                                             }

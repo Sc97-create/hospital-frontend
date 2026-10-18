@@ -17,6 +17,10 @@ export type SidebarChild = {
     key: string;
     icon?: ReactNode;
     label: string;
+    /** Optional module gate for submenu items (defaults to parent module). */
+    module?: ModuleName;
+    /** Optional action required to show this child; defaults to view. */
+    action?: 'view' | 'create' | 'update' | 'delete';
 };
 
 export type SidebarItem = {
@@ -68,14 +72,21 @@ export const ALL_MENU_ITEMS: SidebarItem[] = [
         key: 'lab',
         icon: <ExperimentOutlined />,
         label: 'Lab',
+        /** No separate diagnostic_centre module — both Lab children use lab_order. */
+        module: 'lab_order',
         children: [
             {
                 key: '/lab/tests',
                 label: 'Tests',
+                module: 'lab_order',
+                action: 'view',
             },
             {
+                // No diagnostic_centre module from backend — only show to users who can create lab resources.
                 key: '/lab/diagnostic-center',
                 label: 'Diagnostic Center',
+                module: 'lab_order',
+                action: 'create',
             },
         ],
     },

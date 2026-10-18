@@ -11,6 +11,7 @@ export const MODULE_HOME_ROUTES: { module: ModuleName | string; path: string }[]
     { module: "medicine", path: "/suppliers" },
     { module: "employee", path: "/employees" },
     { module: "prescription", path: "/prescription" },
+    { module: "lab_order", path: "/lab/tests" },
 ];
 
 const emptyPermissions = () => ({

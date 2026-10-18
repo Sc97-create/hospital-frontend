@@ -273,7 +273,8 @@ export interface BillingCreateFinancials {
 export interface BillingCreatePayload {
     /** Omit / `"prescription"` — back-compat with pharmacy checkout. */
     payment_type?: PaymentType;
-    prescription_id: string;
+    /** Prescription UUID used as the billing entity id. */
+    billing_id: string;
     patient_id: string;
     cashier_id: string;
     supplier_id: string;
@@ -295,7 +296,8 @@ export interface BillingCreatePayload {
  */
 export interface ConsultationBillingCreatePayload {
     payment_type: "consultation";
-    appointment_id: string;
+    /** Appointment UUID used as the billing entity id. */
+    billing_id: string;
     patient_id: string;
     cashier_id: string;
     organisation_id: string;

@@ -43,6 +43,7 @@ import LabOrderDetails from './labs/lab-order-details'
 import LabCheckout from './labs/lab-checkout'
 import AddLabTest from './labs/add-lab-test'
 import DiagnosticCenter from './diagnostic-center/diagnostic-center'
+import AddDiagnosticCenter from './diagnostic-center/add-diagnostic-center'
 
 function App() {
 
@@ -92,7 +93,7 @@ function App() {
           <Route path='/patients' element={<AuthGuard module="patient" action="view"><PatientList /></AuthGuard>} />
           <Route path='/patients/patient-overview/:patientID' element={<AuthGuard module="patient" action="view"><GeneralInfo/></AuthGuard>} />
           <Route path='/patients/prescription-preview/:patientID' element={<AuthGuard module="patient" action="view"><PrescPreview /></AuthGuard>} />
-          <Route path='/patients/:patientID/add-lab-test' element={<AuthGuard module="patient" action="view"><AddLabTest /></AuthGuard>} />
+          <Route path='/patients/:patientID/add-lab-test' element={<AuthGuard module="lab_order" action="create"><AddLabTest /></AuthGuard>} />
           {/* Patient — create */}
           <Route path='/patients/add-patient' element={<AuthGuard module="patient" action="create"><Appointment /></AuthGuard>}>
             <Route index element={<FirstStep />} />
@@ -122,10 +123,11 @@ function App() {
           <Route path='/prescription/:id/receipt' element={<AuthGuard module="prescription" action="view"><PrescriptionReceipt /></AuthGuard>} />
           <Route path='/prescription/:id' element={<AuthGuard module="prescription" action="view"><PrescPreview /></AuthGuard>} />
 
-          <Route path='/lab/tests' element={<AuthGuard><LabTests /></AuthGuard>} />
-          <Route path='/lab/tests/:labId/checkout' element={<AuthGuard><LabCheckout /></AuthGuard>} />
-          <Route path='/lab/tests/:labId' element={<AuthGuard><LabOrderDetails /></AuthGuard>} />
-          <Route path='/lab/diagnostic-center' element={<AuthGuard><DiagnosticCenter /></AuthGuard>} />
+          <Route path='/lab/tests' element={<AuthGuard module="lab_order" action="view"><LabTests /></AuthGuard>} />
+          <Route path='/lab/tests/:labId/checkout' element={<AuthGuard module="lab_order" action="view"><LabCheckout /></AuthGuard>} />
+          <Route path='/lab/tests/:labId' element={<AuthGuard module="lab_order" action="view"><LabOrderDetails /></AuthGuard>} />
+          <Route path='/lab/diagnostic-center/add' element={<AuthGuard module="lab_order" action="create"><AddDiagnosticCenter /></AuthGuard>} />
+          <Route path='/lab/diagnostic-center' element={<AuthGuard module="lab_order" action="view"><DiagnosticCenter /></AuthGuard>} />
 
           <Route path='/bed-arrangement' element={<CreateBed />} />
           <Route path='/bed-arrangement/step-2' element={<CreateRooms />} />

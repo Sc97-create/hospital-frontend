@@ -16,7 +16,7 @@ const { Sider } = Layout;
 function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { canView, clearAccess } = usePermissions();
+    const { can, canView, clearAccess } = usePermissions();
     const [collapse, setCollapse] = useState(false);
     const [hover, setHover] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(
@@ -33,13 +33,34 @@ function Sidebar() {
         () =>
             ALL_MENU_ITEMS.filter(
                 (item) => !item.module || canView(item.module),
-            ).map(({ key, icon, label, children }) => ({
-                key,
-                icon,
-                label,
-                ...(children ? { children } : {}),
-            })),
-        [canView],
+            )
+                .map(({ key, icon, label, module, children }) => {
+                    const visibleChildren = children
+                        ?.filter((child) => {
+                            const childModule = child.module ?? module;
+                            if (!childModule) return true;
+                            return can(childModule, child.action ?? 'view');
+                        })
+                        .map(({ key: childKey, icon: childIcon, label: childLabel }) => ({
+                            key: childKey,
+                            icon: childIcon,
+                            label: childLabel,
+                        }));
+
+                    // Hide parent submenu when every child is filtered out
+                    if (children && (!visibleChildren || visibleChildren.length === 0)) {
+                        return null;
+                    }
+
+                    return {
+                        key,
+                        icon,
+                        label,
+                        ...(visibleChildren?.length ? { children: visibleChildren } : {}),
+                    };
+                })
+                .filter((item): item is NonNullable<typeof item> => item != null),
+        [can, canView],
     );
 
     const settingsItems = useMemo(() => SETTINGS_MENU, []);

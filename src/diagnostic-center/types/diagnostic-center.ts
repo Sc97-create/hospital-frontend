@@ -25,3 +25,22 @@ export interface GetDiagnosticCentresResponse {
     total: number;
     data: DiagnosticCentreListItem[];
 }
+
+export interface CreateDiagnosticCentrePayload {
+    organisation_id: string;
+    name: string;
+    address: string;
+    email: string;
+    contact_number: string;
+}
+
+export interface CreateDiagnosticCentreResponse {
+    code: number | string;
+    message?: string;
+    data?: {
+        id?: string;
+        diagnostic_centre_id?: string;
+    };
+    id?: string;
+    diagnostic_centre_id?: string;
+}

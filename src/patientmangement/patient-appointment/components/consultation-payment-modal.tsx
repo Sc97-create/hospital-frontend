@@ -173,7 +173,7 @@ export default function ConsultationPaymentModal({
         try {
             const response = await CreateBilling({
                 payment_type: 'consultation',
-                appointment_id: appointmentId,
+                billing_id: appointmentId,
                 patient_id: patientId,
                 cashier_id: cashierId,
                 organisation_id: organisationId,

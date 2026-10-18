@@ -52,7 +52,7 @@ function GeneralInfo() {
     const [patient, setPatient] = useState<patientlist | null>(null);
     const [activeTab, setActiveTab] = useState('appointments');
     const navigate =useNavigate();
-    const { canCreate } = usePermissions();
+    const { canCreate, canView } = usePermissions();
 
     useEffect(() => {
         if (patientID) {
@@ -67,7 +67,9 @@ function GeneralInfo() {
     const tabs = [
         { key: 'appointments', label: 'Appointments' },
         { key: 'prescriptions', label: 'Prescriptions' },
-        { key: 'lab-orders', label: 'Lab Tests' },
+        ...(canView("lab_order")
+            ? [{ key: 'lab-orders', label: 'Lab Tests' }]
+            : []),
     ];
     return (
         <>
@@ -128,12 +130,14 @@ function GeneralInfo() {
                                         {canCreate("appointment") ? (
                                             <Button type="primary" onClick={()=>navigate(`/patients/addappointment/${patientID}`)}>Add Appointment</Button>
                                         ) : null}
-                                        <Button
-                                            type="default"
-                                            onClick={() => navigate(`/patients/${patientID}/add-lab-test`)}
-                                        >
-                                            Add Lab Test
-                                        </Button>
+                                        {canCreate("lab_order") ? (
+                                            <Button
+                                                type="default"
+                                                onClick={() => navigate(`/patients/${patientID}/add-lab-test`)}
+                                            >
+                                                Add Lab Test
+                                            </Button>
+                                        ) : null}
                                     </div>
                                 </div>
                             </Card>
@@ -159,9 +163,9 @@ function GeneralInfo() {
                                     <PatientPrescriptions patient={patient} />
                                 )}
 
-                                {activeTab === 'lab-orders' && (
+                                {activeTab === 'lab-orders' && canView("lab_order") ? (
                                     <PatientLabOrders patient={patient} />
-                                )}
+                                ) : null}
                             </div>
                         </div>
                     </Content>

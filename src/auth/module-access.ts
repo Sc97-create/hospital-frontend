@@ -7,6 +7,7 @@ export const ROUTE_MODULE_MAP: Record<string, ModuleName> = {
     "/suppliers": "medicine",
     "/employees": "employee",
     "/prescription": "prescription",
+    "/lab": "lab_order",
 };
 
 export function moduleForRoute(path: string): ModuleName | undefined {
