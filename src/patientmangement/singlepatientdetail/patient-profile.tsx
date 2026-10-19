@@ -9,6 +9,7 @@ import Sidebar from "../../sidebar";
 import { Content } from "antd/es/layout/layout";
 import PatientAppointmentHistory from "./patient-appointment-history";
 import PatientPrescriptions from "./patient-prescriptions";
+import PatientLabOrders from "./patient-lab-orders";
 import { StatusTag } from "../../components/status-tag";
 import { getPatientStatusType, STATUS_WARNING } from "../../constants/status-colors";
 import { usePermissions } from "../../auth/permissions-context";
@@ -51,7 +52,7 @@ function GeneralInfo() {
     const [patient, setPatient] = useState<patientlist | null>(null);
     const [activeTab, setActiveTab] = useState('appointments');
     const navigate =useNavigate();
-    const { canCreate } = usePermissions();
+    const { canCreate, canView } = usePermissions();
 
     useEffect(() => {
         if (patientID) {
@@ -66,6 +67,9 @@ function GeneralInfo() {
     const tabs = [
         { key: 'appointments', label: 'Appointments' },
         { key: 'prescriptions', label: 'Prescriptions' },
+        ...(canView("lab_order")
+            ? [{ key: 'lab-orders', label: 'Lab Tests' }]
+            : []),
     ];
     return (
         <>
@@ -126,6 +130,14 @@ function GeneralInfo() {
                                         {canCreate("appointment") ? (
                                             <Button type="primary" onClick={()=>navigate(`/patients/addappointment/${patientID}`)}>Add Appointment</Button>
                                         ) : null}
+                                        {canCreate("lab_order") ? (
+                                            <Button
+                                                type="default"
+                                                onClick={() => navigate(`/patients/${patientID}/add-lab-test`)}
+                                            >
+                                                Add Lab Test
+                                            </Button>
+                                        ) : null}
                                     </div>
                                 </div>
                             </Card>
@@ -150,6 +162,10 @@ function GeneralInfo() {
                                 {activeTab === 'prescriptions' && (
                                     <PatientPrescriptions patient={patient} />
                                 )}
+
+                                {activeTab === 'lab-orders' && canView("lab_order") ? (
+                                    <PatientLabOrders patient={patient} />
+                                ) : null}
                             </div>
                         </div>
                     </Content>

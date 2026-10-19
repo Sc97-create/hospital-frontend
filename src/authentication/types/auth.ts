@@ -6,7 +6,9 @@ export type ModuleName =
     | "patient"
     | "prescription"
     | "medicine"
-    | "appointment";
+    | "appointment"
+    | "lab_order"
+    | "billing";
 
 export type ModulePermissions = Record<PermissionAction, boolean>;
 

@@ -1,0 +1,53 @@
+.diagnostic-add-layout {
+    min-height: 100vh;
+    background: #f5f7fa;
+}
+
+.diagnostic-add-breadcrumb {
+    margin: 16px 24px 0;
+}
+
+.diagnostic-add-content {
+    margin: 16px 24px 24px;
+}
+
+.diagnostic-add-header {
+    margin-bottom: 16px;
+}
+
+.diagnostic-add-title {
+    margin: 0 !important;
+    color: #111827 !important;
+}
+
+.diagnostic-add-subtitle {
+    color: #6b7280;
+}
+
+.diagnostic-add-card {
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.diagnostic-add-form .ant-form-item-label > label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.diagnostic-add-input,
+.diagnostic-add-form .ant-input,
+.diagnostic-add-form textarea.ant-input {
+    border-radius: 8px;
+}
+
+.diagnostic-add-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.diagnostic-add-actions .ant-btn {
+    height: 32px;
+    border-radius: 8px;
+}

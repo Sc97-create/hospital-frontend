@@ -91,6 +91,24 @@ export function getPrescriptionStatusType(status: string | undefined | null): St
     }
 }
 
+export function getLabStatusType(status: string | undefined | null): StatusType {
+    switch (normalizeKey(status)) {
+        case 'received':
+        case 'processing':
+            return 'info';
+        case 'pending':
+            return 'warning';
+        case 'completed':
+            return 'success';
+        case 'cancelled':
+        case 'canceled':
+        case 'failed':
+            return 'danger';
+        default:
+            return 'info';
+    }
+}
+
 
 export function getEmployeeStatusType(status: string | undefined | null): StatusType {
     switch (normalizeKey(status)) {

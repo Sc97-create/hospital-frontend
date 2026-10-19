@@ -29,6 +29,7 @@ type PermissionsContextValue = {
     can: (module: ModuleName | string, action: PermissionAction) => boolean;
     canView: (module: ModuleName | string) => boolean;
     canCreate: (module: ModuleName | string) => boolean;
+    canUpdate: (module: ModuleName | string) => boolean;
     getDefaultRoute: () => string;
 };
 
@@ -130,6 +131,11 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
         [can],
     );
 
+    const canUpdate = useCallback(
+        (module: ModuleName | string): boolean => can(module, "update"),
+        [can],
+    );
+
     const getDefaultRoute = useCallback(
         (): string => resolveDefaultRoute(isAdmin, permissions),
         [isAdmin, permissions],
@@ -145,6 +151,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
             can,
             canView,
             canCreate,
+            canUpdate,
             getDefaultRoute,
         }),
         [
@@ -156,6 +163,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
             can,
             canView,
             canCreate,
+            canUpdate,
             getDefaultRoute,
         ],
     );

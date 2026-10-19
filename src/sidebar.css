@@ -101,10 +101,20 @@
     justify-content: center;
 }
 
-.ant-menu-item>.ant-menu-title-content {
+.ant-menu-item>.ant-menu-title-content,
+.ant-menu-submenu-title>.ant-menu-title-content {
     color: #6B7280;
     font-weight: bold;
     font-size: 14px;
+}
+
+.sidebar-main-menu .ant-menu-sub.ant-menu-inline {
+    background: transparent !important;
+}
+
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title .ant-menu-title-content,
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon {
+    color: #25D366 !important;
 }
 .ant-layout-sider-collapsed .ant-menu-inline-collapsed>.ant-menu-item,
 .ant-layout-sider-collapsed .ant-menu-inline-collapsed>.ant-menu-submenu {
