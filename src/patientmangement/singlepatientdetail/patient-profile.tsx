@@ -1,9 +1,9 @@
-import { Avatar, Card, Button, Layout, Breadcrumb } from "antd"
+import { Avatar, Card, Button, Layout, Breadcrumb, Form, Input, Modal, Select, Row, Col, message } from "antd"
 import './patient-profile.css'
 import { useEffect, useState } from "react";
-import { findOne } from "../api/patients";
+import { findOne, updatePatient } from "../api/patients";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { patientlist } from "../types/patients";
+import type { patientlist, UpdatePatientPayload } from "../types/patients";
 import { HomeOutlined, UserOutlined } from '@ant-design/icons';
 import Sidebar from "../../sidebar";
 import { Content } from "antd/es/layout/layout";
@@ -25,6 +25,46 @@ function getPatientInitials(name: string | undefined | null): string {
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
     return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
+}
+
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+const GENDERS = [
+    { value: "female", label: "Female" },
+    { value: "male", label: "Male" },
+    { value: "not prefer to say", label: "Prefer not to say" },
+];
+
+interface PatientEditForm {
+    name: string;
+    age: string;
+    weight: string;
+    gender: string;
+    email_id: string;
+    mobile_number: string;
+    blood_group: string;
+    address: string;
+}
+
+function normalizeGender(value: string | undefined | null): string {
+    const text = value?.trim().toLowerCase() ?? "";
+    if (text === "female" || text === "f") return "female";
+    if (text === "male" || text === "m") return "male";
+    if (text.includes("prefer")) return "not prefer to say";
+    return text;
+}
+
+function toEditForm(patient: patientlist): PatientEditForm {
+    return {
+        name: patient.patient_name ?? "",
+        age: patient.patient_age != null ? String(patient.patient_age) : "",
+        weight: patient.patient_weight != null ? String(patient.patient_weight) : "",
+        gender: normalizeGender(patient.patient_gender),
+        email_id: patient.patient_email ?? "",
+        mobile_number: patient.patient_phone ?? "",
+        blood_group: patient.patient_bg ?? "",
+        address: patient.patient_address ?? "",
+    };
 }
 
 function formatPatientStatusLabel(status: string | undefined | null): string {
@@ -51,8 +91,12 @@ function GeneralInfo() {
     const patientID = params.patientID;
     const [patient, setPatient] = useState<patientlist | null>(null);
     const [activeTab, setActiveTab] = useState('appointments');
+    const [editOpen, setEditOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [form] = Form.useForm<PatientEditForm>();
+    const [messageApi, contextHolder] = message.useMessage();
     const navigate =useNavigate();
-    const { canCreate, canView } = usePermissions();
+    const { canCreate, canView, canUpdate } = usePermissions();
 
     useEffect(() => {
         if (patientID) {
@@ -64,6 +108,53 @@ function GeneralInfo() {
         }
     }, [patientID]);
 
+    const openEdit = () => {
+        if (!patient) return;
+        setEditOpen(true);
+    };
+
+    const handleUpdate = async () => {
+        if (!patient) return;
+        const organisationId = localStorage.getItem("organisation_id") || "";
+        if (!organisationId) {
+            messageApi.error("Missing organisation — please log in again");
+            throw new Error("Missing organisation");
+        }
+
+        try {
+            const values = await form.validateFields();
+            const payload: UpdatePatientPayload = {
+                patient_id: patient.patient_id,
+                organisation_id: organisationId,
+                name: values.name.trim(),
+                age: String(values.age).trim(),
+                weight: String(values.weight ?? "").trim(),
+                gender: values.gender,
+                email_id: values.email_id?.trim() ?? "",
+                mobile_number: values.mobile_number.trim(),
+                blood_group: values.blood_group,
+                address: values.address.trim(),
+            };
+            setSaving(true);
+            const response = await updatePatient(payload);
+            if (response?.code != null && response.code !== 200) {
+                throw new Error(response.message || "Failed to update patient");
+            }
+            const refreshed = await findOne(patient.patient_id);
+            setPatient(refreshed.data);
+            setEditOpen(false);
+            messageApi.success(response?.message || "patient updated");
+        } catch (error) {
+            if (!(error && typeof error === "object" && "errorFields" in error)) {
+                console.error("Failed to update patient:", error);
+                messageApi.error("Failed to update patient");
+            }
+            throw error;
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const tabs = [
         { key: 'appointments', label: 'Appointments' },
         { key: 'prescriptions', label: 'Prescriptions' },
@@ -73,6 +164,7 @@ function GeneralInfo() {
     ];
     return (
         <>
+            {contextHolder}
             <Layout>
                 <Sidebar />
                 <Layout>
@@ -127,6 +219,11 @@ function GeneralInfo() {
 
                                     {/* Actions */}
                                     <div className="patient-action-buttons">
+                                        {canUpdate("patient") ? (
+                                            <Button onClick={openEdit} disabled={!patient}>
+                                                Edit Patient
+                                            </Button>
+                                        ) : null}
                                         {canCreate("appointment") ? (
                                             <Button type="primary" onClick={()=>navigate(`/patients/addappointment/${patientID}`)}>Add Appointment</Button>
                                         ) : null}
@@ -172,6 +269,127 @@ function GeneralInfo() {
                 </Layout>
 
             </Layout>
+            <Modal
+                title="Edit Patient"
+                open={editOpen}
+                onCancel={() => setEditOpen(false)}
+                onOk={handleUpdate}
+                okText="Save"
+                confirmLoading={saving}
+                destroyOnClose
+                afterOpenChange={(open) => {
+                    if (open && patient) {
+                        form.setFieldsValue(toEditForm(patient));
+                    }
+                }}
+            >
+                <Form layout="vertical" form={form}>
+                    <Row gutter={[16, 0]}>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Name"
+                                name="name"
+                                rules={[{ required: true, message: "Patient name is required" }]}
+                            >
+                                <Input placeholder="Full name" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Blood Group"
+                                name="blood_group"
+                                rules={[{ required: true, message: "Please select a blood group" }]}
+                            >
+                                <Select
+                                    placeholder="Select blood group"
+                                    options={BLOOD_GROUPS.map((value) => ({ value, label: value }))}
+                                />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Age"
+                                name="age"
+                                rules={[
+                                    { required: true, message: "Age is required" },
+                                    {
+                                        validator: (_, value) => {
+                                            const age = Number(value);
+                                            if (!Number.isFinite(age) || age < 0 || age > 150) {
+                                                return Promise.reject(new Error("Enter a valid age (0–150)"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
+                            >
+                                <Input placeholder="Age in years" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Phone Number"
+                                name="mobile_number"
+                                rules={[
+                                    { required: true, message: "Phone number is required" },
+                                    { pattern: /^\d{10}$/, message: "Enter a valid 10-digit phone number" },
+                                ]}
+                            >
+                                <Input placeholder="10-digit mobile number" maxLength={10} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Gender"
+                                name="gender"
+                                rules={[{ required: true, message: "Please select a gender" }]}
+                            >
+                                <Select placeholder="Select gender" options={GENDERS} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Email ID"
+                                name="email_id"
+                                rules={[{ type: "email", message: "Enter a valid email address" }]}
+                            >
+                                <Input placeholder="Email address (optional)" type="email" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Weight (kg)"
+                                name="weight"
+                                rules={[
+                                    {
+                                        validator: (_, value) => {
+                                            if (value == null || String(value).trim() === "") {
+                                                return Promise.resolve();
+                                            }
+                                            const weight = Number(value);
+                                            if (!Number.isFinite(weight) || weight < 0 || weight > 500) {
+                                                return Promise.reject(new Error("Enter a valid weight"));
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
+                            >
+                                <Input placeholder="Weight in kg (optional)" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Address"
+                                name="address"
+                                rules={[{ required: true, message: "Address is required" }]}
+                            >
+                                <Input placeholder="Street / locality" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </Form>
+            </Modal>
 
         </>
     )

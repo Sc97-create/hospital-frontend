@@ -17,6 +17,25 @@ export interface PatientResponse {
     message: string;
     code: number;
 }
+export interface UpdatePatientPayload {
+    patient_id: string;
+    organisation_id: string;
+    name: string;
+    age: string;
+    weight: string;
+    gender: string;
+    email_id: string;
+    mobile_number: string;
+    blood_group: string;
+    address: string;
+}
+
+export interface UpdatePatientResponse {
+    message: string;
+    patient_id: string;
+    code: number;
+}
+
 export interface patientlist {
     patient_id: string;
     patient_code: string;
