@@ -9,7 +9,7 @@ import PaymentStep from '../payment'
 import SubscriptionActiveStep from '../subscription-active'
 import ReadyStep, { type ReadyOrganisationSummary } from '../ready'
 import { useCustomerSignup } from '../api/use-customer-signup'
-import type { BillingCycle, Plan } from '../plan'
+import type { BillingCycle, MonthlyTerm, Plan } from '../plan'
 import './signup.css'
 
 export type PlanAction = 'free_trial' | 'choose'
@@ -264,7 +264,7 @@ function AccountStep({
 
       <p className="cs-signin">
         Already have an account?{' '}
-        <Link to="/login">
+        <Link to="/customer/login">
           Sign in <span aria-hidden="true">↗</span>
         </Link>
       </p>
@@ -300,10 +300,12 @@ export default function CustomerSignup({
 
   const [step, setStep] = useState<SignupStep>(resolvedInitial)
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
+  const [monthlyTerm, setMonthlyTerm] = useState<MonthlyTerm>(3)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
+  const storedEmail = localStorage.getItem('customer_email')?.trim() ?? ''
   const [account, setAccount] = useState<AccountForm>({
     fullName: '',
-    workEmail: resolvedInitial !== 'account' ? previewEmail : '',
+    workEmail: resolvedInitial !== 'account' ? storedEmail || previewEmail : '',
     password: '',
   })
   const [organisation, setOrganisation] = useState<ReadyOrganisationSummary | null>(
@@ -376,6 +378,8 @@ export default function CustomerSignup({
             <PlanBillingStep
               cycle={billingCycle}
               onCycleChange={setBillingCycle}
+              monthlyTerm={monthlyTerm}
+              onMonthlyTermChange={setMonthlyTerm}
               selectedPlanId={selectedPlan?.id}
               onPlanSelect={setSelectedPlan}
               onContinue={(nextPlan) => {
@@ -393,6 +397,7 @@ export default function CustomerSignup({
           {step === 'payment' && plan === 'choose' ? (
             <PaymentStep
               cycle={billingCycle}
+              monthlyTerm={monthlyTerm}
               plan={selectedPlan}
               prefillName={account.fullName}
               prefillEmail={account.workEmail}

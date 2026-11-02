@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { usePermissions } from "./permissions-context";
 import type { ModuleName, PermissionAction } from "../authentication/types/auth";
+import { isSubscriptionExpired, SUBSCRIPTION_RENEW_PATH } from "../customer/subscription/access";
 
 type AuthGuardProps = {
     children: ReactNode;
@@ -25,6 +26,10 @@ const AuthGuard = ({
 
     if (!token) {
         return <Navigate to="/login" replace />;
+    }
+
+    if (isSubscriptionExpired()) {
+        return <Navigate to={SUBSCRIPTION_RENEW_PATH} replace />;
     }
 
     if (module && !can(module, action)) {

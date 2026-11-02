@@ -1,10 +1,12 @@
 import axios from "axios";
+import { LICENSE_EXPIRED_PATH } from "../license/constants";
 
 // URLs that should NOT include the Authorization header
 const PUBLIC_ENDPOINTS: string[] = [
     "/authentication/login",
     "/authentication/requestPasswordReset",
     "/central/customer/signup",
+    "/central/customer/login",
 ];
 
 /** Central signup APIs use a customer JWT — hospital refresh cookies do not apply. */
@@ -66,10 +68,20 @@ const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue = [];
 };
 
-// Response interceptor — handle 401 (token expired) globally
+function redirectToLicenseExpired() {
+    if (window.location.pathname === LICENSE_EXPIRED_PATH) return;
+    window.location.replace(LICENSE_EXPIRED_PATH);
+}
+
+// Response interceptor — handle 401 (token expired) and 402 (license expired) globally
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
+        if (error.response?.status === 402) {
+            redirectToLicenseExpired();
+            return Promise.reject(error);
+        }
+
         const originalRequest = error.config;
 
         // Check if the error is 401, we haven't retried this request yet, and it's not a public endpoint
@@ -133,6 +145,14 @@ apiClient.interceptors.response.use(
                 }
             } catch (refreshError) {
                 processQueue(refreshError, null);
+
+                if (
+                    axios.isAxiosError(refreshError) &&
+                    refreshError.response?.status === 402
+                ) {
+                    redirectToLicenseExpired();
+                    return Promise.reject(refreshError);
+                }
 
                 // If refresh fails, clear storage and redirect to login
                 localStorage.removeItem("access_token");

@@ -1,10 +1,33 @@
-import type { BillingCycle } from '../plan/types'
+import type { BillingCycle, MonthlyTerm, PlanDetails } from '../plan/types'
 
 export type CreateSubscriptionPayload = {
   plan_id: string
   tenant_id: string
-  /** 6 = monthly (6-month commitment), 12 = yearly */
-  billing_cycle: 6 | 12
+  /** 3 or 6 for monthly, 12 for yearly. Trial sends 6 when the term picker is hidden. */
+  billing_cycle: 3 | 6 | 12
+}
+
+/** POST /api/v1/central/subscription/update — expired trial renewal, not first signup. */
+export type UpdateSubscriptionPayload = {
+  subscription_id: string
+  plan_id: string
+  hospital_name: string
+  billing_cycle: 3 | 6 | 12
+  price: 0
+}
+
+export type UpdateSubscriptionResponse = {
+  message?: string
+  subscription_id?: string
+  tenant_id?: string
+  hospital_name?: string
+  price?: number
+  billing_cycle?: number | string
+  status?: string
+  start_at?: string
+  end_at?: string
+  order_id?: string
+  key_id?: string
 }
 
 export type CreateSubscriptionResponse = {
@@ -12,6 +35,7 @@ export type CreateSubscriptionResponse = {
   subscription_id?: string
   tenant_id?: string
   plan_id?: string
+  plan_name?: string
   hospital_name?: string
   /** Amount used for Razorpay order (currency subunits / paise). */
   price?: number
@@ -20,6 +44,7 @@ export type CreateSubscriptionResponse = {
   status?: string
   start_at?: string
   end_at?: string
+  expired?: boolean
   /** Present for paid plans — Razorpay order id */
   order_id?: string
   /** Present for paid plans — Razorpay public Key ID */
@@ -39,6 +64,36 @@ export type ConfirmCheckoutPayload = {
   razorpay_payment_id: string
   razorpay_order_id: string
   razorpay_signature: string
+}
+
+/** Nested plan on GET /central/subscription/getByTenant/:tenant_id */
+export type SubscriptionPlanSummary = {
+  name: string
+  status: string
+  monthly_price: number
+  discount: number
+  plan_details?: PlanDetails
+}
+
+/** GET /api/v1/central/subscription/getByTenant/:tenant_id */
+export type SubscriptionByTenantRecord = {
+  subscription_id: string
+  tenant_id: string
+  plan_id: string
+  status: string
+  billing_cycle: string
+  price: number
+  order_id?: string
+  start_at?: string
+  end_at?: string
+  expired: boolean
+  hospital_name?: string
+  plan?: SubscriptionPlanSummary
+}
+
+export type GetSubscriptionByTenantResponse = {
+  message: string
+  subscription: SubscriptionByTenantRecord
 }
 
 export type ConfirmCheckoutResponse = {
@@ -62,6 +117,64 @@ const STORAGE = {
   startAt: 'subscription_start_at',
   endAt: 'subscription_end_at',
 } as const
+
+export function normalizeSubscriptionByTenant(
+  response: GetSubscriptionByTenantResponse | null | undefined,
+): CreateSubscriptionResponse | null {
+  const record = response?.subscription
+  if (!record?.subscription_id) return null
+  return {
+    message: response?.message,
+    subscription_id: record.subscription_id,
+    tenant_id: record.tenant_id,
+    plan_id: record.plan_id,
+    plan_name: record.plan?.name,
+    price: record.price,
+    billing_cycle: record.billing_cycle,
+    status: record.status,
+    start_at: record.start_at,
+    end_at: record.end_at,
+    expired: record.expired,
+    hospital_name: record.hospital_name,
+    order_id: record.order_id,
+  }
+}
+
+/** Save lookup fields without clearing an in-progress Razorpay checkout. */
+export function persistSubscriptionLookup(data: CreateSubscriptionResponse) {
+  if (data.subscription_id) {
+    localStorage.setItem(STORAGE.subscriptionId, String(data.subscription_id))
+  }
+  if (data.tenant_id) {
+    localStorage.setItem(STORAGE.tenantId, String(data.tenant_id))
+  }
+  if (data.status) {
+    localStorage.setItem(STORAGE.status, String(data.status))
+  }
+  if (data.price != null) {
+    localStorage.setItem(STORAGE.price, String(data.price))
+  }
+  if (data.billing_cycle != null) {
+    localStorage.setItem(STORAGE.billingCycle, String(data.billing_cycle))
+  }
+  if (data.start_at) {
+    localStorage.setItem(STORAGE.startAt, data.start_at)
+  }
+  if (data.end_at) {
+    localStorage.setItem(STORAGE.endAt, data.end_at)
+  }
+  if (data.plan_id) {
+    localStorage.setItem('selected_plan_id', data.plan_id)
+  }
+  if (data.order_id && data.key_id && data.price != null && data.price > 0) {
+    localStorage.setItem(STORAGE.orderId, data.order_id)
+    localStorage.setItem(STORAGE.keyId, data.key_id)
+    localStorage.setItem(STORAGE.amount, String(data.price))
+    if (data.hospital_name) {
+      localStorage.setItem(STORAGE.hospitalName, data.hospital_name)
+    }
+  }
+}
 
 export function persistSubscriptionCreateResponse(data: CreateSubscriptionResponse) {
   if (data.subscription_id) {
@@ -127,8 +240,9 @@ export function readRazorpayCheckoutSession(
   }
 }
 
-export function billingCycleToMonths(cycle: BillingCycle): 6 | 12 {
-  return cycle === 'yearly' ? 12 : 6
+export function billingCycleToMonths(cycle: BillingCycle, monthlyTerm: MonthlyTerm): 3 | 6 | 12 {
+  if (cycle === 'yearly') return 12
+  return monthlyTerm
 }
 
 export function isPaidSubscriptionResponse(data: CreateSubscriptionResponse): boolean {

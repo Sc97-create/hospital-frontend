@@ -108,9 +108,34 @@
 .cpb-plan__plans .ant-radio-button-wrapper {
   flex: 1;
   text-align: center;
-  height: 40px;
-  line-height: 38px;
+  height: auto;
+  min-height: 40px;
+  line-height: 1.2;
+  white-space: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
   text-transform: capitalize;
+}
+
+.cpb-plan__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.cpb-plan__option-used {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.cpb-plan__plans .ant-radio-button-wrapper-disabled .cpb-plan__option-used {
+  color: #6b7280;
 }
 
 .cpb-plan__cycle {
@@ -124,6 +149,15 @@
   text-align: center;
   height: 40px;
   line-height: 38px;
+}
+
+.cpb-plan__term {
+  width: 100%;
+  margin-bottom: var(--space-3);
+}
+
+.cpb-plan__term.ant-select-lg .ant-select-selector {
+  border-radius: 8px;
 }
 
 .cpb-plan__cycle-note {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Alert, Button, message } from 'antd'
-import type { BillingCycle, Plan } from '../plan'
+import type { BillingCycle, MonthlyTerm, Plan } from '../plan'
 import {
   ConfirmCheckout,
   clearRazorpayCheckoutSession,
@@ -11,6 +11,7 @@ import './payment.css'
 
 type PaymentStepProps = {
   cycle: BillingCycle
+  monthlyTerm: MonthlyTerm
   plan?: Plan | null
   prefillName?: string
   prefillEmail?: string
@@ -50,7 +51,12 @@ function getApiErrorMessage(error: unknown, fallback: string): string {
 }
 
 /** Display label from plan catalog (rupees). Checkout amount still comes from subscription/create. */
-function getAmountLabel(cycle: BillingCycle, plan?: Plan | null, checkoutAmount?: number) {
+function getAmountLabel(
+  cycle: BillingCycle,
+  monthlyTerm: MonthlyTerm,
+  plan?: Plan | null,
+  checkoutAmount?: number,
+) {
   if (isFreeTrialPlan(plan)) return '₹0 / 7 days'
   if (plan) {
     if (cycle === 'yearly') {
@@ -60,17 +66,18 @@ function getAmountLabel(cycle: BillingCycle, plan?: Plan | null, checkoutAmount?
         plan.effective_monthly_price * 12
       return `${formatInr(yearly)} / year`
     }
-    return `${formatInr(plan.effective_monthly_price)} / month`
+    return `${formatInr(plan.effective_monthly_price * monthlyTerm)} / ${monthlyTerm} months`
   }
   if (checkoutAmount != null) {
     // subscription/create price is Razorpay subunits (paise)
     return `${formatInr(checkoutAmount / 100)}`
   }
-  return cycle === 'monthly' ? '₹X / month' : '₹Y / year'
+  return cycle === 'yearly' ? '₹Y / year' : `₹X / ${monthlyTerm} months`
 }
 
 export default function PaymentStep({
   cycle,
+  monthlyTerm,
   plan,
   prefillName,
   prefillEmail,
@@ -84,7 +91,7 @@ export default function PaymentStep({
   const session = useMemo(() => readRazorpayCheckoutSession(), [])
   const planName = plan?.name ?? 'Standard'
   const isBusy = status === 'opening' || status === 'confirming'
-  const amountLabel = getAmountLabel(cycle, plan, session?.amount)
+  const amountLabel = getAmountLabel(cycle, monthlyTerm, plan, session?.amount)
 
   const handlePay = async () => {
     const checkout = readRazorpayCheckoutSession()

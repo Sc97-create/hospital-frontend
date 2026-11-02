@@ -7,6 +7,7 @@ import type { loginPayload, loginResponse, UpdatePasswordPayload } from './types
 import { LoginReq, UpdatePasswordFirstLogin } from './api/login-api';
 import { usePermissions } from '../auth/permissions-context';
 import { resolveDefaultRouteFromEntries } from '../auth/default-route';
+import { setSubscriptionExpired } from '../customer/subscription/access';
 
 function isPasswordCleared(data: loginResponse): boolean {
     const flag = data.passwordcleared ?? data.password_cleared;
@@ -65,6 +66,7 @@ function Login() {
         localStorage.setItem("access_token", data.token);
         localStorage.setItem("user_id", data.user_id);
         localStorage.setItem("organisation_id", data.organisation_id);
+        setSubscriptionExpired(false);
         setAccess(Boolean(data.is_admin), data.permissions);
     };
 

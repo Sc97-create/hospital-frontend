@@ -15,6 +15,10 @@
   font-family: var(--font-family) !important;
 }
 
+.csa-active__loading {
+  margin-bottom: var(--space-5);
+}
+
 .csa-active__icon {
   margin-bottom: var(--space-5);
   font-size: 56px;
