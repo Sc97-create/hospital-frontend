@@ -4,6 +4,9 @@ import type {
   ConfirmCheckoutResponse,
   CreateSubscriptionPayload,
   CreateSubscriptionResponse,
+  GetSubscriptionByTenantResponse,
+  UpdateSubscriptionPayload,
+  UpdateSubscriptionResponse,
 } from './types'
 
 /** POST /api/v1/central/subscription/create — requires signup JWT */
@@ -13,6 +16,29 @@ export const CreateSubscription = async (
   const response = await apiClient.post<CreateSubscriptionResponse>(
     '/central/subscription/create',
     payload,
+    { skipAuthRefresh: true },
+  )
+  return response.data
+}
+
+/** POST /api/v1/central/subscription/update — expired trial renewal */
+export const UpdateSubscription = async (
+  payload: UpdateSubscriptionPayload,
+): Promise<UpdateSubscriptionResponse> => {
+  const response = await apiClient.post<UpdateSubscriptionResponse>(
+    '/central/subscription/update',
+    payload,
+    { skipAuthRefresh: true },
+  )
+  return response.data
+}
+
+/** GET /api/v1/central/subscription/getByTenant/:tenant_id — requires signup JWT */
+export const GetSubscriptionByTenant = async (
+  tenantId: string,
+): Promise<GetSubscriptionByTenantResponse> => {
+  const response = await apiClient.get<GetSubscriptionByTenantResponse>(
+    `/central/subscription/getByTenant/${tenantId}`,
     { skipAuthRefresh: true },
   )
   return response.data

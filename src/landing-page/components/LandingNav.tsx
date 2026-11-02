@@ -162,7 +162,7 @@ export default function LandingNav({
         </nav>
 
         <div className={`${p}-nav__actions`}>
-          <Link to="/login" className={`${p}-text-link`}>
+          <Link to="/customer/login" className={`${p}-text-link`}>
             {p === 'pp' ? 'Sign In' : 'Log In'}
           </Link>
           <Link to="/signup" className={`${p}-btn ${p}-btn--primary ${p}-btn--sm`}>
@@ -217,7 +217,7 @@ export default function LandingNav({
             </NavAnchor>
           )
         })}
-        <Link to="/login" onClick={() => setMenuOpen(false)}>
+        <Link to="/customer/login" onClick={() => setMenuOpen(false)}>
           {p === 'pp' ? 'Sign In' : 'Log In'}
         </Link>
         <Link

@@ -44,6 +44,9 @@ import LabCheckout from './labs/lab-checkout'
 import AddLabTest from './labs/add-lab-test'
 import DiagnosticCenter from './diagnostic-center/diagnostic-center'
 import AddDiagnosticCenter from './diagnostic-center/add-diagnostic-center'
+import LicenseExpiredPage from './license/license-expired'
+import CustomerLoginPage from './customer/login'
+import SubscriptionRenewPage from './customer/subscription-renew'
 
 function App() {
 
@@ -74,6 +77,9 @@ function App() {
           <Route path='/landing-page/solutions/clinic-management' element={<ClinicManagementPage />} />
           <Route path='/landing-page/solutions/patient-management' element={<PatientManagementPage />} />
           <Route path='/login' element={<Login />} />
+          <Route path='/customer/login' element={<CustomerLoginPage />} />
+          <Route path='/subscription/renew' element={<SubscriptionRenewPage />} />
+          <Route path='/license-expired' element={<LicenseExpiredPage />} />
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path='/signup' element={<CustomerSignup />} />
           <Route path='/signup/verify' element={<CustomerSignup initialStepName="verify" />} />

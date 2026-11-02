@@ -14,6 +14,7 @@ import {
     Row,
     Select,
     Table,
+    Tooltip,
     Typography,
     message,
 } from "antd";
@@ -23,6 +24,7 @@ import {
     EditOutlined,
     FilePdfOutlined,
     HomeOutlined,
+    InfoCircleOutlined,
     PlusOutlined,
     SearchOutlined,
     ShopOutlined,
@@ -110,6 +112,11 @@ function lineUnits(line: StockFillLine): number {
 
 function linePurchaseTotal(line: StockFillLine): number {
     return (line.purchase_price || 0) * (line.purchase_qty_boxes || 0);
+}
+
+function priceAfterPercentDiscount(mrp: number, discountPercent: number): number {
+    const percent = Math.min(100, Math.max(0, Number(discountPercent) || 0));
+    return Math.max(0, Math.round(mrp * (1 - percent / 100) * 100) / 100);
 }
 
 function getApiErrorMessage(error: unknown): string | null {
@@ -960,7 +967,7 @@ function FillStockPage() {
                                         if (mrp != null && form.getFieldValue("selling_price") == null) {
                                             form.setFieldValue(
                                                 "selling_price",
-                                                Math.max(0, Number(mrp) - discount),
+                                                priceAfterPercentDiscount(Number(mrp), discount),
                                             );
                                         }
                                     }}
@@ -980,9 +987,21 @@ function FillStockPage() {
 
                     <Row gutter={12}>
                         <Col span={12}>
-                            <Form.Item name="discount" label="Discount (₹)" initialValue={0}>
+                            <Form.Item
+                                name="discount"
+                                label={
+                                    <span>
+                                        Discount (%){" "}
+                                        <Tooltip title="Discount is in %">
+                                            <InfoCircleOutlined />
+                                        </Tooltip>
+                                    </span>
+                                }
+                                initialValue={0}
+                            >
                                 <InputNumber
                                     min={0}
+                                    max={100}
                                     step={0.5}
                                     precision={2}
                                     style={{ width: "100%" }}
@@ -991,7 +1010,7 @@ function FillStockPage() {
                                         if (!Number.isNaN(mrp) && mrp > 0) {
                                             form.setFieldValue(
                                                 "selling_price",
-                                                Math.max(0, mrp - (Number(discount) || 0)),
+                                                priceAfterPercentDiscount(mrp, Number(discount) || 0),
                                             );
                                         }
                                     }}
@@ -1005,7 +1024,7 @@ function FillStockPage() {
                                 rules={[{ required: true, message: "Enter selling price" }]}
                                 extra={
                                     watchedMrp != null
-                                        ? `Suggested: ₹${Math.max(0, Number(watchedMrp) - (Number(watchedDiscount) || 0)).toFixed(2)}`
+                                        ? `Suggested: ₹${priceAfterPercentDiscount(Number(watchedMrp), Number(watchedDiscount) || 0).toFixed(2)}`
                                         : undefined
                                 }
                             >

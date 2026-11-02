@@ -23,7 +23,7 @@ import {
 
 import { useCallback, useRef, useState } from 'react';
 import type { UIEvent } from 'react';
-import type { Dayjs } from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import { Link, useNavigate } from 'react-router-dom';
 
 import './add-employee.css';
@@ -36,6 +36,20 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const LOOKUP_PAGE_SIZE = 10;
+
+function latestAllowedEmployeeDob() {
+    return dayjs().subtract(18, 'year').endOf('day');
+}
+
+function employeeDobError(value: Dayjs) {
+    if (value.isAfter(dayjs(), 'day')) {
+        return 'Date of birth cannot be in the future';
+    }
+    if (value.isAfter(latestAllowedEmployeeDob(), 'day')) {
+        return 'Employee must be at least 18 years old';
+    }
+    return null;
+}
 
 interface LookupOption {
     value: string;
@@ -331,8 +345,27 @@ function AddEmployee() {
                                 </Col>
 
                                 <Col xs={24} sm={12} lg={8}>
-                                    <Form.Item label="Date of Birth" name="date_of_birth">
-                                        <DatePicker className="date-picker-layout" placeholder="Select date" />
+                                    <Form.Item
+                                        label="Date of Birth"
+                                        name="date_of_birth"
+                                        rules={[
+                                            {
+                                                validator: (_, value?: Dayjs) => {
+                                                    if (!value) return Promise.resolve();
+                                                    const error = employeeDobError(value);
+                                                    return error ? Promise.reject(new Error(error)) : Promise.resolve();
+                                                },
+                                            },
+                                        ]}
+                                    >
+                                        <DatePicker
+                                            className="date-picker-layout"
+                                            placeholder="Select date"
+                                            defaultPickerValue={latestAllowedEmployeeDob()}
+                                            disabledDate={(current) =>
+                                                current != null && current.isAfter(latestAllowedEmployeeDob(), 'day')
+                                            }
+                                        />
                                     </Form.Item>
                                 </Col>
 
@@ -385,7 +418,7 @@ function AddEmployee() {
                                 </Col>
 
                                 <Col xs={24} sm={12} lg={8}>
-                                    <Form.Item label="License / Registration No." name="license_no">
+                                    <Form.Item label="License / Registration No. (optional)" name="license_no" required={false}>
                                         <Input
                                             placeholder="Medical council or board ID"
                                             className="input-form-layout"
@@ -420,16 +453,28 @@ function AddEmployee() {
                                 </Col>
 
                                 <Col xs={24} sm={12} lg={8}>
-                                    <Form.Item label="Emergency Contact Name" name="emergency_name">
+                                    <Form.Item label="Emergency Contact Name (optional)" name="emergency_name" required={false}>
                                         <Input placeholder="Full name" className="input-form-layout" />
                                     </Form.Item>
                                 </Col>
 
                                 <Col xs={24} sm={12} lg={8}>
                                     <Form.Item
-                                        label="Emergency Contact Email"
+                                        label="Emergency Contact Email (optional)"
                                         name="emergency_email"
-                                        rules={[{ type: 'email', message: 'Enter a valid email address' }]}
+                                        required={false}
+                                        rules={[
+                                            {
+                                                validator: (_, value?: string) => {
+                                                    const email = value?.trim() ?? '';
+                                                    if (!email) return Promise.resolve();
+                                                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                                                        return Promise.reject(new Error('Enter a valid email address'));
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                        ]}
                                     >
                                         <Input
                                             prefix={<MailOutlined />}
@@ -441,9 +486,21 @@ function AddEmployee() {
 
                                 <Col xs={24} sm={12} lg={8}>
                                     <Form.Item
-                                        label="Emergency Contact Phone"
+                                        label="Emergency Contact Phone (optional)"
                                         name="emergency_contact"
-                                        rules={[{ pattern: /^\d{10}$/, message: 'Enter a valid 10-digit number' }]}
+                                        required={false}
+                                        rules={[
+                                            {
+                                                validator: (_, value?: string) => {
+                                                    const phone = value?.trim() ?? '';
+                                                    if (!phone) return Promise.resolve();
+                                                    if (!/^\d{10}$/.test(phone)) {
+                                                        return Promise.reject(new Error('Enter a valid 10-digit number'));
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                        ]}
                                     >
                                         <Input
                                             prefix={<PhoneOutlined />}

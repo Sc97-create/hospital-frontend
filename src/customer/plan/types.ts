@@ -24,3 +24,4 @@ export type ListPlansResponse = {
 }
 
 export type BillingCycle = 'monthly' | 'yearly'
+export type MonthlyTerm = 3 | 6

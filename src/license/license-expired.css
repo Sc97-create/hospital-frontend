@@ -1,0 +1,12 @@
+.license-expired-copy {
+    margin-top: var(--space-2);
+}
+
+.license-expired-email {
+    font-weight: var(--weight-semibold);
+    color: var(--status-info-default);
+}
+
+.license-expired-back {
+    margin-top: var(--space-5);
+}

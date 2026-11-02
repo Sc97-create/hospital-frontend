@@ -1,0 +1,55 @@
+.subscription-renew.customer-signup .cs-panel {
+  align-items: flex-start;
+  overflow: auto;
+}
+
+.renew-current {
+  margin-bottom: var(--space-8);
+  padding: var(--space-5);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff7ed;
+}
+
+.renew-current__label {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: #9a3412;
+}
+
+.renew-current__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: #111827;
+}
+
+.renew-current__status {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: #c2410c;
+}
+
+.renew-current__meta {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-muted-text);
+}
+
+.renew-done__button {
+  margin-top: var(--space-6);
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  height: 48px;
+  font-weight: var(--weight-bold);
+}
+
+@media (max-width: 960px) {
+  .subscription-renew .cs-brand__copy {
+    padding-top: 3.25rem;
+  }
+}
