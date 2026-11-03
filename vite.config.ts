@@ -11,6 +11,7 @@ export default defineConfig({
         '998894f6516c.ngrok-free.app',
         '0fd9-2409-40f2-11a2-b4dc-acd1-d585-c3e3-4c4d.ngrok-free.app',
         'f042-2409-40f2-11a2-b4dc-acd1-d585-c3e3-4c4d.ngrok-free.app',
+        'https://floatohealth.com'
       ],
     }
 })

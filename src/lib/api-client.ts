@@ -1,5 +1,6 @@
 import axios from "axios";
 import { LICENSE_EXPIRED_PATH } from "../license/constants";
+import { API_V1_URL, APP_URL } from "./env";
 
 // URLs that should NOT include the Authorization header
 const PUBLIC_ENDPOINTS: string[] = [
@@ -23,7 +24,7 @@ declare module "axios" {
 
 // Shared Axios instance with base URL and auth header
 const apiClient = axios.create({
-    baseURL: "http://localhost:9069/api/v1",
+    baseURL: API_V1_URL,
 });
 
 // Request interceptor — automatically attaches the token to every request
@@ -70,7 +71,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
 
 function redirectToLicenseExpired() {
     if (window.location.pathname === LICENSE_EXPIRED_PATH) return;
-    window.location.replace(LICENSE_EXPIRED_PATH);
+    window.location.replace(`${APP_URL}${LICENSE_EXPIRED_PATH}`);
 }
 
 // Response interceptor — handle 401 (token expired) and 402 (license expired) globally
@@ -124,7 +125,7 @@ apiClient.interceptors.response.use(
                 // Call the refresh token API endpoint
                 // Since refresh token is in cookies, we use withCredentials: true
                 const response = await axios.post(
-                    "http://localhost:9069/api/v1/authentication/refresh",
+                    `${API_V1_URL}/authentication/refresh`,
                     {},
                     { withCredentials: true }
                 );
@@ -160,7 +161,7 @@ apiClient.interceptors.response.use(
                 localStorage.removeItem("organisation_id");
                 localStorage.removeItem("is_admin");
                 localStorage.removeItem("user_permissions");
-                window.location.href = "/login";
+                window.location.href = `${APP_URL}/login`;
 
                 return Promise.reject(refreshError);
             } finally {
