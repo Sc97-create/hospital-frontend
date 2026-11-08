@@ -42,6 +42,10 @@ import {
   type VisitType,
 } from "./dashboard-mock-data";
 import {
+  GetOrganisationDetailsByUserId,
+  organisationDisplayName,
+} from "./api/organisation";
+import {
   GetDashboardStatusCounts,
   GetDashboardTodayAppointments,
   GetDashboardTodayInvoiceSummary,
@@ -303,8 +307,34 @@ function Dashboard() {
     const loadDashboard = async () => {
       const overview = getDashboardOverview();
       const organisationId = localStorage.getItem("organisation_id") || "";
+      const userId = localStorage.getItem("user_id") || "";
 
-      if (organisationId) {
+      if (userId) {
+        try {
+          const organisationResponse = await GetOrganisationDetailsByUserId(userId);
+          const organisation = organisationResponse?.data;
+          if (organisation) {
+            const name = organisationDisplayName(organisation);
+            if (name) {
+              overview.branch_label = name;
+              overview.clinic_name = organisation.legal_entity_name?.trim() || name;
+            }
+            if (organisation.id) {
+              localStorage.setItem("organisation_id", organisation.id);
+            }
+            if (organisation.tenant_id) {
+              localStorage.setItem("tenant_id", organisation.tenant_id);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch organisation details:", error);
+        }
+      }
+
+      const resolvedOrganisationId =
+        localStorage.getItem("organisation_id") || organisationId;
+
+      if (resolvedOrganisationId) {
         try {
           const [
             statusResponse,
@@ -313,11 +343,11 @@ function Dashboard() {
             employeeResponse,
             prescriptionsResponse,
           ] = await Promise.all([
-            GetDashboardStatusCounts(organisationId),
-            GetDashboardTodayAppointments(organisationId),
-            GetDashboardTodayInvoiceSummary(organisationId),
-            GetDashboardEmployeeStatusCounts(organisationId),
-            GetDashboardTodayPrescriptions(organisationId),
+            GetDashboardStatusCounts(resolvedOrganisationId),
+            GetDashboardTodayAppointments(resolvedOrganisationId),
+            GetDashboardTodayInvoiceSummary(resolvedOrganisationId),
+            GetDashboardEmployeeStatusCounts(resolvedOrganisationId),
+            GetDashboardTodayPrescriptions(resolvedOrganisationId),
           ]);
 
           if (!cancelled) {
