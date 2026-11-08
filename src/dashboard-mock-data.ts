@@ -86,7 +86,7 @@ export interface DashboardOverview {
 
 const EMPTY_OVERVIEW: DashboardOverview = {
   clinic_name: "ClearSkin Clinic",
-  branch_label: "Hubli Branch",
+  branch_label: "Clinic",
   date_label: new Date().toLocaleDateString("en-IN", {
     weekday: "long",
     day: "numeric",
