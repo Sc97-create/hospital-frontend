@@ -51,6 +51,14 @@
     gap: 16px;
 }
 
+.patient-avatar-letter {
+    flex-shrink: 0;
+    background: #e8f0fe !important;
+    color: #1d4ed8 !important;
+    font-size: 20px !important;
+    font-weight: 700;
+}
+
 .patient-grid {
     flex: 1;
     display: grid;

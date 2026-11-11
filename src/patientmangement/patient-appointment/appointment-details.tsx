@@ -28,6 +28,11 @@ import { usePermissions } from "../../auth/permissions-context";
 
 const { Text } = Typography;
 
+function firstLetter(name?: string | null): string {
+    const letter = name?.trim().charAt(0);
+    return letter ? letter.toUpperCase() : "?";
+}
+
 const AppointmentDetails: React.FC = () => {
     const navigate = useNavigate()
     const { canCreate } = usePermissions()
@@ -130,10 +135,9 @@ const AppointmentDetails: React.FC = () => {
                                 </div>
 
                                 <div className="patient-info">
-                                    <Avatar
-                                        size={56}
-                                        src="https://i.pravatar.cc/100"
-                                    />
+                                    <Avatar size={56} className="patient-avatar-letter">
+                                        {firstLetter(previewData?.patient_name)}
+                                    </Avatar>
 
                                     <div className="patient-grid">
                                         <div>

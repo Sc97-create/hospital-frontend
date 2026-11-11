@@ -21,18 +21,11 @@ function displayValue(value: string | number | null | undefined): string {
 
 function getInitials(firstName?: string, lastName?: string, fullName?: string): string {
     const first = firstName?.trim();
-    const last = lastName?.trim();
-    if (first && last) {
-        return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
-    }
     if (first) return first.charAt(0).toUpperCase();
+    const last = lastName?.trim();
     if (last) return last.charAt(0).toUpperCase();
-    if (fullName?.trim()) {
-        const parts = fullName.trim().split(/\s+/);
-        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-        return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
-    }
-    return "?";
+    const fromFull = fullName?.trim().charAt(0);
+    return fromFull ? fromFull.toUpperCase() : "?";
 }
 
 function formatStatusLabel(status: string | undefined | null): string {
