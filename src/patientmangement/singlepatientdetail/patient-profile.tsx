@@ -21,10 +21,8 @@ function displayValue(value: string | number | null | undefined): string {
 }
 
 function getPatientInitials(name: string | undefined | null): string {
-    if (!name?.trim()) return "?";
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`.toUpperCase();
+    const letter = name?.trim().charAt(0);
+    return letter ? letter.toUpperCase() : "?";
 }
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];

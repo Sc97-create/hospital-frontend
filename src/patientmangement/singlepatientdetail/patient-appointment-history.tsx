@@ -125,7 +125,7 @@ function PatientAppointmentHistory({ patient }: Props) {
             dataIndex: "doctor_name",
             render: (doctor: string) => (
                 <Space>
-                    <Avatar>{doctor?.charAt(0) || "D"}</Avatar>
+                    <Avatar>{(doctor?.trim().charAt(0) || "D").toUpperCase()}</Avatar>
                     <span>{doctor}</span>
                 </Space>
             ),
