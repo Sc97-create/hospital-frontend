@@ -277,12 +277,29 @@
     flex: none;
     max-width: none;
     min-height: auto;
-    gap: 1.75rem;
-    padding: 1.5rem 1.35rem;
+    gap: 1rem;
+    padding: 1.25rem 1.25rem 1.35rem;
+    justify-content: flex-start;
+  }
+
+  .cs-brand__logo {
+    position: static;
+    top: auto;
+    left: auto;
   }
 
   .cs-brand__copy {
     max-width: none;
+    padding-top: 0;
+  }
+
+  .cs-brand__headline {
+    font-size: 1.45rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .cs-brand__support {
+    font-size: 0.9rem;
   }
 
   .cs-panel {

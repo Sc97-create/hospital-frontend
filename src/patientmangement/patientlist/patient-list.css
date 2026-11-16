@@ -148,3 +148,35 @@
     color: #F5F5F5;
     font-weight: var(--weight-semibold);
 }
+
+@media (max-width: 768px) {
+    .breadcrumb-layout {
+        margin-left: 0;
+        margin-top: 8px;
+        padding-left: 0;
+    }
+
+    .main-layout {
+        margin: 8px;
+        width: auto;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .button-layout {
+        margin-right: 0;
+        justify-content: stretch;
+    }
+
+    .search-layout {
+        margin-right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .table-data,
+    .pagination-tab {
+        margin-right: 0;
+    }
+}

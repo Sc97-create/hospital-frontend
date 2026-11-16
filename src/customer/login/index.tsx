@@ -13,6 +13,22 @@ import {
 import { isSubscriptionExpiredFlag, setSubscriptionExpired, SUBSCRIPTION_RENEW_PATH } from "../subscription/access";
 import type { CustomerLoginPayload, CustomerLoginResponse } from "../types/signup";
 
+function LogoMark() {
+    return (
+        <svg className="login-brand-logo-mark" viewBox="0 0 36 36" aria-hidden="true">
+            <rect width="36" height="36" rx="10" fill="#1B806A" />
+            <path
+                d="M11 19c2.4 3.4 5.5 5.3 10 5.8M15.5 11.5c1.9-.4 3.8-.3 5.7.4 1.7.6 3 1.8 3.8 3.3"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+            />
+            <circle cx="13.2" cy="14.2" r="1.7" fill="#fff" />
+        </svg>
+    );
+}
+
 function getApiErrorMessage(error: unknown, fallback: string): string {
     if (
         error &&
@@ -114,19 +130,18 @@ function CustomerLoginPage() {
             {contextHolder}
             <aside className="login-brand">
                 <div className="login-brand-logo">
-                    <img
-                        src="/sample-icon.ico"
-                        alt=""
-                        className="login-brand-logo-mark"
-                    />
-                    <span className="login-brand-logo-name">Hospital Management System</span>
+                    <LogoMark />
+                    <div>
+                        <div className="login-brand-logo-name">Floato</div>
+                        <div className="login-brand-logo-tag">Healthcare OS</div>
+                    </div>
                 </div>
                 <div className="login-brand-content">
                     <h1 className="login-brand-headline">
-                        Hospital operations, in one place
+                        Healthcare operations, made simpler.
                     </h1>
                     <p className="login-brand-support">
-                        Sign in to manage patients, pharmacy, and day-to-day care workflows.
+                        Sign in with your work email to open your Floato workspace.
                     </p>
                 </div>
             </aside>

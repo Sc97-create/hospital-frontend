@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Button, Table } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Button, Grid, Table, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,8 @@ import type { patientlist } from "../types/patients";
 import { StatusTag } from "../../components/status-tag";
 import { getLabStatusType, STATUS_INFO } from "../../constants/status-colors";
 import "./patient-appointment-history.css";
+
+const { Text } = Typography;
 
 interface Props {
     patient: patientlist | null;
@@ -27,8 +29,19 @@ function shortId(id: string) {
     return id.length > 8 ? id.slice(0, 8).toUpperCase() : id.toUpperCase();
 }
 
+function formatReceivedOn(date: string | undefined) {
+    if (!date) return "—";
+    return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+}
+
 function PatientLabOrders({ patient }: Props) {
     const navigate = useNavigate();
+    const screens = Grid.useBreakpoint();
+    const isMobile = screens.md === false;
     const [orders, setOrders] = useState<LabOrderListItem[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
@@ -69,76 +82,117 @@ function PatientLabOrders({ patient }: Props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when patient changes
     }, [patient?.patient_id, organisationId]);
 
-    const columns: ColumnsType<LabOrderListItem> = [
-        {
-            title: "Order ID",
-            key: "order_id",
-            render: (_: unknown, record: LabOrderListItem) => (
-                <StatusTag type={STATUS_INFO} className="code-badge">
-                    {shortId(record.id)}
-                </StatusTag>
-            ),
-        },
-        {
-            title: "Doctor",
-            dataIndex: "doctor_name",
-            key: "doctor_name",
-            render: (name: string | undefined) => name?.trim() || "—",
-        },
-        {
-            title: "Tests",
-            dataIndex: "tests_count",
-            key: "tests_count",
-            render: (count: number) =>
-                `${count ?? 0} ${(count ?? 0) === 1 ? "Test" : "Tests"}`,
-        },
-        {
-            title: "Received On",
-            dataIndex: "received_at",
-            key: "received_at",
-            render: (date: string) =>
-                date
-                    ? new Date(date).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                      })
-                    : "—",
-        },
-        {
-            title: "Status",
-            dataIndex: "status",
-            key: "status",
-            render: (status: string) => (
-                <StatusTag type={getLabStatusType(status)} bordered>
-                    {formatStatusLabel(status)}
-                </StatusTag>
-            ),
-        },
-        {
-            title: "Action",
-            key: "action",
-            align: "center",
-            render: (_: unknown, record: LabOrderListItem) => (
-                <Button
-                    type="primary"
-                    size="small"
-                    icon={<EyeOutlined />}
-                    onClick={() => navigate(`/lab/tests/${record.id}`)}
-                >
-                    View
-                </Button>
-            ),
-        },
-    ];
+    const columns: ColumnsType<LabOrderListItem> = useMemo(() => {
+        if (isMobile) {
+            return [
+                {
+                    title: "Lab order",
+                    key: "lab_order",
+                    render: (_: unknown, record: LabOrderListItem) => {
+                        const tests = Number(record.tests_count) || 0;
+                        return (
+                            <div className="appt-history-card">
+                                <div className="lab-order-card__top">
+                                    <StatusTag type={STATUS_INFO} className="code-badge">
+                                        {shortId(record.id)}
+                                    </StatusTag>
+                                    <StatusTag type={getLabStatusType(record.status)} bordered>
+                                        {formatStatusLabel(record.status)}
+                                    </StatusTag>
+                                </div>
+                                <Text className="appt-history-card__doctor-name">
+                                    {record.doctor_name?.trim() || "—"}
+                                </Text>
+                                <div className="appt-history-card__when">
+                                    <span className="appt-history-card__date">
+                                        {tests} {tests === 1 ? "Test" : "Tests"}
+                                    </span>
+                                    <span className="appt-history-card__time">
+                                        {formatReceivedOn(record.received_at)}
+                                    </span>
+                                </div>
+                                <Button
+                                    type="primary"
+                                    size="small"
+                                    icon={<EyeOutlined />}
+                                    className="lab-order-card__view"
+                                    onClick={() => navigate(`/lab/tests/${record.id}`)}
+                                >
+                                    View
+                                </Button>
+                            </div>
+                        );
+                    },
+                },
+            ];
+        }
+
+        return [
+            {
+                title: "Order ID",
+                key: "order_id",
+                render: (_: unknown, record: LabOrderListItem) => (
+                    <StatusTag type={STATUS_INFO} className="code-badge">
+                        {shortId(record.id)}
+                    </StatusTag>
+                ),
+            },
+            {
+                title: "Doctor",
+                dataIndex: "doctor_name",
+                key: "doctor_name",
+                render: (name: string | undefined) => name?.trim() || "—",
+            },
+            {
+                title: "Tests",
+                dataIndex: "tests_count",
+                key: "tests_count",
+                render: (count: number) =>
+                    `${count ?? 0} ${(count ?? 0) === 1 ? "Test" : "Tests"}`,
+            },
+            {
+                title: "Received On",
+                dataIndex: "received_at",
+                key: "received_at",
+                render: (date: string) => formatReceivedOn(date),
+            },
+            {
+                title: "Status",
+                dataIndex: "status",
+                key: "status",
+                render: (status: string) => (
+                    <StatusTag type={getLabStatusType(status)} bordered>
+                        {formatStatusLabel(status)}
+                    </StatusTag>
+                ),
+            },
+            {
+                title: "Action",
+                key: "action",
+                align: "center",
+                render: (_: unknown, record: LabOrderListItem) => (
+                    <Button
+                        type="primary"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() => navigate(`/lab/tests/${record.id}`)}
+                    >
+                        View
+                    </Button>
+                ),
+            },
+        ];
+    }, [isMobile, navigate]);
 
     return (
-        <div className="appointment-history-container">
+        <div className={`appointment-history-container${isMobile ? " is-mobile" : ""}`}>
             <Table
+                className="appointment-history-table"
                 rowKey="id"
                 columns={columns}
                 dataSource={orders}
                 loading={loading}
+                size={isMobile ? "small" : "middle"}
                 locale={{ emptyText: "No lab orders for this patient" }}
                 pagination={{
                     current: currentPage,

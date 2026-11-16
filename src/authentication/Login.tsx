@@ -8,6 +8,23 @@ import { LoginReq, UpdatePasswordFirstLogin } from './api/login-api';
 import { usePermissions } from '../auth/permissions-context';
 import { resolveDefaultRouteFromEntries } from '../auth/default-route';
 import { setSubscriptionExpired } from '../customer/subscription/access';
+import { pickAccessToken, pickOrganisationId, pickUserId } from '../auth/session';
+
+function LogoMark() {
+    return (
+        <svg className="login-brand-logo-mark" viewBox="0 0 36 36" aria-hidden="true">
+            <rect width="36" height="36" rx="10" fill="#1B806A" />
+            <path
+                d="M11 19c2.4 3.4 5.5 5.3 10 5.8M15.5 11.5c1.9-.4 3.8-.3 5.7.4 1.7.6 3 1.8 3.8 3.3"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+            />
+            <circle cx="13.2" cy="14.2" r="1.7" fill="#fff" />
+        </svg>
+    );
+}
 
 function isPasswordCleared(data: loginResponse): boolean {
     const flag = data.passwordcleared ?? data.password_cleared;
@@ -63,9 +80,14 @@ function Login() {
     }, [passwordModalOpen]);
 
     const storeSession = (data: loginResponse) => {
-        localStorage.setItem("access_token", data.token);
-        localStorage.setItem("user_id", data.user_id);
-        localStorage.setItem("organisation_id", data.organisation_id);
+        const raw = data as unknown as Record<string, unknown>;
+        const token = pickAccessToken(raw) || data.token;
+        const userId = pickUserId(raw) || data.user_id;
+        const organisationId = pickOrganisationId(raw) || data.organisation_id;
+
+        if (token) localStorage.setItem("access_token", token);
+        if (userId) localStorage.setItem("user_id", userId);
+        if (organisationId) localStorage.setItem("organisation_id", organisationId);
         setSubscriptionExpired(false);
         setAccess(Boolean(data.is_admin), data.permissions);
     };
@@ -75,6 +97,10 @@ function Login() {
         try {
             const data = await LoginReq(values);
             storeSession(data);
+            if (!localStorage.getItem("user_id")) {
+                messageApi.error("Login succeeded but user id was missing. Please contact support.");
+                return;
+            }
             if (isPasswordCleared(data)) {
                 passwordForm.resetFields();
                 setPasswordModalOpen(true);
@@ -119,16 +145,15 @@ function Login() {
             {contextHolder}
             <aside className="login-brand">
                 <div className="login-brand-logo">
-                    <img
-                        src="/sample-icon.ico"
-                        alt=""
-                        className="login-brand-logo-mark"
-                    />
-                    <span className="login-brand-logo-name">Hospital Management System</span>
+                    <LogoMark />
+                    <div>
+                        <div className="login-brand-logo-name">Floato</div>
+                        <div className="login-brand-logo-tag">Healthcare OS</div>
+                    </div>
                 </div>
                 <div className="login-brand-content">
                     <h1 className="login-brand-headline">
-                        Hospital operations, in one place
+                        Healthcare operations, made simpler.
                     </h1>
                     <p className="login-brand-support">
                         Sign in to manage patients, pharmacy, and day-to-day care workflows.

@@ -48,20 +48,21 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
-    padding: 16px 20px;
+    padding: 14px 20px;
     border-bottom: 1px solid #f3f4f6;
 }
 
 .lab-search-input {
-    width: 260px !important;
+    width: 280px !important;
+    max-width: 100%;
     height: 32px !important;
     border-radius: 8px !important;
     background-color: #e6f9ef !important;
     color: #1f2937 !important;
     font-size: 13px;
-    flex-shrink: 0;
+    flex: 0 1 280px;
 }
 
 .lab-search-input .ant-input {
@@ -84,7 +85,7 @@
 }
 
 .lab-status-filters {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     flex-wrap: nowrap;
     gap: 0;
@@ -92,10 +93,8 @@
     border-radius: 8px;
     overflow: hidden;
     background: #ffffff;
-    flex: 1;
-    justify-content: center;
-    max-width: fit-content;
-    margin: 0 auto;
+    flex: 0 0 auto;
+    margin: 0;
 }
 
 .lab-status-filter-btn {
@@ -147,18 +146,25 @@
 
 .lab-table-wrapper .ant-table-tbody > tr > td {
     border-bottom: 1px solid #f3f4f6 !important;
-    padding: 14px !important;
+    padding: 12px 14px !important;
     vertical-align: middle;
 }
 
 .lab-table-wrapper .ant-table-thead > tr > th,
 .lab-table-wrapper .ant-table-tbody > tr > td {
-    white-space: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .lab-table-wrapper .ant-table-cell .ant-tag {
     margin-inline-end: 0;
     max-width: none;
+}
+
+.lab-table-wrapper .ant-table-tbody > tr > td .lab-received-date {
+    white-space: nowrap;
+    display: inline-block;
 }
 
 .lab-cell-stack {
@@ -183,6 +189,7 @@
 .lab-received-date {
     color: #374151;
     font-size: 13px;
+    white-space: nowrap;
 }
 
 .lab-view-details-btn {
@@ -236,4 +243,103 @@
     .lab-status-filters {
         margin: 0;
     }
+}
+
+.lab-tests-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.lab-tests-card__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.lab-tests-card__patient {
+    color: #111827;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.lab-tests-card__doctor {
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.lab-tests-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 12px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.lab-tests-card__view {
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+.lab-tests-page.is-mobile {
+    margin: 8px 12px 16px;
+}
+
+.lab-tests-page.is-mobile .lab-tests-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
+}
+
+.lab-tests-page.is-mobile .lab-search-input {
+    width: 100% !important;
+    flex: 1 1 auto;
+}
+
+.lab-tests-page.is-mobile .lab-status-filters {
+    width: 100%;
+    display: flex;
+}
+
+.lab-tests-page.is-mobile .lab-status-filter-btn {
+    flex: 1 1 0;
+    padding: 0 8px !important;
+    white-space: nowrap;
+}
+
+.lab-tests-page.is-mobile .lab-table-wrapper .ant-table {
+    table-layout: fixed;
+    width: 100% !important;
+}
+
+.lab-tests-page.is-mobile .lab-table-wrapper .ant-table-thead {
+    display: none;
+}
+
+.lab-tests-page.is-mobile .lab-table-wrapper .ant-table-thead > tr > th,
+.lab-tests-page.is-mobile .lab-table-wrapper .ant-table-tbody > tr > td {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    padding: 12px 14px !important;
+    vertical-align: top;
+}
+
+.lab-tests-page.is-mobile .lab-table-wrapper .ant-tag {
+    margin-inline-end: 0;
+    white-space: nowrap;
+}
+
+.lab-tests-page.is-mobile .lab-table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
 }

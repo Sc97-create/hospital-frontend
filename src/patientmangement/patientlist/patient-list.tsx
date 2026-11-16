@@ -76,17 +76,20 @@ function PatientList() {
             title: 'Age',
             dataIndex: 'age',
             className: 'other-layout',
+            responsive: ['md'],
             sorter: (a, b) => a.age - b.age,
         },
         {
             title: 'Weight',
             dataIndex: 'weight',
-            className: 'other-layout'
+            className: 'other-layout',
+            responsive: ['lg'],
         },
         {
             title: 'Gender',
             dataIndex: 'gender',
             className: 'other-layout',
+            responsive: ['lg'],
             filters: [
                 {
                     text: 'Male',
@@ -102,6 +105,7 @@ function PatientList() {
             title: 'Issued At',
             dataIndex: 'issued_at',
             className: 'other-layout',
+            responsive: ['md'],
             showSorterTooltip: { target: 'full-header' },
             render: (_date: Date, record) => datecheck(record.patient_created_at).format('DD MMMM YYYY'),
             defaultSortOrder: 'descend',

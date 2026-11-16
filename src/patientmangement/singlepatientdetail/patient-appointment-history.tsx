@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
-import { Avatar, Segmented, Space, Table, Typography } from "antd";
+import { Avatar, Grid, Segmented, Table, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import "./patient-appointment-history.css";
 import { GetAppointmentByPatientID } from "../api/appointments";
@@ -45,18 +45,21 @@ const formatVisitTypeLabel = (visitType: string | undefined | null): string => {
                 .replace(/\b\w/g, (char) => char.toUpperCase());
     }
 };
-interface Props {
-    patient: patientlist | null
-}
-function PatientAppointmentHistory({ patient }: Props) {
-    const [selectedFilter, setSelectedFilter] =
-        useState<AppointmentStatus | null>(null);
 
+interface Props {
+    patient: patientlist | null;
+}
+
+function PatientAppointmentHistory({ patient }: Props) {
+    const screens = Grid.useBreakpoint();
+    const isMobile = screens.md === false;
+    const [selectedFilter, setSelectedFilter] = useState<AppointmentStatus | null>(null);
     const [appointmentsData, setAppointmentsData] = useState<Appointment[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
     const [totalAppointments, setTotalAppointments] = useState(0);
     const [loading, setLoading] = useState(false);
+
     const fetchAppointments = async (page: number, limit: number, status?: string | null) => {
         if (!patient) {
             setAppointmentsData([]);
@@ -96,92 +99,118 @@ function PatientAppointmentHistory({ patient }: Props) {
     useEffect(() => {
         if (patient) {
             setCurrentPage(1);
-            fetchAppointments(1, pageSize, selectedFilter);
+            void fetchAppointments(1, pageSize, selectedFilter);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch when patient/filter changes
     }, [patient, selectedFilter]);
 
-    const columns: ColumnsType<Appointment> = [
-        {
-            title: "DATE & TIME",
-            key: "dateTime",
-            render: (_, record) => {
-                const formattedDate = dayjs(record.appointment_date).format("DD MMM YYYY");
-               
-                //const formattedEndTime = record.end_time ? formatSlotTime(record.end_time) : "";
+    const columns: ColumnsType<Appointment> = useMemo(() => {
+        if (isMobile) {
+            return [
+                {
+                    title: "Appointment",
+                    key: "appointment",
+                    render: (_, record) => {
+                        const formattedDate = dayjs(record.appointment_date).format("DD MMM YYYY");
+                        const doctor = record.doctor_name?.trim() || "Doctor";
+                        return (
+                            <div className="appt-history-card">
+                                <div className="appt-history-card__when">
+                                    <span className="appt-history-card__date">{formattedDate}</span>
+                                    <span className="appt-history-card__time">{record.start_time}</span>
+                                </div>
+                                <div className="appt-history-card__doctor">
+                                    <Avatar size={28}>
+                                        {(doctor.charAt(0) || "D").toUpperCase()}
+                                    </Avatar>
+                                    <Text className="appt-history-card__doctor-name">{doctor}</Text>
+                                </div>
+                            </div>
+                        );
+                    },
+                },
+                {
+                    title: "Status",
+                    dataIndex: "status",
+                    width: 110,
+                    align: "right",
+                    render: (status: string) => getStatusTag(status as AppointmentStatus),
+                },
+            ];
+        }
 
-                return (
-                    <Space direction="vertical" size={0}>
-                        <Text strong>{formattedDate}</Text>
-                        <Text type="secondary">
-                            {record.start_time}
-                            {/* {formattedEndTime ? ` - ${formattedEndTime}` : ""} */}
-                        </Text>
-                    </Space>
-                );
+        return [
+            {
+                title: "DATE & TIME",
+                key: "dateTime",
+                width: 160,
+                render: (_, record) => {
+                    const formattedDate = dayjs(record.appointment_date).format("DD MMM YYYY");
+                    return (
+                        <div className="appt-history-when">
+                            <Text strong>{formattedDate}</Text>
+                            <Text type="secondary">{record.start_time}</Text>
+                        </div>
+                    );
+                },
             },
-        },
-        {
-            title: "DOCTOR",
-            dataIndex: "doctor_name",
-            render: (doctor: string) => (
-                <Space>
-                    <Avatar>{(doctor?.trim().charAt(0) || "D").toUpperCase()}</Avatar>
-                    <span>{doctor}</span>
-                </Space>
-            ),
-        },
-        {
-            title: "DEPARTMENT",
-            dataIndex: "department_name",
-        },
-        {
-            title: "TYPE",
-            dataIndex: "visit_type",
-            render: (visitType: string) => formatVisitTypeLabel(visitType),
-        },
-        {
-            title: "STATUS",
-            dataIndex: "status",
-            render: (status: string) => getStatusTag(status as AppointmentStatus),
-        },
-    ];
+            {
+                title: "DOCTOR",
+                dataIndex: "doctor_name",
+                render: (doctor: string) => (
+                    <div className="appt-history-doctor">
+                        <Avatar>{(doctor?.trim().charAt(0) || "D").toUpperCase()}</Avatar>
+                        <span>{doctor}</span>
+                    </div>
+                ),
+            },
+            {
+                title: "DEPARTMENT",
+                dataIndex: "department_name",
+                responsive: ["md"],
+            },
+            {
+                title: "TYPE",
+                dataIndex: "visit_type",
+                responsive: ["lg"],
+                render: (visitType: string) => formatVisitTypeLabel(visitType),
+            },
+            {
+                title: "STATUS",
+                dataIndex: "status",
+                render: (status: string) => getStatusTag(status as AppointmentStatus),
+            },
+        ];
+    }, [isMobile]);
 
     return (
-        <div className="appointment-history-container">
+        <div className={`appointment-history-container${isMobile ? " is-mobile" : ""}`}>
             <div className="appointment-history-header">
-                <Segmented
-                    size="large"
-                    className="appointment-filter"
-                    value={selectedFilter || "all"}
-                    onChange={(value) =>
-                        setSelectedFilter(value === "all" ? null : (value as AppointmentStatus))
-                    }
-                    options={[
-                        {
-                            label: "All",
-                            value: "all",
-                        },
-                        {
-                            label: "Upcoming",
-                            value: "upcoming",
-                        },
-                        {
-                            label: "Completed",
-                            value: "completed",
-                        },
-                        {
-                            label: "Cancelled",
-                            value: "cancelled",
-                        },
-                    ]}
-                />
+                <div className="appointment-filter-scroll">
+                    <Segmented
+                        size={isMobile ? "middle" : "large"}
+                        className="appointment-filter"
+                        value={selectedFilter || "all"}
+                        onChange={(value) =>
+                            setSelectedFilter(value === "all" ? null : (value as AppointmentStatus))
+                        }
+                        options={[
+                            { label: "All", value: "all" },
+                            { label: "Upcoming", value: "upcoming" },
+                            { label: "Completed", value: "completed" },
+                            { label: "Cancelled", value: "cancelled" },
+                        ]}
+                    />
+                </div>
             </div>
 
             <Table
+                className="appointment-history-table"
                 rowKey={(record) => record.appointment_id}
                 columns={columns}
                 dataSource={appointmentsData}
                 loading={loading}
+                size={isMobile ? "small" : "middle"}
                 pagination={{
                     current: currentPage,
                     pageSize,
@@ -189,12 +218,12 @@ function PatientAppointmentHistory({ patient }: Props) {
                     showSizeChanger: false,
                     onChange: (page) => {
                         setCurrentPage(page);
-                        fetchAppointments(page, pageSize, selectedFilter);
+                        void fetchAppointments(page, pageSize, selectedFilter);
                     },
                 }}
             />
         </div>
     );
-};
+}
 
 export default PatientAppointmentHistory;

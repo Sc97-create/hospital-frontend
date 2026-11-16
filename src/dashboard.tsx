@@ -6,6 +6,7 @@ import {
   Col,
   Dropdown,
   Flex,
+  Grid,
   Input,
   Layout,
   Row,
@@ -45,6 +46,7 @@ import {
   GetOrganisationDetailsByUserId,
   organisationDisplayName,
 } from "./api/organisation";
+import { getSessionUserId } from "./auth/session";
 import {
   GetDashboardStatusCounts,
   GetDashboardTodayAppointments,
@@ -282,6 +284,8 @@ const kpiAccentClass = (key: string, isZero: boolean): string => {
 function Dashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const screens = Grid.useBreakpoint();
+  const isMobile = screens.md === false;
   const { clearAccess, canCreate } = usePermissions();
   const canBookAppointment = canCreate("appointment");
   // Preview loading: /dashboard?loading=1
@@ -307,7 +311,7 @@ function Dashboard() {
     const loadDashboard = async () => {
       const overview = getDashboardOverview();
       const organisationId = localStorage.getItem("organisation_id") || "";
-      const userId = localStorage.getItem("user_id") || "";
+      const userId = getSessionUserId();
 
       if (userId) {
         try {
@@ -667,7 +671,7 @@ function Dashboard() {
                 <DashboardSkeleton />
               ) : (
                 <>
-              <Row gutter={[12, 12]} className="dash-kpi-row">
+              <Row gutter={isMobile ? [16, 16] : [12, 12]} className="dash-kpi-row">
                 {kpiCards.map((kpi) => (
                   <Col xs={12} sm={8} md={4} lg={4} xl={4} key={kpi.key} className="dash-kpi-col">
                     <Card
@@ -687,7 +691,7 @@ function Dashboard() {
                 ))}
               </Row>
 
-              <Row gutter={[16, 16]} className="dash-main-row">
+              <Row gutter={isMobile ? [0, 20] : [16, 16]} className="dash-main-row">
                 <Col xs={24} lg={16} className="dash-main-col">
                   <Card
                     className={`dash-card${isQueueEmpty ? " dash-card--queue-empty" : ""}`}

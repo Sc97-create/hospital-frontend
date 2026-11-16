@@ -1,12 +1,13 @@
 import { Avatar, Breadcrumb, Button, Card, Layout, Spin, Typography, message } from "antd";
 import { CopyOutlined, HomeOutlined, UserOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Content } from "antd/es/layout/layout";
 
 import Sidebar from "../sidebar";
 import { StatusTag } from "../components/status-tag";
 import { getEmployeeStatusType } from "../constants/status-colors";
+import { getSessionUserId } from "../auth/session";
 import { GetUserbyID } from "../signup-step/api/common-api";
 import type { UserData } from "../signup-step/types/common-api";
 import "./my-profile.css";
@@ -95,7 +96,7 @@ function MyProfilePage() {
     const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
-        const userId = localStorage.getItem("user_id");
+        const userId = getSessionUserId();
         if (!userId) {
             setError("Missing user — please log in again");
             setLoading(false);
@@ -145,6 +146,10 @@ function MyProfilePage() {
             messageApi.error("Could not copy email");
         }
     };
+
+    if (!loading && error === "Missing user — please log in again") {
+        return <Navigate to="/login" replace />;
+    }
 
     return (
         <Layout>

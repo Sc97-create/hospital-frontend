@@ -1,6 +1,7 @@
 import {
     Breadcrumb,
     Button,
+    Grid,
     Input,
     Layout,
     Pagination,
@@ -8,6 +9,7 @@ import {
     Typography,
     message,
 } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import {
     ExperimentOutlined,
     EyeOutlined,
@@ -67,6 +69,8 @@ function shortId(id: string) {
 
 function LabTests() {
     const navigate = useNavigate();
+    const screens = Grid.useBreakpoint();
+    const isMobile = screens.md === false;
     const [messageApi, contextHolder] = message.useMessage();
     const [searchInput, setSearchInput] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -151,81 +155,130 @@ function LabTests() {
         setPage(1);
     };
 
-    const columns = [
-        {
-            title: "Order ID",
-            key: "order_id",
-            width: 140,
-            render: (_: unknown, record: LabOrderListItem) => (
-                <StatusTag type={STATUS_INFO} className="code-badge">
-                    {shortId(record.id)}
-                </StatusTag>
-            ),
-        },
-        {
-            title: "Patient",
-            key: "patient",
-            width: 180,
-            render: (_: unknown, record: LabOrderListItem) => (
-                <span className="lab-cell-primary">{record.patient_name || "—"}</span>
-            ),
-        },
-        {
-            title: "Doctor",
-            key: "doctor",
-            width: 180,
-            render: (_: unknown, record: LabOrderListItem) => (
-                <span className="lab-cell-primary">{record.doctor_name || "—"}</span>
-            ),
-        },
-        {
-            title: "Tests",
-            key: "tests",
-            width: 90,
-            render: (_: unknown, record: LabOrderListItem) => (
-                <span className="lab-cell-primary">
-                    {record.tests_count} {record.tests_count === 1 ? "Test" : "Tests"}
-                </span>
-            ),
-        },
-        {
-            title: "Received Date",
-            dataIndex: "received_at",
-            key: "received_at",
-            width: 160,
-            render: (date: string) => (
-                <span className="lab-cell-meta lab-received-date">{formatReceivedAt(date)}</span>
-            ),
-        },
-        {
-            title: "Status",
-            dataIndex: "status",
-            key: "status",
-            width: 140,
-            render: (status: string) => (
-                <StatusTag type={getLabStatusType(status)} bordered>
-                    {formatStatusLabel(status)}
-                </StatusTag>
-            ),
-        },
-        {
-            title: "Action",
-            key: "action",
-            width: 100,
-            align: "center" as const,
-            render: (_: unknown, record: LabOrderListItem) => (
-                <Button
-                    type="primary"
-                    size="small"
-                    className="lab-view-details-btn"
-                    icon={<EyeOutlined />}
-                    onClick={() => navigate(`/lab/tests/${record.id}`)}
-                >
-                    View
-                </Button>
-            ),
-        },
-    ];
+    const columns: ColumnsType<LabOrderListItem> = useMemo(() => {
+        if (isMobile) {
+            return [
+                {
+                    title: "Lab order",
+                    key: "lab_order",
+                    render: (_: unknown, record: LabOrderListItem) => {
+                        const tests = Number(record.tests_count) || 0;
+                        return (
+                            <div className="lab-tests-card">
+                                <div className="lab-tests-card__top">
+                                    <StatusTag type={STATUS_INFO} className="code-badge">
+                                        {shortId(record.id)}
+                                    </StatusTag>
+                                    <StatusTag type={getLabStatusType(record.status)} bordered>
+                                        {formatStatusLabel(record.status)}
+                                    </StatusTag>
+                                </div>
+                                <span className="lab-tests-card__patient">
+                                    {record.patient_name?.trim() || "—"}
+                                </span>
+                                <span className="lab-tests-card__doctor">
+                                    {record.doctor_name?.trim()
+                                        ? `Dr. ${record.doctor_name.trim()}`
+                                        : "—"}
+                                </span>
+                                <div className="lab-tests-card__meta">
+                                    <span>
+                                        {tests} {tests === 1 ? "Test" : "Tests"}
+                                    </span>
+                                    <span>{formatReceivedAt(record.received_at)}</span>
+                                </div>
+                                <Button
+                                    type="primary"
+                                    size="small"
+                                    className="lab-view-details-btn lab-tests-card__view"
+                                    icon={<EyeOutlined />}
+                                    onClick={() => navigate(`/lab/tests/${record.id}`)}
+                                >
+                                    View
+                                </Button>
+                            </div>
+                        );
+                    },
+                },
+            ];
+        }
+
+        return [
+            {
+                title: "Order ID",
+                key: "order_id",
+                width: 120,
+                render: (_: unknown, record: LabOrderListItem) => (
+                    <StatusTag type={STATUS_INFO} className="code-badge">
+                        {shortId(record.id)}
+                    </StatusTag>
+                ),
+            },
+            {
+                title: "Patient",
+                key: "patient",
+                ellipsis: true,
+                render: (_: unknown, record: LabOrderListItem) => (
+                    <span className="lab-cell-primary">{record.patient_name || "—"}</span>
+                ),
+            },
+            {
+                title: "Doctor",
+                key: "doctor",
+                ellipsis: true,
+                render: (_: unknown, record: LabOrderListItem) => (
+                    <span className="lab-cell-primary">{record.doctor_name || "—"}</span>
+                ),
+            },
+            {
+                title: "Tests",
+                key: "tests",
+                width: 100,
+                render: (_: unknown, record: LabOrderListItem) => (
+                    <span className="lab-cell-primary">
+                        {record.tests_count} {record.tests_count === 1 ? "Test" : "Tests"}
+                    </span>
+                ),
+            },
+            {
+                title: "Received Date",
+                dataIndex: "received_at",
+                key: "received_at",
+                width: 200,
+                render: (date: string) => (
+                    <span className="lab-cell-meta lab-received-date">{formatReceivedAt(date)}</span>
+                ),
+            },
+            {
+                title: "Status",
+                dataIndex: "status",
+                key: "status",
+                width: 120,
+                render: (status: string) => (
+                    <StatusTag type={getLabStatusType(status)} bordered>
+                        {formatStatusLabel(status)}
+                    </StatusTag>
+                ),
+            },
+            {
+                title: "Action",
+                key: "action",
+                width: 110,
+                align: "center",
+                render: (_: unknown, record: LabOrderListItem) => (
+                    <Button
+                        type="primary"
+                        size="small"
+                        className="lab-view-details-btn"
+                        icon={<EyeOutlined />}
+                        onClick={() => navigate(`/lab/tests/${record.id}`)}
+                    >
+                        View
+                    </Button>
+                ),
+            },
+        ];
+    }, [isMobile, navigate]);
 
     return (
         <Layout>
@@ -250,7 +303,7 @@ function LabTests() {
                     ]}
                 />
 
-                <Content className="lab-tests-page">
+                <Content className={`lab-tests-page${isMobile ? " is-mobile" : ""}`}>
                     <div className="lab-page-header">
                         <Title level={3} className="lab-page-title">
                             Lab Tests
@@ -292,7 +345,7 @@ function LabTests() {
                                 rowKey="id"
                                 loading={loading}
                                 pagination={false}
-                                size="middle"
+                                size={isMobile ? "small" : "middle"}
                                 tableLayout="fixed"
                                 locale={{ emptyText: "No lab orders" }}
                             />

@@ -161,6 +161,7 @@ const AppointmentsPage: React.FC = () => {
             key: "time",
             color: "#6B7280",
             width: 110,
+            responsive: ["md" as const],
             render: (_: string, record: AppointmentOrg) => (
                 <div className="time-text">
                     <span>{record.start_time}</span>
@@ -207,6 +208,7 @@ const AppointmentsPage: React.FC = () => {
             key: "doctor",
             width: 130,
             ellipsis: true,
+            responsive: ["md" as const],
             render: (_: string, record: AppointmentOrg) => (
                 <div className="doctor-name">{record.doctor_name}</div>
             ),
@@ -217,6 +219,7 @@ const AppointmentsPage: React.FC = () => {
             color: "#6B7280",
             width: 100,
             key: "visitType",
+            responsive: ["lg" as const],
             render: (_: string, record: AppointmentOrg) => getVisitTag(record.visit_type),
         },
         {
@@ -270,6 +273,7 @@ const AppointmentsPage: React.FC = () => {
             color: "#6B7280",
             key: "appointment_date",
             width: 100,
+            responsive: ["md" as const],
             render: (_: string, record: AppointmentOrg) => (
                 <div className="doctor-name">
                     {dayjs(record.appointment_date).format("DD MMM YYYY")}

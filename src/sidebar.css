@@ -40,9 +40,60 @@
     padding-bottom: 12px;
 }
 
-@media (max-width: 992px) {
+.mobile-topbar {
+    display: none;
+}
+
+.mobile-sidebar-drawer .ant-drawer-header {
+    display: none;
+}
+
+.sidebar-layout--drawer {
+    height: 100%;
+    border-right: none !important;
+}
+
+/* body.mobile-shell is toggled by Sidebar when viewport < md */
+body.mobile-shell {
+    padding-top: 48px;
+}
+
+body.mobile-shell .mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    padding: 0 8px 0 4px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 1100;
+}
+
+body.mobile-shell .mobile-topbar__menu {
+    width: 40px;
+    height: 40px;
+    color: #1f2937 !important;
+}
+
+body.mobile-shell .mobile-topbar__brand {
+    font-weight: 700;
+    font-size: 16px;
+    color: #111827;
+}
+
+body.mobile-shell .ant-layout,
+body.mobile-shell .ant-layout-content {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+@media (min-width: 768px) and (max-width: 992px) {
     .sidebar-layout {
-        position: fixed !important;
+        position: sticky !important;
         z-index: 100;
         height: 100vh;
     }

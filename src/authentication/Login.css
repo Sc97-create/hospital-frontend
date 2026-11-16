@@ -5,7 +5,7 @@
     background: #fff;
 }
 
-/* Left branding panel — 40% */
+/* Left branding panel — matches Floato signup banner */
 .login-brand {
     position: relative;
     flex: 0 0 40%;
@@ -15,58 +15,69 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: var(--color-primary-light);
-    border-right: 1px solid var(--color-primary-border);
+    padding: 2rem 2.5rem 2.25rem;
+    background: #eaf6f1;
+    border-right: 1px solid #b7e9d1;
+    box-sizing: border-box;
 }
 
 .login-brand-logo {
     position: absolute;
-    top: var(--space-8);
-    left: var(--space-10);
+    top: 2rem;
+    left: 2.5rem;
     z-index: 2;
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    max-width: calc(100% - var(--space-10) * 2);
+    gap: 0.75rem;
+    max-width: calc(100% - 5rem);
 }
 
 .login-brand-logo-mark {
     width: 36px;
     height: 36px;
     flex-shrink: 0;
-    object-fit: contain;
-    border-radius: 8px;
+    display: block;
 }
 
 .login-brand-logo-name {
-    font-size: var(--text-md);
-    font-weight: var(--weight-semibold);
-    line-height: var(--leading-snug);
-    color: var(--status-success-darkest);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #111827;
+}
+
+.login-brand-logo-tag {
+    margin-top: 0.1rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6b7280;
 }
 
 .login-brand-content {
     position: relative;
     z-index: 1;
-    padding: var(--space-8) var(--space-10);
-    color: var(--status-success-darkest);
+    max-width: 20rem;
+    color: #111827;
 }
 
 .login-brand-headline {
-    margin: 0 0 var(--space-3);
-    font-size: var(--text-xl);
-    font-weight: var(--weight-bold);
-    line-height: var(--leading-tight);
-    color: var(--status-success-darkest);
-    max-width: 14ch;
+    margin: 0 0 0.85rem;
+    font-size: clamp(1.75rem, 2.6vw, 2.35rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #111827;
+    max-width: none;
 }
 
 .login-brand-support {
     margin: 0;
-    font-size: var(--text-sm);
-    line-height: var(--leading-normal);
-    color: var(--color-muted-text);
-    max-width: 32ch;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: #6b7280;
+    max-width: none;
 }
 
 /* Right form panel — 60% */
@@ -188,7 +199,7 @@
     color: var(--status-info-default);
 }
 
-/* Mobile / tablet: form first, brand collapses */
+/* Mobile / tablet: compact Floato banner on top, form below */
 @media (max-width: 900px) {
     .login-page {
         flex-direction: column;
@@ -197,43 +208,50 @@
     .login-brand {
         flex: none;
         max-width: none;
-        min-height: 160px;
-        order: 2;
-        border-right: none;
-        border-top: 1px solid var(--color-primary-border);
+        min-height: auto;
+        width: 100%;
+        gap: 1rem;
+        padding: 1.25rem 1.25rem 1.35rem;
         justify-content: flex-start;
-        padding-top: calc(var(--space-8) + 40px);
+        border-right: none;
+        border-bottom: 1px solid #b7e9d1;
     }
 
     .login-brand-logo {
-        top: var(--space-5);
-        left: var(--space-5);
-    }
-
-    .login-brand-logo-name {
-        font-size: var(--text-base);
+        position: static;
+        top: auto;
+        left: auto;
+        max-width: 100%;
     }
 
     .login-brand-content {
-        padding: var(--space-5);
+        max-width: none;
+        padding: 0;
     }
 
     .login-brand-headline {
-        max-width: none;
-        font-size: var(--text-lg);
+        font-size: 1.45rem;
+        margin-bottom: 0.5rem;
     }
 
     .login-brand-support {
-        display: none;
+        font-size: 0.9rem;
     }
 
     .login-form-panel {
-        order: 1;
         flex: 1 1 auto;
-        min-height: calc(100vh - 180px);
+        width: 100%;
+        max-width: none;
+        min-height: auto;
         padding: var(--space-8) var(--space-5);
         align-items: flex-start;
-        padding-top: var(--space-12);
+        justify-content: flex-start;
+    }
+
+    .login-form-shell {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
     }
 }
 

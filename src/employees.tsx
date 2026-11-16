@@ -111,24 +111,28 @@ function Employees() {
             title: "Role",
             dataIndex: "role_name",
             className: "other-layout",
+            responsive: ["md"],
             render: (role: string) => role || "—",
         },
         {
             title: "Department",
             dataIndex: "department_name",
             className: "other-layout",
+            responsive: ["lg"],
             render: (department: string) => department || "—",
         },
         {
             title: "Mobile",
             dataIndex: "employee_phone",
             className: "other-layout",
+            responsive: ["lg"],
             render: (phone: string) => phone || "—",
         },
         {
             title: "Email",
             dataIndex: "employee_email",
             className: "other-layout",
+            responsive: ["lg"],
             render: (email: string) => email || "—",
         },
         {

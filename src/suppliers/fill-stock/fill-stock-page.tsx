@@ -7,6 +7,7 @@ import {
     DatePicker,
     Drawer,
     Form,
+    Grid,
     Input,
     InputNumber,
     Layout,
@@ -142,9 +143,11 @@ function FillStockPage() {
     const { supplierId } = useParams<{ supplierId: string }>();
     const location = useLocation();
     const navigate = useNavigate();
+    const screens = Grid.useBreakpoint();
     const [messageApi, contextHolder] = message.useMessage();
     const [modal, modalContextHolder] = Modal.useModal();
     const [form] = Form.useForm<MedicineFormValues>();
+    const drawerWidth = screens.md ? 520 : "100%";
 
     const navState = (location.state ?? {}) as FillStockLocationState;
     const supplierName = navState.supplierName || "Supplier";
@@ -786,7 +789,7 @@ function FillStockPage() {
 
             <Drawer
                 title={editingKey ? "Edit medicine" : "Add medicine"}
-                width={520}
+                width={drawerWidth}
                 open={drawerOpen}
                 onClose={closeDrawer}
                 destroyOnClose

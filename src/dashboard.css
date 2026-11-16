@@ -669,6 +669,14 @@
 
   .dash-header__left {
     min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .dash-header__branch {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .dash-kpi-col {
@@ -684,12 +692,146 @@
   }
 }
 
-@media (max-width: 576px) {
-  .dash-content {
-    padding: var(--space-3);
+@media (max-width: 768px) {
+  .dash-shell {
+    overflow-x: hidden;
   }
 
-  .dash-queue-table {
+  .dash-header {
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .dash-header__date {
+    display: none;
+  }
+
+  .dash-header__branch {
+    max-width: 96px;
+  }
+
+  .dash-header__search {
+    margin-top: var(--space-2);
+  }
+
+  .dash-content {
+    padding: 20px 20px 28px;
+    overflow-x: hidden;
+  }
+
+  /* Reliable 2-col KPI grid — Ant Col flex overrides were collapsing gutters */
+  .dash-kpi-row.ant-row,
+  .dash-kpi-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .dash-kpi-row > .dash-kpi-col,
+  .dash-kpi-row > .ant-col {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .dash-kpi {
+    border-radius: 12px;
+  }
+
+  .dash-kpi .ant-card-body {
+    padding: 16px !important;
+  }
+
+  .dash-kpi__label {
+    margin-bottom: 8px;
+  }
+
+  .dash-kpi__value {
+    font-size: 22px;
+  }
+
+  .dash-main-row.ant-row,
+  .dash-main-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    row-gap: 20px !important;
+  }
+
+  .dash-main-row > .ant-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .dash-main-col,
+  .dash-rail-col {
+    gap: 20px;
+  }
+
+  .dash-card {
+    border-radius: 12px;
+  }
+
+  .dash-card .ant-card-head {
+    min-height: 56px;
+    padding: 0 16px;
+  }
+
+  .dash-card .ant-card-body {
+    padding: 16px !important;
+  }
+
+  .dash-payments-summary {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .dash-payments-summary__stat {
+    padding: 12px;
+  }
+
+  .dash-rx-list {
+    gap: 12px;
+  }
+
+  .dash-rx-list__row {
+    padding: 12px;
+  }
+
+  .dash-queue-table,
+  .dash-card .ant-table-wrapper {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dash-card .ant-table {
+    min-width: 520px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dash-content {
+    padding: 20px 16px 28px;
+  }
+
+  .dash-header {
+    padding: 12px 16px;
+  }
+
+  .dash-header__title {
+    font-size: var(--text-base) !important;
+  }
+
+  .dash-kpi-row.ant-row,
+  .dash-kpi-row {
+    gap: 12px;
+  }
+
+  .dash-header__bell {
+    display: none;
   }
 }

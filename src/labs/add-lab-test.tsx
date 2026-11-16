@@ -25,6 +25,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../sidebar";
+import { getSessionUserId } from "../auth/session";
 import { findOne } from "../patientmangement/api/patients";
 import type { patientlist } from "../patientmangement/types/patients";
 import { StatusTag } from "../components/status-tag";
@@ -515,7 +516,7 @@ function AddLabTest() {
         testIds: string[];
     }) => {
         const organisation_id = localStorage.getItem("organisation_id") || "";
-        const created_by = localStorage.getItem("user_id") || "";
+        const created_by = getSessionUserId();
 
         if (!organisation_id) {
             messageApi.error("Missing organisation id — please log in again");
@@ -601,7 +602,15 @@ function AddLabTest() {
                             checked={checked}
                             onChange={(e) => toggleTest(record.id, e.target.checked)}
                         />
-                        <span className="add-lab-test-name">{record.name}</span>
+                        <div className="add-lab-name-meta">
+                            <span className="add-lab-test-name">{record.name}</span>
+                            <div className="add-lab-name-sub">
+                                <StatusTag type={STATUS_INFO} className="code-badge add-lab-code-inline">
+                                    {record.code}
+                                </StatusTag>
+                                <span className="add-lab-specimen-inline">{record.specimen}</span>
+                            </div>
+                        </div>
                     </div>
                 );
             },
@@ -613,6 +622,7 @@ function AddLabTest() {
             width: 110,
             align: "left" as const,
             className: "add-lab-code-col",
+            responsive: ["md" as const],
             render: (code: string) => (
                 <div className="add-lab-code-cell">
                     <StatusTag type={STATUS_INFO} className="code-badge">
@@ -625,12 +635,14 @@ function AddLabTest() {
             title: "Specimen",
             dataIndex: "specimen",
             key: "specimen",
+            responsive: ["md" as const],
+            ellipsis: true,
         },
         {
             title: "TAT",
             dataIndex: "tat",
             key: "tat",
-            width: 120,
+            width: 100,
             render: (tat: string) => <span className="add-lab-tat">{tat}</span>,
         },
     ];

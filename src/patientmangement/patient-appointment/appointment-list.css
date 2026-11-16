@@ -119,6 +119,29 @@
   }
 }
 
+@media (max-width: 768px) {
+  .appointments-page {
+    padding: 8px 12px;
+    overflow-x: hidden;
+  }
+
+  .appointments-page .ant-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .appointments-page .ant-table {
+    min-width: 640px;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+}
+
 /* Hover */
 
 

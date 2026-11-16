@@ -106,12 +106,55 @@
 }
 
 @media (max-width: 768px) {
+    .patient-profile-wrapper {
+        overflow-x: hidden;
+        max-width: 100%;
+        padding: 12px;
+        box-sizing: border-box;
+    }
+
+    .patient-header-card {
+        padding: 12px;
+    }
+
+    .patient-left-section {
+        flex-direction: row;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .patient-main-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .patient-name-row {
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .patient-meta-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
     .patient-tabs {
         overflow-x: auto;
         white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        gap: 16px;
     }
 
     .patient-action-buttons {
         width: 100%;
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+
+    .patient-action-buttons .ant-btn {
+        width: 100%;
+        margin: 0 !important;
     }
 }

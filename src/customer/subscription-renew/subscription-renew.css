@@ -48,8 +48,3 @@
   font-weight: var(--weight-bold);
 }
 
-@media (max-width: 960px) {
-  .subscription-renew .cs-brand__copy {
-    padding-top: 3.25rem;
-  }
-}
